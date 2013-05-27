@@ -2,12 +2,12 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="HEVCodec" />
+		<Option title="HEVCAnalyser" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin/Debug/HEVCodec" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Debug/HEVCAnalyser" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
@@ -30,7 +30,7 @@
 				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/Release/HEVCodec" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Release/HEVCAnalyser" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
@@ -70,9 +70,9 @@
 		<Linker>
 			<Add option="-mthreads" />
 		</Linker>
-		<Unit filename="HEVCodec/HEVCodec.h" />
-		<Unit filename="HEVCodec/MainFrame.cpp" />
-		<Unit filename="HEVCodec/MainFrame.h" />
+		<Unit filename="HEVCAnalyser/HEVCAnalyser.h" />
+		<Unit filename="HEVCAnalyser/MainFrame.cpp" />
+		<Unit filename="HEVCAnalyser/MainFrame.h" />
 		<Unit filename="TLibCommon/CommonDef.h" />
 		<Unit filename="TLibCommon/TComPicYuv.cpp" />
 		<Unit filename="TLibCommon/TComPicYuv.h" />
