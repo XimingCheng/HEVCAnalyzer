@@ -71,8 +71,12 @@
 			<Add option="-mthreads" />
 		</Linker>
 		<Unit filename="HEVCAnalyser/HEVCAnalyser.h" />
+		<Unit filename="HEVCAnalyser/HEVCodecApp.cpp" />
+		<Unit filename="HEVCAnalyser/HEVCodecApp.h" />
 		<Unit filename="HEVCAnalyser/MainFrame.cpp" />
 		<Unit filename="HEVCAnalyser/MainFrame.h" />
+		<Unit filename="HEVCAnalyser/ThumbnailThread.cpp" />
+		<Unit filename="HEVCAnalyser/ThumbnailThread.h" />
 		<Unit filename="TLibCommon/CommonDef.h" />
 		<Unit filename="TLibCommon/TComPicYuv.cpp" />
 		<Unit filename="TLibCommon/TComPicYuv.h" />

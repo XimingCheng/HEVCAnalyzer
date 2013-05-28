@@ -1,4 +1,5 @@
 #include "MainFrame.h"
+#include "ThumbnailThread.h"
 
 enum wxbuildinfoformat {
     short_f, long_f };
@@ -27,21 +28,13 @@ wxString wxbuildinfo(wxbuildinfoformat format)
     return wxbuild;
 }
 
-IMPLEMENT_APP(HEVCodecApp)
-
-bool HEVCodecApp::OnInit()
-{
-    wxFrame* frame = new MainFrame(NULL, wxID_ANY, wxT("HEVC Codec Stream Analyser"),
-                                 wxDefaultPosition, wxSize(800, 600));
-    SetTopWindow(frame);
-    frame->Show();
-    return true;
-}
+DEFINE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD)
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_EXIT, MainFrame::OnExit)
     EVT_MENU(wxID_OPEN, MainFrame::OnOpenFile)
     EVT_MENU(wxID_CLOSE, MainFrame::OnCloseFile)
+    EVT_COMMAND(wxID_ANY, wxEVT_ADDANIMAGE_THREAD, MainFrame::OnThreadAddImage)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos,
@@ -165,11 +158,39 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
     m_bOPened = true;
     if(m_bYUVFile)
     {
-        m_cYUVIO.open((char *)sfile.mb_str(wxConvUTF8).data(), false, 8, 8, 8, 8);
+        // only used in test, the single thread cost a lot of time
+//        wxBeginBusyCursor();
+//        m_cYUVIO.open((char *)sfile.mb_str(wxConvUTF8).data(), false, 8, 8, 8, 8);
+//
+//        m_iSourceWidth = 832;
+//        m_iSourceHeight = 480;
+//
+//        AddThumbnailListSingleThread();
+//        wxEndBusyCursor();
+        // single thread end
 
+        // multi-thread
         m_iSourceWidth = 832;
         m_iSourceHeight = 480;
-        AddThumbnailList();
+        wxImageList* pImage_list = new wxImageList((int)m_iSourceWidth*0.2, (int)m_iSourceHeight*0.2);
+        m_pThumbnalList->SetImageList(pImage_list, wxIMAGE_LIST_NORMAL);
+        ThumbnailThread* pThumbThread = new ThumbnailThread(this, pImage_list, m_iSourceWidth, m_iSourceHeight, 8, sfile);
+        if(pThumbThread->Create() != wxTHREAD_NO_ERROR)
+        {
+            wxLogError(wxT("Can't create the thread!"));
+            delete pThumbThread;
+            pThumbThread = NULL;
+        }
+        else
+        {
+            if(pThumbThread->Run() != wxTHREAD_NO_ERROR)
+            {
+                wxLogError(wxT("Can't create the thread!"));
+                delete pThumbThread;
+                pThumbThread = NULL;
+            }
+        }
+
     }
     else
     {
@@ -194,7 +215,7 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
     }
 }
 
-void MainFrame::AddThumbnailList()
+void MainFrame::AddThumbnailListSingleThread()
 {
     TComPicYuv* pcPicYuvOrg = new TComPicYuv;
     pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
@@ -251,4 +272,19 @@ void MainFrame::AddThumbnailList()
     pcPicYuvOrg->destroy();
     delete pcPicYuvOrg;
     pcPicYuvOrg = NULL;
+}
+
+void MainFrame::OnThreadAddImage(wxCommandEvent& event)
+{
+    int frame = event.GetInt();
+//    wxString str;
+//    str.Printf(wxT("frame %d added"), frame);
+//    wxMessageBox(str);
+    wxListItem item;
+    item.SetId(frame);
+    wxString text;
+    text.Printf(wxT("POC %d"), frame);
+    item.SetText(text);
+    item.SetImage(frame);
+    m_pThumbnalList->InsertItem(item);
 }

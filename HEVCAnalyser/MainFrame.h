@@ -4,13 +4,7 @@
 #include "HEVCAnalyser.h"
 #include "../TLibVideoIO/TVideoIOYuv.h"
 
-class HEVCodecApp : public wxApp
-{
-public:
-    bool OnInit();
-};
-
-DECLARE_APP(HEVCodecApp)
+DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
 
 class MainFrame : public wxFrame
 {
@@ -30,6 +24,7 @@ public:
 
 private:
     void           OnExit(wxCommandEvent& evt);
+    void           OnThreadAddImage(wxCommandEvent& event);
     // UI creator functions
     void           CreateMenuToolBar();
     void           CreateNoteBookPane();
@@ -38,7 +33,7 @@ private:
     void           OnOpenFile(wxCommandEvent& event);
     void           OnCloseFile(wxCommandEvent& event);
 
-    void           AddThumbnailList();
+    void           AddThumbnailListSingleThread();
 
 private:
     wxAuiManager   m_mgr;
