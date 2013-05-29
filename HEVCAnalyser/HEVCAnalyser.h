@@ -8,6 +8,8 @@
 #include <wx/listctrl.h>
 #include <wx/file.h>
 #include <wx/rawbmp.h>
+#include <wx/thread.h>
+#include <wx/imaglist.h>
 //#include <wx/menu.h>
 //#include <wx/toolbar.h>
 //#include <wx/statusbr.h>
