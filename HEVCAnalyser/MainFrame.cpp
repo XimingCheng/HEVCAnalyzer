@@ -1,4 +1,5 @@
 #include "MainFrame.h"
+#include "YUVConfigDlg.h"
 #include "ThumbnailThread.h"
 
 enum wxbuildinfoformat {
@@ -118,7 +119,7 @@ void MainFrame::OnExit(wxCommandEvent& evt)
 
 wxNotebook* MainFrame::CreateLeftNotebook()
 {
-    wxSize client_size = GetClientSize();
+    //wxSize client_size = GetClientSize();
     wxNotebook* ctrl = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0 );
     //wxBitmap page_bmp = wxArtProvider::GetBitmap(wxART_NORMAL_FILE, wxART_OTHER, wxSize(16,16));
     wxGridSizer* gSizer;
@@ -145,36 +146,28 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
     wxFileDialog dlg(this, wxT("Open YUV file or HEVC stream file"), wxT(""), wxT(""),
                      wxT("YUV files (*.yuv)|*.yuv"), wxFD_OPEN|wxFD_FILE_MUST_EXIST);
     if (dlg.ShowModal() == wxID_CANCEL)
-    {
-        m_bOPened = false;
         return;
-    }
     wxString sfile = dlg.GetPath();
     if(sfile.EndsWith(wxT(".yuv")))
         m_bYUVFile = true;
     else
         m_bYUVFile = false;
-    OnCloseFile(event);
-    m_bOPened = true;
+
     if(m_bYUVFile)
     {
-        // only used in test, the single thread cost a lot of time
-//        wxBeginBusyCursor();
-//        m_cYUVIO.open((char *)sfile.mb_str(wxConvUTF8).data(), false, 8, 8, 8, 8);
-//
-//        m_iSourceWidth = 832;
-//        m_iSourceHeight = 480;
-//
-//        AddThumbnailListSingleThread();
-//        wxEndBusyCursor();
-        // single thread end
+        YUVConfigDlg cdlg(this);
+        if(cdlg.ShowModal() == wxID_CANCEL)
+            return;
 
         // multi-thread
-        m_iSourceWidth = 832;
-        m_iSourceHeight = 480;
+        OnCloseFile(event);
+        m_bOPened = true;
+        m_iSourceWidth = cdlg.GetWidth();
+        m_iSourceHeight = cdlg.GetHeight();
+        int bit = (cdlg.Is10bitYUV() ? 10 : 8);
         wxImageList* pImage_list = new wxImageList((int)m_iSourceWidth*0.2, (int)m_iSourceHeight*0.2);
         m_pThumbnalList->SetImageList(pImage_list, wxIMAGE_LIST_NORMAL);
-        ThumbnailThread* pThumbThread = new ThumbnailThread(this, pImage_list, m_iSourceWidth, m_iSourceHeight, 8, sfile);
+        ThumbnailThread* pThumbThread = new ThumbnailThread(this, pImage_list, m_iSourceWidth, m_iSourceHeight, bit, sfile);
         if(pThumbThread->Create() != wxTHREAD_NO_ERROR)
         {
             wxLogError(wxT("Can't create the thread!"));
@@ -194,7 +187,8 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
     }
     else
     {
-
+        OnCloseFile(event);
+        m_bOPened = true;
     }
 }
 

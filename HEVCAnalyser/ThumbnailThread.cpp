@@ -6,7 +6,7 @@ void* ThumbnailThread::Entry()
 {
     m_pImageList->RemoveAll();
     TVideoIOYuv cYUVIO;
-    cYUVIO.open((char *)m_sYUVPath.mb_str(wxConvUTF8).data(), false, 8, 8, 8, 8);
+    cYUVIO.open((char *)m_sYUVPath.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
     TComPicYuv* pcPicYuvOrg = new TComPicYuv;
     pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
 
@@ -50,7 +50,9 @@ void* ThumbnailThread::Entry()
         m_pImageList->Add(newbmp);
         wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);
         event.SetInt(frame);
-        m_pFrame->ProcessEvent(event);
+        //m_pFrame->ProcessEvent(event);
+        // this method can be used in Linux
+        wxPostEvent(m_pFrame, event);
         frame++;
     }
 

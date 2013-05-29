@@ -1,7 +1,7 @@
 /* The copyright in this software is being made available under the BSD
  * License, included below. This software may be subject to other third party
  * and contributor rights, including patent rights, and no such rights are
- * granted under this license.  
+ * granted under this license.
  *
  * Copyright (c) 2010-2013, ITU/ISO/IEC
  * All rights reserved.
@@ -50,7 +50,7 @@
 Void initROM()
 {
   Int i, c;
-  
+
   // g_aucConvertToBit[ x ]: log2(x/4), if x=4 -> 0, x=8 -> 1, x=16 -> 2, ...
   ::memset( g_aucConvertToBit,   -1, sizeof( g_aucConvertToBit ) );
   c=0;
@@ -60,7 +60,7 @@ Void initROM()
     c++;
   }
   g_aucConvertToBit[ i ] = c;
-  
+
   // g_auiFrameScanXY[ g_aucConvertToBit[ transformSize ] ]: zigzag scan array for transformSize
   c=2;
   for ( i=0; i<MAX_CU_DEPTH; i++ )
@@ -71,13 +71,13 @@ Void initROM()
     initSigLastScan( g_auiSigLastScan[0][i], g_auiSigLastScan[1][i], g_auiSigLastScan[2][i], c, c);
 
     c <<= 1;
-  }  
+  }
 }
 
 Void destroyROM()
 {
   Int i;
-  
+
   for ( i=0; i<MAX_CU_DEPTH; i++ )
   {
     delete[] g_auiSigLastScan[0][i];
@@ -104,7 +104,7 @@ UInt g_auiPUOffset[8] = { 0, 8, 4, 4, 2, 10, 1, 5};
 Void initZscanToRaster ( Int iMaxDepth, Int iDepth, UInt uiStartVal, UInt*& rpuiCurrIdx )
 {
   Int iStride = 1 << ( iMaxDepth - 1 );
-  
+
   if ( iDepth == iMaxDepth )
   {
     rpuiCurrIdx[0] = uiStartVal;
@@ -124,10 +124,10 @@ Void initRasterToZscan ( UInt uiMaxCUWidth, UInt uiMaxCUHeight, UInt uiMaxDepth 
 {
   UInt  uiMinCUWidth  = uiMaxCUWidth  >> ( uiMaxDepth - 1 );
   UInt  uiMinCUHeight = uiMaxCUHeight >> ( uiMaxDepth - 1 );
-  
+
   UInt  uiNumPartInWidth  = (UInt)uiMaxCUWidth  / uiMinCUWidth;
   UInt  uiNumPartInHeight = (UInt)uiMaxCUHeight / uiMinCUHeight;
-  
+
   for ( UInt i = 0; i < uiNumPartInWidth*uiNumPartInHeight; i++ )
   {
     g_auiRasterToZscan[ g_auiZscanToRaster[i] ] = i;
@@ -137,16 +137,16 @@ Void initRasterToZscan ( UInt uiMaxCUWidth, UInt uiMaxCUHeight, UInt uiMaxDepth 
 Void initRasterToPelXY ( UInt uiMaxCUWidth, UInt uiMaxCUHeight, UInt uiMaxDepth )
 {
   UInt    i;
-  
+
   UInt* uiTempX = &g_auiRasterToPelX[0];
   UInt* uiTempY = &g_auiRasterToPelY[0];
-  
+
   UInt  uiMinCUWidth  = uiMaxCUWidth  >> ( uiMaxDepth - 1 );
   UInt  uiMinCUHeight = uiMaxCUHeight >> ( uiMaxDepth - 1 );
-  
+
   UInt  uiNumPartInWidth  = uiMaxCUWidth  / uiMinCUWidth;
   UInt  uiNumPartInHeight = uiMaxCUHeight / uiMinCUHeight;
-  
+
   uiTempX[0] = 0; uiTempX++;
   for ( i = 1; i < uiNumPartInWidth; i++ )
   {
@@ -157,7 +157,7 @@ Void initRasterToPelXY ( UInt uiMaxCUWidth, UInt uiMaxCUHeight, UInt uiMaxDepth 
     memcpy(uiTempX, uiTempX-uiNumPartInWidth, sizeof(UInt)*uiNumPartInWidth);
     uiTempX += uiNumPartInWidth;
   }
-  
+
   for ( i = 1; i < uiNumPartInWidth*uiNumPartInHeight; i++ )
   {
     uiTempY[i] = ( i / uiNumPartInWidth ) * uiMinCUWidth;
@@ -168,7 +168,7 @@ Void initRasterToPelXY ( UInt uiMaxCUWidth, UInt uiMaxCUHeight, UInt uiMaxDepth 
 Int g_quantScales[6] =
 {
   26214,23302,20560,18396,16384,14564
-};    
+};
 
 Int g_invQuantScales[6] =
 {
@@ -260,7 +260,7 @@ const UChar g_aucChromaScale[58]=
 };
 
 
-// Mode-Dependent DCT/DST 
+// Mode-Dependent DCT/DST
 const Short g_as_DST_MAT_4 [4][4]=
 {
   {29,   55,    74,   84},
@@ -280,10 +280,10 @@ const UChar g_aucIntraModeNumFast[7] =
   3,  //   2x2
   8,  //   4x4
   8,  //   8x8
-  3,  //  16x16   
-  3,  //  32x32   
-  3,  //  64x64   
-  3   // 128x128  
+  3,  //  16x16
+  3,  //  32x32
+  3,  //  64x64
+  3   // 128x128
 };
 #else // FAST_UDI_USE_MPM
 const UChar g_aucIntraModeNumFast[7] =
@@ -423,14 +423,14 @@ Void initSigLastScan(UInt* pBuffD, UInt* pBuffH, UInt* pBuffV, Int iWidth, Int i
       }
     }
   }
-  
+
   UInt uiCnt = 0;
   if( iWidth > 2 )
   {
     UInt numBlkSide = iWidth >> 2;
-    for(Int blkY=0; blkY < numBlkSide; blkY++)
+    for(UInt blkY=0; blkY < numBlkSide; blkY++)
     {
-      for(Int blkX=0; blkX < numBlkSide; blkX++)
+      for(UInt blkX=0; blkX < numBlkSide; blkX++)
       {
         UInt offset    = blkY * 4 * iWidth + blkX * 4;
         for(Int y=0; y < 4; y++)
@@ -445,9 +445,9 @@ Void initSigLastScan(UInt* pBuffD, UInt* pBuffH, UInt* pBuffV, Int iWidth, Int i
     }
 
     uiCnt = 0;
-    for(Int blkX=0; blkX < numBlkSide; blkX++)
+    for(UInt blkX=0; blkX < numBlkSide; blkX++)
     {
-      for(Int blkY=0; blkY < numBlkSide; blkY++)
+      for(UInt blkY=0; blkY < numBlkSide; blkY++)
       {
         UInt offset    = blkY * 4 * iWidth + blkX * 4;
         for(Int x=0; x < 4; x++)
@@ -480,7 +480,7 @@ Void initSigLastScan(UInt* pBuffD, UInt* pBuffH, UInt* pBuffV, Int iWidth, Int i
       pBuffV[uiCnt] = iY*iWidth + iX;
       uiCnt ++;
     }
-  }    
+  }
   }
 }
 
@@ -515,7 +515,7 @@ Int g_quantInterDefault8x8[64] =
   20,24,25,28,33,41,54,71,
   24,25,28,33,41,54,71,91
 };
-UInt g_scalingListSize   [4] = {16,64,256,1024}; 
+UInt g_scalingListSize   [4] = {16,64,256,1024};
 UInt g_scalingListSizeX  [4] = { 4, 8, 16,  32};
 UInt g_scalingListNum[SCALING_LIST_SIZE_NUM]={6,6,6,2};
 Int  g_eTTable[4] = {0,3,1,2};

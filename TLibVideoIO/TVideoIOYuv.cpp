@@ -249,7 +249,7 @@ static Bool readPlane(Pel* dst, istream& fd, Bool is16bit,
 {
   Int read_len = width * (is16bit ? 2 : 1);
   UChar *buf = new UChar[read_len];
-  for (Int y = 0; y < height; y++)
+  for (UInt y = 0; y < height; y++)
   {
     fd.read(reinterpret_cast<Char*>(buf), read_len);
     if (fd.eof() || fd.fail() )
@@ -260,28 +260,28 @@ static Bool readPlane(Pel* dst, istream& fd, Bool is16bit,
 
     if (!is16bit)
     {
-      for (Int x = 0; x < width; x++)
+      for (UInt x = 0; x < width; x++)
       {
         dst[x] = buf[x];
       }
     }
     else
     {
-      for (Int x = 0; x < width; x++)
+      for (UInt x = 0; x < width; x++)
       {
         dst[x] = (buf[2*x+1] << 8) | buf[2*x];
       }
     }
 
-    for (Int x = width; x < width + pad_x; x++)
+    for (UInt x = width; x < width + pad_x; x++)
     {
       dst[x] = dst[width - 1];
     }
     dst += stride;
   }
-  for (Int y = height; y < height + pad_y; y++)
+  for (UInt y = height; y < height + pad_y; y++)
   {
-    for (Int x = 0; x < width + pad_x; x++)
+    for (UInt x = 0; x < width + pad_x; x++)
     {
       dst[x] = (dst - stride)[x];
     }
@@ -308,18 +308,18 @@ static Bool writePlane(ostream& fd, Pel* src, Bool is16bit,
 {
   Int write_len = width * (is16bit ? 2 : 1);
   UChar *buf = new UChar[write_len];
-  for (Int y = 0; y < height; y++)
+  for (UInt y = 0; y < height; y++)
   {
     if (!is16bit)
     {
-      for (Int x = 0; x < width; x++)
+      for (UInt x = 0; x < width; x++)
       {
         buf[x] = (UChar) src[x];
       }
     }
     else
     {
-      for (Int x = 0; x < width; x++)
+      for (UInt x = 0; x < width; x++)
       {
         buf[2*x] = src[x] & 0xff;
         buf[2*x+1] = (src[x] >> 8) & 0xff;

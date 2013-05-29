@@ -11,9 +11,10 @@ class HEVCodecApp : public wxApp
 {
 public:
 #if defined(__UNIX__)
-	HEVCodecApp(){
-		XInitThreads();
-	}
+    HEVCodecApp()
+    {
+        XInitThreads();
+    }
 #endif
     bool OnInit();
 };
