@@ -56,7 +56,8 @@ void* ThumbnailThread::Entry()
         }
         //bmp.SaveFile(_("test.bmp"), wxBITMAP_TYPE_BMP);
         wxImage bimg = bmp.ConvertToImage();
-        wxImage simg = bimg.Scale((int)m_iSourceWidth*0.2, (int)m_iSourceHeight*0.2);
+        double scaleRate = 165.0/m_iSourceWidth;
+        wxImage simg = bimg.Scale((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
         wxBitmap newbmp(simg);
         m_pImageList->Add(newbmp);
         wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);

@@ -166,7 +166,8 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_iSourceWidth = cdlg.GetWidth();
         m_iSourceHeight = cdlg.GetHeight();
         int bit = (cdlg.Is10bitYUV() ? 10 : 8);
-        wxImageList* pImage_list = new wxImageList((int)m_iSourceWidth*0.2, (int)m_iSourceHeight*0.2);
+        double scaleRate = 165.0/m_iSourceWidth;
+        wxImageList* pImage_list = new wxImageList((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
         m_pThumbnalList->SetImageList(pImage_list, wxIMAGE_LIST_NORMAL);
         m_pThumbThread = new ThumbnailThread(this, pImage_list, m_iSourceWidth, m_iSourceHeight, bit, sfile);
         if(m_pThumbThread->Create() != wxTHREAD_NO_ERROR)
