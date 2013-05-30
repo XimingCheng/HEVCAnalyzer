@@ -27,9 +27,19 @@ void* ThumbnailThread::Entry()
             Pel* pV = pcPicYuvOrg->getCrAddr()   + (j/2)*pcPicYuvOrg->getCStride();
             for(int i = 0; i < m_iSourceWidth; i++)
             {
-                Pel y = pY[i];
-                Pel u = pU[i/2];
-                Pel v = pV[i/2];
+                unsigned char y, u, v;
+                if(m_iYUVBit == 10)
+                {
+                    y = (unsigned char)(pY[i] >> 2);
+                    u = (unsigned char)(pU[i/2] >> 2);
+                    v = (unsigned char)(pV[i/2] >> 2);
+                }
+                else
+                {
+                    y = (unsigned char)pY[i];
+                    u = (unsigned char)pU[i/2];
+                    v = (unsigned char)pV[i/2];
+                }
                 int r = y + 1.402*(v-128);
                 int g = y - 0.344*(u-128) - 0.714*(v-128);
                 int b = y + 1.722*(u-128);

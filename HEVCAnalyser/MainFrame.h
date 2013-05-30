@@ -8,6 +8,8 @@
 DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_END_THREAD, wxID_ANY)
 
+class ThumbnailThread;
+
 class MainFrame : public wxFrame
 {
 public:
