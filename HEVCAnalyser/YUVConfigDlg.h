@@ -6,6 +6,11 @@
 class YUVConfigDlg : public wxDialog
 {
 public:
+    enum
+    {
+        ID_OKBUTTON = wxID_HIGHEST+1,
+        ID_CANCELBUTTON,
+    };
     YUVConfigDlg(wxWindow *parent);
 
     int GetWidth()    const { return m_iWith; }

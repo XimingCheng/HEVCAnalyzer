@@ -77,6 +77,8 @@
 		<Unit filename="HEVCAnalyser/MainFrame.h" />
 		<Unit filename="HEVCAnalyser/ThumbnailThread.cpp" />
 		<Unit filename="HEVCAnalyser/ThumbnailThread.h" />
+		<Unit filename="HEVCAnalyser/YUVConfigDlg.cpp" />
+		<Unit filename="HEVCAnalyser/YUVConfigDlg.h" />
 		<Unit filename="TLibCommon/CommonDef.h" />
 		<Unit filename="TLibCommon/TComPicYuv.cpp" />
 		<Unit filename="TLibCommon/TComPicYuv.h" />

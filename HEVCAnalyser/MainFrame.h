@@ -2,9 +2,11 @@
 #define MAINFRAME_H_INCLUDED
 
 #include "HEVCAnalyser.h"
+#include "ThumbnailThread.h"
 #include "../TLibVideoIO/TVideoIOYuv.h"
 
 DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
+DECLARE_EVENT_TYPE(wxEVT_END_THREAD, wxID_ANY)
 
 class MainFrame : public wxFrame
 {
@@ -34,6 +36,7 @@ private:
     void           OnCloseFile(wxCommandEvent& event);
 
     void           AddThumbnailListSingleThread();
+    void           OnThreadEnd(wxCommandEvent& event);
 
 private:
     wxAuiManager   m_mgr;
@@ -50,6 +53,7 @@ private:
     int            m_iSourceHeight;
 
     TVideoIOYuv    m_cYUVIO;
+    ThumbnailThread* m_pThumbThread;
 
     DECLARE_EVENT_TABLE()
 };

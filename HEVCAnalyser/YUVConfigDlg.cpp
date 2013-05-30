@@ -1,7 +1,8 @@
 #include "YUVConfigDlg.h"
 
 BEGIN_EVENT_TABLE(YUVConfigDlg, wxDialog)
-    EVT_BUTTON(wxID_OK, YUVConfigDlg::OnOK)
+    EVT_BUTTON(ID_OKBUTTON, YUVConfigDlg::OnOK)
+    EVT_BUTTON(ID_CANCELBUTTON, YUVConfigDlg::OnCancel)
 END_EVENT_TABLE()
 
 YUVConfigDlg::YUVConfigDlg(wxWindow *parent)
@@ -47,10 +48,10 @@ YUVConfigDlg::YUVConfigDlg(wxWindow *parent)
     m_choiceBit->SetSelection( 0 );
     fgSizer->Add( m_choiceBit, 0, wxALIGN_CENTER|wxALL, 5 );
 
-    wxButton* buttonCancel = new wxButton( this, wxID_CANCEL, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+    wxButton* buttonCancel = new wxButton( this, ID_CANCELBUTTON, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
     fgSizer->Add( buttonCancel, 0, wxALL, 5 );
 
-    wxButton* buttonOK = new wxButton( this, wxID_OK, wxT("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+    wxButton* buttonOK = new wxButton( this, ID_OKBUTTON, wxT("OK"), wxDefaultPosition, wxDefaultSize, 0 );
     fgSizer->Add( buttonOK, 0, wxALIGN_RIGHT|wxALL, 5 );
 
 

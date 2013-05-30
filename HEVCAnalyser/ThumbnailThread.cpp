@@ -1,6 +1,7 @@
 #include "ThumbnailThread.h"
 
 extern const wxEventType wxEVT_ADDANIMAGE_THREAD;
+extern const wxEventType wxEVT_END_THREAD;
 
 void* ThumbnailThread::Entry()
 {
@@ -12,7 +13,7 @@ void* ThumbnailThread::Entry()
 
     wxBitmap bmp(m_iSourceWidth, m_iSourceHeight, 24);
     int frame = 0;
-    while(!cYUVIO.isEof())
+    while(!cYUVIO.isEof() && !TestDestroy())
     {
         int pad[] = {0, 0};
         cYUVIO.read(pcPicYuvOrg, pad);
@@ -59,6 +60,7 @@ void* ThumbnailThread::Entry()
     pcPicYuvOrg->destroy();
     delete pcPicYuvOrg;
     pcPicYuvOrg = NULL;
-
+    wxCommandEvent event(wxEVT_END_THREAD, wxID_ANY);
+    wxPostEvent(m_pFrame, event);
     return (wxThread::ExitCode)0;
 }

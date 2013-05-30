@@ -1,6 +1,5 @@
 #include "MainFrame.h"
 #include "YUVConfigDlg.h"
-#include "ThumbnailThread.h"
 
 enum wxbuildinfoformat {
     short_f, long_f };
@@ -30,18 +29,20 @@ wxString wxbuildinfo(wxbuildinfoformat format)
 }
 
 DEFINE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD)
+DEFINE_EVENT_TYPE(wxEVT_END_THREAD)
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_EXIT, MainFrame::OnExit)
     EVT_MENU(wxID_OPEN, MainFrame::OnOpenFile)
     EVT_MENU(wxID_CLOSE, MainFrame::OnCloseFile)
     EVT_COMMAND(wxID_ANY, wxEVT_ADDANIMAGE_THREAD, MainFrame::OnThreadAddImage)
+    EVT_COMMAND(wxID_ANY, wxEVT_END_THREAD, MainFrame::OnThreadEnd)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos,
             const wxSize& size, long style)
             : wxFrame(parent, id, title, pos, size, style),
-            m_bYUVFile(false), m_bOPened(false)
+            m_bYUVFile(false), m_bOPened(false), m_pThumbThread(NULL)
 {
     //SetSizeHints( wxDefaultSize, wxDefaultSize );
     Centre();
@@ -119,19 +120,19 @@ void MainFrame::OnExit(wxCommandEvent& evt)
 
 wxNotebook* MainFrame::CreateLeftNotebook()
 {
-    //wxSize client_size = GetClientSize();
+    wxSize client_size = GetClientSize();
     wxNotebook* ctrl = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0 );
     //wxBitmap page_bmp = wxArtProvider::GetBitmap(wxART_NORMAL_FILE, wxART_OTHER, wxSize(16,16));
     wxGridSizer* gSizer;
-    gSizer = new wxGridSizer( 0, 1, 0, 0 );
+    gSizer = new wxGridSizer( 1, 1, 0, 0 );
     m_pThumbnalListPanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
     m_pThumbnalList = new wxListCtrl( m_pThumbnalListPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize , wxNO_BORDER | wxLC_ICON);
-    gSizer->Add( m_pThumbnalList, 0, wxALL|wxEXPAND, 5 );
+    gSizer->Add( m_pThumbnalList, 0, wxEXPAND, 5 );
 
     m_pThumbnalListPanel->SetSizer( gSizer );
     m_pThumbnalListPanel->Layout();
-    gSizer->Fit( m_pThumbnalListPanel );
-    //m_pThumbnalList->Fit( m_pThumbnalListPanel );
+//    gSizer->Fit( m_pThumbnalListPanel );
+//    m_pThumbnalList->Fit( m_pThumbnalListPanel );
     ctrl->AddPage( m_pThumbnalListPanel, wxT("Thumbnails"), true );
     wxPanel* m_panel7 = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
     ctrl->AddPage( m_panel7, wxT("CU Pixels"), false );
@@ -167,20 +168,20 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         int bit = (cdlg.Is10bitYUV() ? 10 : 8);
         wxImageList* pImage_list = new wxImageList((int)m_iSourceWidth*0.2, (int)m_iSourceHeight*0.2);
         m_pThumbnalList->SetImageList(pImage_list, wxIMAGE_LIST_NORMAL);
-        ThumbnailThread* pThumbThread = new ThumbnailThread(this, pImage_list, m_iSourceWidth, m_iSourceHeight, bit, sfile);
-        if(pThumbThread->Create() != wxTHREAD_NO_ERROR)
+        m_pThumbThread = new ThumbnailThread(this, pImage_list, m_iSourceWidth, m_iSourceHeight, bit, sfile);
+        if(m_pThumbThread->Create() != wxTHREAD_NO_ERROR)
         {
             wxLogError(wxT("Can't create the thread!"));
-            delete pThumbThread;
-            pThumbThread = NULL;
+            delete m_pThumbThread;
+            m_pThumbThread = NULL;
         }
         else
         {
-            if(pThumbThread->Run() != wxTHREAD_NO_ERROR)
+            if(m_pThumbThread->Run() != wxTHREAD_NO_ERROR)
             {
                 wxLogError(wxT("Can't create the thread!"));
-                delete pThumbThread;
-                pThumbThread = NULL;
+                delete m_pThumbThread;
+                m_pThumbThread = NULL;
             }
         }
 
@@ -199,6 +200,12 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
         if(m_bYUVFile)
         {
             m_cYUVIO.close();
+            if(m_pThumbThread)
+            {
+                if(m_pThumbThread->IsRunning())
+                    m_pThumbThread->Delete();
+                m_pThumbThread = NULL;
+            }
             m_pThumbnalList->ClearAll();
         }
         else
@@ -281,4 +288,9 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
     item.SetText(text);
     item.SetImage(frame);
     m_pThumbnalList->InsertItem(item);
+}
+
+void MainFrame::OnThreadEnd(wxCommandEvent& event)
+{
+    m_pThumbThread = NULL;
 }
