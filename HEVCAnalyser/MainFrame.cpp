@@ -1,5 +1,6 @@
 #include "MainFrame.h"
 #include "YUVConfigDlg.h"
+#include <wx/fs_mem.h>
 
 enum wxbuildinfoformat {
     short_f, long_f };
@@ -42,10 +43,10 @@ END_EVENT_TABLE()
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos,
             const wxSize& size, long style)
             : wxFrame(parent, id, title, pos, size, style),
-            m_bYUVFile(false), m_bOPened(false), m_pThumbThread(NULL)
+            m_bYUVFile(false), m_bOPened(false), m_pThumbThread(NULL) 
 {
     //SetSizeHints( wxDefaultSize, wxDefaultSize );
-    Centre();
+    //m_StrMemFileName = new wxArrayString();
     m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
     m_mgr.SetManagedWindow(this);
     // this is not define yet
@@ -53,9 +54,12 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
     m_notebook_style = wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE | wxAUI_NB_SCROLL_BUTTONS
                     | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER;
     m_notebook_theme = 1;
+    wxFileSystem::AddHandler(new wxMemoryFSHandler);
 
     CreateMenuToolBar();
     CreateNoteBookPane();
+    
+    Centre();
 
     m_mgr.Update();
 }
@@ -110,6 +114,7 @@ void MainFrame::CreateNoteBookPane()
 
 MainFrame::~MainFrame()
 {
+    ClearThumbnalMemory();
     m_mgr.UnInit();
 }
 
@@ -124,9 +129,15 @@ wxNotebook* MainFrame::CreateLeftNotebook()
     wxNotebook* ctrl = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0 );
     //wxBitmap page_bmp = wxArtProvider::GetBitmap(wxART_NORMAL_FILE, wxART_OTHER, wxSize(16,16));
     wxGridSizer* gSizer;
-    gSizer = new wxGridSizer( 1, 1, 0, 0 );
+    gSizer = new wxGridSizer( 1, 0, 0 );
     m_pThumbnalListPanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-    m_pThumbnalList = new wxListCtrl( m_pThumbnalListPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize , wxNO_BORDER | wxLC_ICON);
+//  m_pThumbnalList = new wxListCtrl( m_pThumbnalListPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize , wxNO_BORDER | wxLC_ICON);
+    m_pThumbnalList = new wxSimpleHtmlListBox(m_pThumbnalListPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 
+                                              0, NULL, 0);
+//    wxArrayString arr;
+//    wxString label = wxString::Format(_T("<h>poc%d</h>"), 100);
+//    arr.Add(label);
+//    m_pThumbnalList->Append(arr);
     gSizer->Add( m_pThumbnalList, 0, wxEXPAND, 5 );
 
     m_pThumbnalListPanel->SetSizer( gSizer );
@@ -159,7 +170,6 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         YUVConfigDlg cdlg(this);
         if(cdlg.ShowModal() == wxID_CANCEL)
             return;
-
         // multi-thread
         OnCloseFile(event);
         m_bOPened = true;
@@ -167,9 +177,9 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_iSourceHeight = cdlg.GetHeight();
         int bit = (cdlg.Is10bitYUV() ? 10 : 8);
         double scaleRate = 165.0/m_iSourceWidth;
-        wxImageList* pImage_list = new wxImageList((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
-        m_pThumbnalList->SetImageList(pImage_list, wxIMAGE_LIST_NORMAL);
-        m_pThumbThread = new ThumbnailThread(this, pImage_list, m_iSourceWidth, m_iSourceHeight, bit, sfile);
+        m_pImageList = new wxImageList((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
+//        m_pThumbnalList->SetImageList(m_pImageList, wxIMAGE_LIST_NORMAL);
+        m_pThumbThread = new ThumbnailThread(this, m_pImageList, m_iSourceWidth, m_iSourceHeight, bit, sfile);
         if(m_pThumbThread->Create() != wxTHREAD_NO_ERROR)
         {
             wxLogError(wxT("Can't create the thread!"));
@@ -207,7 +217,9 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
                     m_pThumbThread->Delete();
                 m_pThumbThread = NULL;
             }
-            m_pThumbnalList->ClearAll();
+            //m_pThumbnalList->ClearAll();
+            if(m_StrMemFileName.GetCount())
+                ClearThumbnalMemory();
         }
         else
         {
@@ -221,8 +233,8 @@ void MainFrame::AddThumbnailListSingleThread()
 {
     TComPicYuv* pcPicYuvOrg = new TComPicYuv;
     pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
-    wxImageList* pImage_list = new wxImageList((int)m_iSourceWidth*0.2, (int)m_iSourceHeight*0.2);
-    m_pThumbnalList->SetImageList(pImage_list, wxIMAGE_LIST_NORMAL);
+    m_pImageList = new wxImageList((int)m_iSourceWidth*0.2, (int)m_iSourceHeight*0.2);
+    //m_pThumbnalList->SetImageList(m_pImageList, wxIMAGE_LIST_NORMAL);
     wxBitmap bmp(m_iSourceWidth, m_iSourceHeight, 24);
     int frame = 0;
     while(!m_cYUVIO.isEof())
@@ -238,7 +250,7 @@ void MainFrame::AddThumbnailListSingleThread()
             Pel* pU = pcPicYuvOrg->getCbAddr()   + (j/2)*pcPicYuvOrg->getCStride();
             Pel* pV = pcPicYuvOrg->getCrAddr()   + (j/2)*pcPicYuvOrg->getCStride();
             for(int i = 0; i < m_iSourceWidth; i++)
-            {
+            { 
                 Pel y = pY[i];
                 Pel u = pU[i/2];
                 Pel v = pV[i/2];
@@ -260,14 +272,14 @@ void MainFrame::AddThumbnailListSingleThread()
         wxImage bimg = bmp.ConvertToImage();
         wxImage simg = bimg.Scale((int)m_iSourceWidth*0.2, (int)m_iSourceHeight*0.2);
         wxBitmap newbmp(simg);
-        pImage_list->Add(newbmp);
+        m_pImageList->Add(newbmp);
         wxListItem item;
         item.SetId(frame);
         wxString text;
         text.Printf(wxT("POC %d"), frame);
         item.SetText(text);
         item.SetImage(frame);
-        m_pThumbnalList->InsertItem(item);
+        //m_pThumbnalList->InsertItem(item);
         frame++;
     }
 
@@ -278,20 +290,28 @@ void MainFrame::AddThumbnailListSingleThread()
 
 void MainFrame::OnThreadAddImage(wxCommandEvent& event)
 {
-    int frame = event.GetInt();
-//    wxString str;
-//    str.Printf(wxT("frame %d added"), frame);
-//    wxMessageBox(str);
-    wxListItem item;
-    item.SetId(frame);
-    wxString text;
-    text.Printf(wxT("POC %d"), frame);
-    item.SetText(text);
-    item.SetImage(frame);
-    m_pThumbnalList->InsertItem(item);
+   int frame = event.GetInt();
+   wxString filename = wxString::Format(_T("poc %d.bmp"), frame);
+   m_StrMemFileName.Add(filename);
+   wxArrayString arr;
+   wxMemoryFSHandler::AddFile(wxString::Format(_T("poc %d.bmp"), frame), m_pImageList->GetBitmap(frame),wxBITMAP_TYPE_BMP);
+   wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:poc %d.bmp\"><br></p><span text-align=center>poc%d </span>"), frame, frame);
+   arr.Add(label);
+   m_pThumbnalList->Append(arr);
+   m_pThumbnalList->RefreshAll();
+
+   m_mgr.Update();
 }
 
 void MainFrame::OnThreadEnd(wxCommandEvent& event)
 {
     m_pThumbThread = NULL;
+}
+
+void MainFrame::ClearThumbnalMemory()
+{
+//    wxLogError(wxString::Format(_T("clearing: %d"), m_StrMemFileName.GetCount()));
+    for(int i = 0; i < m_StrMemFileName.GetCount(); i++)
+        wxMemoryFSHandler::RemoveFile(m_StrMemFileName[i]);
+    m_StrMemFileName.Clear();
 }

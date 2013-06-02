@@ -4,6 +4,9 @@
 #include "HEVCAnalyser.h"
 #include "ThumbnailThread.h"
 #include "../TLibVideoIO/TVideoIOYuv.h"
+#include <wx/htmllbox.h>
+#include <wx/imaglist.h>
+#include <wx/arrstr.h>
 
 DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_END_THREAD, wxID_ANY)
@@ -39,17 +42,22 @@ private:
 
     void           AddThumbnailListSingleThread();
     void           OnThreadEnd(wxCommandEvent& event);
+    void           ClearThumbnalMemory();
 
 private:
     wxAuiManager   m_mgr;
     wxNotebook*    m_pLeftNoteBook;
     wxPanel*       m_pThumbnalListPanel;
-    wxListCtrl*    m_pThumbnalList;
+    //wxListCtrl*    m_pThumbnalList;
+    wxSimpleHtmlListBox* m_pThumbnalList;
+    wxImageList*   m_pImageList;
+    wxArrayString  m_StrMemFileName;
 
     long           m_notebook_style;
     long           m_notebook_theme;
     bool           m_bYUVFile;
     bool           m_bOPened;
+   
 
     int            m_iSourceWidth;
     int            m_iSourceHeight;
