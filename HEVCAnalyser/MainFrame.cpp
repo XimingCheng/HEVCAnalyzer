@@ -295,7 +295,7 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
    m_StrMemFileName.Add(filename);
    wxArrayString arr;
    wxMemoryFSHandler::AddFile(wxString::Format(_T("poc %d.bmp"), frame), m_pImageList->GetBitmap(frame),wxBITMAP_TYPE_BMP);
-   wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:poc %d.bmp\"><br></p><span text-align=center>poc%d </span>"), frame, frame);
+   wxString label = wxString::Format(_T("<p align=\"center\"><img src=\"memory:poc %d.bmp\"><br></p><span text-align=center>poc%d </span><br><span>&nbsp;</span>"), frame, frame);
    arr.Add(label);
    m_pThumbnalList->Append(arr);
    m_pThumbnalList->RefreshAll();
