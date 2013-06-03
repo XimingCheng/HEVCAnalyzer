@@ -8,23 +8,23 @@ void* ThumbnailThread::Entry()
     m_pImageList->RemoveAll();
     TVideoIOYuv cYUVIO;
     cYUVIO.open((char *)m_sYUVPath.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
-    TComPicYuv* pcPicYuvOrg = new TComPicYuv;
-    pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
+    m_pcPicYuvOrg = new TComPicYuv;
+    m_pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
 
     wxBitmap bmp(m_iSourceWidth, m_iSourceHeight, 24);
     int frame = 0;
     while(!cYUVIO.isEof() && !TestDestroy())
     {
         int pad[] = {0, 0};
-        cYUVIO.read(pcPicYuvOrg, pad);
+        cYUVIO.read(m_pcPicYuvOrg, pad);
         wxNativePixelData img(bmp);
         wxNativePixelData::Iterator p(img);
         for(int j = 0; j < m_iSourceHeight; j++)
         {
             wxNativePixelData::Iterator rowStart = p;
-            Pel* pY = pcPicYuvOrg->getLumaAddr() + j*pcPicYuvOrg->getStride();
-            Pel* pU = pcPicYuvOrg->getCbAddr()   + (j/2)*pcPicYuvOrg->getCStride();
-            Pel* pV = pcPicYuvOrg->getCrAddr()   + (j/2)*pcPicYuvOrg->getCStride();
+            Pel* pY = m_pcPicYuvOrg->getLumaAddr() + j*m_pcPicYuvOrg->getStride();
+            Pel* pU = m_pcPicYuvOrg->getCbAddr()   + (j/2)*m_pcPicYuvOrg->getCStride();
+            Pel* pV = m_pcPicYuvOrg->getCrAddr()   + (j/2)*m_pcPicYuvOrg->getCStride();
             for(int i = 0; i < m_iSourceWidth; i++)
             {
                 unsigned char y, u, v;
@@ -68,10 +68,20 @@ void* ThumbnailThread::Entry()
         frame++;
     }
 
-    pcPicYuvOrg->destroy();
-    delete pcPicYuvOrg;
-    pcPicYuvOrg = NULL;
+    m_pcPicYuvOrg->destroy();
+    delete m_pcPicYuvOrg;
+    m_pcPicYuvOrg = NULL;
     wxCommandEvent event(wxEVT_END_THREAD, wxID_ANY);
     wxPostEvent(m_pFrame, event);
     return (wxThread::ExitCode)0;
+}
+
+ThumbnailThread::~ThumbnailThread()
+{
+    if(m_pcPicYuvOrg)
+    {
+        m_pcPicYuvOrg->destroy();
+        delete m_pcPicYuvOrg;
+        m_pcPicYuvOrg = NULL;
+    }
 }

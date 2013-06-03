@@ -1,6 +1,5 @@
 #include "MainFrame.h"
 #include "YUVConfigDlg.h"
-#include <wx/fs_mem.h>
 
 enum wxbuildinfoformat {
     short_f, long_f };
@@ -38,15 +37,14 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_CLOSE, MainFrame::OnCloseFile)
     EVT_COMMAND(wxID_ANY, wxEVT_ADDANIMAGE_THREAD, MainFrame::OnThreadAddImage)
     EVT_COMMAND(wxID_ANY, wxEVT_END_THREAD, MainFrame::OnThreadEnd)
+    EVT_LISTBOX(wxID_ANY, MainFrame::OnThumbnailLboxSelect)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos,
             const wxSize& size, long style)
             : wxFrame(parent, id, title, pos, size, style),
-            m_bYUVFile(false), m_bOPened(false), m_pThumbThread(NULL) 
+            m_bYUVFile(false), m_bOPened(false), m_pThumbThread(NULL)
 {
-    //SetSizeHints( wxDefaultSize, wxDefaultSize );
-    //m_StrMemFileName = new wxArrayString();
     m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
     m_mgr.SetManagedWindow(this);
     // this is not define yet
@@ -58,7 +56,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 
     CreateMenuToolBar();
     CreateNoteBookPane();
-    
+
     Centre();
 
     m_mgr.Update();
@@ -68,30 +66,30 @@ void MainFrame::CreateMenuToolBar()
 {
     wxMenuBar* mb = new wxMenuBar;
     wxMenu* file_menu = new wxMenu;
-    file_menu->Append(wxID_OPEN, wxT("Open File"));
-    file_menu->Append(wxID_CLOSE, wxT("Close Current File"));
-    file_menu->Append(wxID_EXIT, wxT("Exit"));
+    file_menu->Append(wxID_OPEN, _T("Open File"));
+    file_menu->Append(wxID_CLOSE, _T("Close Current File"));
+    file_menu->Append(wxID_EXIT, _T("Exit"));
     wxMenu* help_menu = new wxMenu;
-    help_menu->Append(wxID_ABOUT, wxT("About HEVC Analyser"));
+    help_menu->Append(wxID_ABOUT, _T("About HEVC Analyser"));
 
-    mb->Append(file_menu, wxT("File"));
-    mb->Append(help_menu, wxT("Help"));
+    mb->Append(file_menu, _T("File"));
+    mb->Append(help_menu, _T("Help"));
 
     SetMenuBar(mb);
 
     CreateStatusBar();
-    GetStatusBar()->SetStatusText(wxT("Ready"));
+    GetStatusBar()->SetStatusText(_T("Ready"));
     SetMinSize(wxSize(400, 300));
 
     wxAuiToolBar* tb = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE);
     tb->SetToolBitmapSize(wxSize(16, 16));
     wxBitmap tb_bmp1 = wxArtProvider::GetBitmap(wxART_QUESTION, wxART_OTHER, wxSize(16, 16));
-    tb->AddTool(wxID_OPEN, wxT("Open File"), tb_bmp1, wxT("Open File"), wxITEM_NORMAL);
-    tb->AddTool(ID_CLOSE_FILE, wxT("CLose File"), tb_bmp1, wxT("Close File"), wxITEM_NORMAL);
+    tb->AddTool(wxID_OPEN, _T("Open File"), tb_bmp1, _T("Open File"), wxITEM_NORMAL);
+    tb->AddTool(ID_CLOSE_FILE, wxT("CLose File"), tb_bmp1, _T("Close File"), wxITEM_NORMAL);
     tb->Realize();
 
     m_mgr.AddPane(tb, wxAuiPaneInfo().
-                  Name(wxT("tb")).Caption(wxT("Toolbar")).
+                  Name(_T("tb")).Caption(_T("Toolbar")).
                   ToolbarPane().Top().
                   LeftDockable(false).RightDockable(false));
     g_uiMaxCUWidth  = 64;
@@ -100,16 +98,12 @@ void MainFrame::CreateMenuToolBar()
 
 void MainFrame::CreateNoteBookPane()
 {
-    m_pLeftNoteBook = CreateLeftNotebook();
-    m_mgr.AddPane(m_pLeftNoteBook, wxAuiPaneInfo().Name(wxT("Left NoteBook")).
-                                                        Caption(wxT("YUV info")).
+    m_mgr.AddPane(CreateLeftNotebook(), wxAuiPaneInfo().Name(_T("Left NoteBook")).Caption(_T("YUV info")).
                   BestSize(wxSize(300,100)).MaxSize(wxSize(500,100)).Left().Layer(1));
-    m_mgr.AddPane(new wxTextCtrl(this,wxID_ANY, _("test"),
+    m_mgr.AddPane(CreateCenterNotebook(), wxAuiPaneInfo().Name(_T("Center NoteBook")).Center().Layer(0));
+    m_mgr.AddPane(new wxTextCtrl(this,wxID_ANY, _T("test"),
                           wxPoint(0,0), wxSize(150,90),
-                          wxNO_BORDER | wxTE_MULTILINE), wxAuiPaneInfo().Name(wxT("Center NoteBook")).Center().Layer(0));
-    m_mgr.AddPane(new wxTextCtrl(this,wxID_ANY, _("test"),
-                          wxPoint(0,0), wxSize(150,90),
-                          wxNO_BORDER | wxTE_MULTILINE), wxAuiPaneInfo().Name(wxT("Bottom NoteBook")).Bottom().Layer(1));
+                          wxNO_BORDER | wxTE_MULTILINE), wxAuiPaneInfo().Name(_T("Bottom NoteBook")).Bottom().Layer(1));
 }
 
 MainFrame::~MainFrame()
@@ -125,31 +119,38 @@ void MainFrame::OnExit(wxCommandEvent& evt)
 
 wxNotebook* MainFrame::CreateLeftNotebook()
 {
-    wxSize client_size = GetClientSize();
     wxNotebook* ctrl = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0 );
-    //wxBitmap page_bmp = wxArtProvider::GetBitmap(wxART_NORMAL_FILE, wxART_OTHER, wxSize(16,16));
-    wxGridSizer* gSizer;
-    gSizer = new wxGridSizer( 1, 0, 0 );
-    m_pThumbnalListPanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-//  m_pThumbnalList = new wxListCtrl( m_pThumbnalListPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize , wxNO_BORDER | wxLC_ICON);
-    m_pThumbnalList = new wxSimpleHtmlListBox(m_pThumbnalListPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 
-                                              0, NULL, 0);
-//    wxArrayString arr;
-//    wxString label = wxString::Format(_T("<h>poc%d</h>"), 100);
-//    arr.Add(label);
-//    m_pThumbnalList->Append(arr);
+    wxGridSizer* gSizer = new wxGridSizer( 1, 0, 0 );
+    wxPanel* pThumbnalListPanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    m_pThumbnalList = new wxSimpleHtmlListBox(pThumbnalListPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0);
     gSizer->Add( m_pThumbnalList, 0, wxEXPAND, 5 );
-
-    m_pThumbnalListPanel->SetSizer( gSizer );
-    m_pThumbnalListPanel->Layout();
-//    gSizer->Fit( m_pThumbnalListPanel );
-//    m_pThumbnalList->Fit( m_pThumbnalListPanel );
-    ctrl->AddPage( m_pThumbnalListPanel, wxT("Thumbnails"), true );
+    pThumbnalListPanel->SetSizer( gSizer );
+    pThumbnalListPanel->Layout();
+    ctrl->AddPage( pThumbnalListPanel, _T("Thumbnails"), true );
     wxPanel* m_panel7 = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-    ctrl->AddPage( m_panel7, wxT("CU Pixels"), false );
-//    ctrl->AddPage( new wxPanel( ctrl) , wxT("wxTextCtrl 1"), false );
-//    ctrl->AddPage( new wxPanel( ctrl) , wxT("wxTextCtrl 1"), false );
+    ctrl->AddPage( m_panel7, _T("CU Pixels"), false );
+    return ctrl;
+}
 
+wxNotebook* MainFrame::CreateCenterNotebook()
+{
+    wxNotebook* ctrl = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0 );
+    wxGridSizer* gSizer = new wxGridSizer( 1, 0, 0 );
+    wxPanel* pDecodePanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    //wxScrolledWindow
+    m_pDecodeScrolledWin = new wxScrolledWindow( pDecodePanel, -1, wxDefaultPosition, wxDefaultSize,
+                        wxSUNKEN_BORDER|wxScrolledWindowStyle);
+
+    wxGridSizer* innerSizer = new wxGridSizer( 1, 0, 0 );
+
+    m_pDecodeScrolledWin->SetScrollRate( 5, 5 );
+    m_pDecodeScrolledWin->SetSizer( innerSizer );
+    gSizer->Add( m_pDecodeScrolledWin, 1, wxEXPAND );
+    pDecodePanel->SetSizer( gSizer );
+    pDecodePanel->Layout();
+    ctrl->AddPage( pDecodePanel, _T("Decode Pic"), true );
+    wxPanel* m_panel7 = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    ctrl->AddPage( m_panel7, _T("Residual Pic"), false );
     return ctrl;
 }
 
@@ -217,7 +218,8 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
                     m_pThumbThread->Delete();
                 m_pThumbThread = NULL;
             }
-            //m_pThumbnalList->ClearAll();
+            m_pImageList->RemoveAll();
+            m_pThumbnalList->Clear();
             if(m_StrMemFileName.GetCount())
                 ClearThumbnalMemory();
         }
@@ -234,7 +236,6 @@ void MainFrame::AddThumbnailListSingleThread()
     TComPicYuv* pcPicYuvOrg = new TComPicYuv;
     pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
     m_pImageList = new wxImageList((int)m_iSourceWidth*0.2, (int)m_iSourceHeight*0.2);
-    //m_pThumbnalList->SetImageList(m_pImageList, wxIMAGE_LIST_NORMAL);
     wxBitmap bmp(m_iSourceWidth, m_iSourceHeight, 24);
     int frame = 0;
     while(!m_cYUVIO.isEof())
@@ -250,7 +251,7 @@ void MainFrame::AddThumbnailListSingleThread()
             Pel* pU = pcPicYuvOrg->getCbAddr()   + (j/2)*pcPicYuvOrg->getCStride();
             Pel* pV = pcPicYuvOrg->getCrAddr()   + (j/2)*pcPicYuvOrg->getCStride();
             for(int i = 0; i < m_iSourceWidth; i++)
-            { 
+            {
                 Pel y = pY[i];
                 Pel u = pU[i/2];
                 Pel v = pV[i/2];
@@ -290,28 +291,33 @@ void MainFrame::AddThumbnailListSingleThread()
 
 void MainFrame::OnThreadAddImage(wxCommandEvent& event)
 {
-   int frame = event.GetInt();
-   wxString filename = wxString::Format(_T("poc %d.bmp"), frame);
-   m_StrMemFileName.Add(filename);
-   wxArrayString arr;
-   wxMemoryFSHandler::AddFile(wxString::Format(_T("poc %d.bmp"), frame), m_pImageList->GetBitmap(frame),wxBITMAP_TYPE_BMP);
-   wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:poc %d.bmp\"><br></p><span text-align=center>poc%d </span>"), frame, frame);
-   arr.Add(label);
-   m_pThumbnalList->Append(arr);
-   m_pThumbnalList->RefreshAll();
+    int frame = event.GetInt();
+    wxString filename = wxString::Format(_T("poc %d.bmp"), frame);
+    m_StrMemFileName.Add(filename);
+    wxArrayString arr;
+    wxMemoryFSHandler::AddFile(wxString::Format(_T("poc %d.bmp"), frame), m_pImageList->GetBitmap(frame),wxBITMAP_TYPE_BMP);
+    wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:poc %d.bmp\"><br></p><span text-align=center>poc%d </span>"), frame, frame);
+    arr.Add(label);
+    m_pThumbnalList->Append(arr);
+    m_pThumbnalList->RefreshAll();
 
-   m_mgr.Update();
+    m_mgr.Update();
 }
 
 void MainFrame::OnThreadEnd(wxCommandEvent& event)
 {
     m_pThumbThread = NULL;
+    m_pImageList->RemoveAll();
 }
 
 void MainFrame::ClearThumbnalMemory()
 {
-//    wxLogError(wxString::Format(_T("clearing: %d"), m_StrMemFileName.GetCount()));
     for(int i = 0; i < m_StrMemFileName.GetCount(); i++)
         wxMemoryFSHandler::RemoveFile(m_StrMemFileName[i]);
     m_StrMemFileName.Clear();
+}
+
+void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
+{
+
 }

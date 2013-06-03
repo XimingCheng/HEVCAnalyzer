@@ -4,9 +4,6 @@
 #include "HEVCAnalyser.h"
 #include "ThumbnailThread.h"
 #include "../TLibVideoIO/TVideoIOYuv.h"
-#include <wx/htmllbox.h>
-#include <wx/imaglist.h>
-#include <wx/arrstr.h>
 
 DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_END_THREAD, wxID_ANY)
@@ -36,34 +33,35 @@ private:
     void           CreateMenuToolBar();
     void           CreateNoteBookPane();
     wxNotebook*    CreateLeftNotebook();
+    wxNotebook*    CreateCenterNotebook();
     // File IO operators
     void           OnOpenFile(wxCommandEvent& event);
     void           OnCloseFile(wxCommandEvent& event);
+
+    void           OnThumbnailLboxSelect(wxCommandEvent& event);
 
     void           AddThumbnailListSingleThread();
     void           OnThreadEnd(wxCommandEvent& event);
     void           ClearThumbnalMemory();
 
 private:
-    wxAuiManager   m_mgr;
-    wxNotebook*    m_pLeftNoteBook;
-    wxPanel*       m_pThumbnalListPanel;
-    //wxListCtrl*    m_pThumbnalList;
+    wxAuiManager         m_mgr;
     wxSimpleHtmlListBox* m_pThumbnalList;
-    wxImageList*   m_pImageList;
-    wxArrayString  m_StrMemFileName;
+    wxImageList*         m_pImageList;
+    wxArrayString        m_StrMemFileName;
+    wxScrolledWindow*    m_pDecodeScrolledWin;
 
-    long           m_notebook_style;
-    long           m_notebook_theme;
-    bool           m_bYUVFile;
-    bool           m_bOPened;
-   
+    long                 m_notebook_style;
+    long                 m_notebook_theme;
+    bool                 m_bYUVFile;
+    bool                 m_bOPened;
 
-    int            m_iSourceWidth;
-    int            m_iSourceHeight;
 
-    TVideoIOYuv    m_cYUVIO;
-    ThumbnailThread* m_pThumbThread;
+    int                  m_iSourceWidth;
+    int                  m_iSourceHeight;
+
+    TVideoIOYuv          m_cYUVIO;
+    ThumbnailThread*     m_pThumbThread;
 
     DECLARE_EVENT_TABLE()
 };

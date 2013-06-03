@@ -10,12 +10,10 @@
 #include <wx/rawbmp.h>
 #include <wx/thread.h>
 #include <wx/imaglist.h>
-//#include <wx/menu.h>
-//#include <wx/toolbar.h>
-//#include <wx/statusbr.h>
 #include <wx/artprov.h>
-//#include <wx/textdlg.h>
-//#include <wx/msgdlg.h>
-//#include <wx/filedlg.h>
+#include <wx/fs_mem.h>
+#include <wx/htmllbox.h>
+#include <wx/imaglist.h>
+#include <wx/arrstr.h>
 
 #endif // HEVCANALYSER_H_INCLUDED

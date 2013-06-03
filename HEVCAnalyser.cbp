@@ -4,6 +4,7 @@
 	<Project>
 		<Option title="HEVCAnalyser" />
 		<Option pch_mode="2" />
+		<Option default_target="Release" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
@@ -48,6 +49,7 @@
 					<Add library="libwxbase28u.a" />
 					<Add library="libwxpng.a" />
 					<Add library="libwxzlib.a" />
+					<Add library="libwxmsw28u_aui.a" />
 					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll" />
 				</Linker>
 			</Target>
