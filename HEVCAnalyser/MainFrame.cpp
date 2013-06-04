@@ -87,7 +87,7 @@ void MainFrame::CreateMenuToolBar()
     tb->SetToolBitmapSize(wxSize(16, 16));
     wxBitmap tb_bmp1 = wxArtProvider::GetBitmap(wxART_QUESTION, wxART_OTHER, wxSize(16, 16));
     tb->AddTool(wxID_OPEN, wxT("Open File"), tb_bmp1, wxT("Open File"), wxITEM_NORMAL);
-    tb->AddTool(ID_CLOSE_FILE, wxT("CLose File"), tb_bmp1, wxT("Close File"), wxITEM_NORMAL);
+    tb->AddTool(wxID_CLOSE, wxT("CLose File"), tb_bmp1, wxT("Close File"), wxITEM_NORMAL);
     tb->Realize();
 
     m_mgr.AddPane(tb, wxAuiPaneInfo().
@@ -291,16 +291,19 @@ void MainFrame::AddThumbnailListSingleThread()
 void MainFrame::OnThreadAddImage(wxCommandEvent& event)
 {
    int frame = event.GetInt();
-   wxString filename = wxString::Format(_T("poc %d.bmp"), frame);
-   m_StrMemFileName.Add(filename);
+   long framenumber = event.GetExtraLong();
    wxArrayString arr;
-   wxMemoryFSHandler::AddFile(wxString::Format(_T("poc %d.bmp"), frame), m_pImageList->GetBitmap(frame),wxBITMAP_TYPE_BMP);
-   wxString label = wxString::Format(_T("<p align=\"center\"><img src=\"memory:poc %d.bmp\"><br></p><span text-align=center>poc%d </span><br><span>&nbsp;</span>"), frame, frame);
-   arr.Add(label);
+   for(int i = 0;  i < (int)framenumber; i++)
+   {
+       int tmp = frame-framenumber+i;
+       wxString filename = wxString::Format(_T("poc %d.bmp"), tmp);
+       m_StrMemFileName.Add(filename);
+       wxMemoryFSHandler::AddFile(wxString::Format(_T("poc %d.bmp"), tmp), m_pImageList->GetBitmap(tmp),wxBITMAP_TYPE_BMP);
+       wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:poc %d.bmp\"><br></p><span text-align=center>poc%d </span><br>"), tmp, tmp);
+       arr.Add(label);
+   }
    m_pThumbnalList->Append(arr);
    m_pThumbnalList->RefreshAll();
-
-   m_mgr.Update();
 }
 
 void MainFrame::OnThreadEnd(wxCommandEvent& event)
@@ -314,4 +317,6 @@ void MainFrame::ClearThumbnalMemory()
     for(int i = 0; i < m_StrMemFileName.GetCount(); i++)
         wxMemoryFSHandler::RemoveFile(m_StrMemFileName[i]);
     m_StrMemFileName.Clear();
+    m_pThumbnalList->Clear();
+    m_pThumbnalList->RefreshAll();
 }

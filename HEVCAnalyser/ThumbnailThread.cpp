@@ -13,6 +13,7 @@ void* ThumbnailThread::Entry()
 
     wxBitmap bmp(m_iSourceWidth, m_iSourceHeight, 24);
     int frame = 0;
+    long framenumbers = 0;
     while(!cYUVIO.isEof() && !TestDestroy())
     {
         int pad[] = {0, 0};
@@ -60,12 +61,27 @@ void* ThumbnailThread::Entry()
         wxImage simg = bimg.Scale((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
         wxBitmap newbmp(simg);
         m_pImageList->Add(newbmp);
-        wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);
-        event.SetInt(frame);
         //m_pFrame->ProcessEvent(event);
         // this method can be used in Linux
-        wxPostEvent(m_pFrame, event);
         frame++;
+        framenumbers++;
+        if(framenumbers < m_iFrameNumbers)
+            continue;
+        else
+        {
+            wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);
+            event.SetExtraLong(framenumbers);
+            event.SetInt(frame);
+            wxPostEvent(m_pFrame, event);
+            framenumbers = 0;
+        }
+    }
+    if(framenumbers > 0)
+    {
+            wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);
+            event.SetExtraLong(framenumbers);
+            event.SetInt(frame);
+            wxPostEvent(m_pFrame, event);
     }
 
     pcPicYuvOrg->destroy();
