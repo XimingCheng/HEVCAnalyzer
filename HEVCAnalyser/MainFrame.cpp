@@ -84,8 +84,8 @@ void MainFrame::CreateMenuToolBar()
     wxAuiToolBar* tb = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE);
     tb->SetToolBitmapSize(wxSize(16, 16));
     wxBitmap tb_bmp1 = wxArtProvider::GetBitmap(wxART_QUESTION, wxART_OTHER, wxSize(16, 16));
-    tb->AddTool(wxID_OPEN, _T("Open File"), tb_bmp1, _T("Open File"), wxITEM_NORMAL);
-    tb->AddTool(ID_CLOSE_FILE, wxT("CLose File"), tb_bmp1, _T("Close File"), wxITEM_NORMAL);
+    tb->AddTool(wxID_OPEN, wxT("Open File"), tb_bmp1, wxT("Open File"), wxITEM_NORMAL);
+    tb->AddTool(wxID_CLOSE, wxT("CLose File"), tb_bmp1, wxT("Close File"), wxITEM_NORMAL);
     tb->Realize();
 
     m_mgr.AddPane(tb, wxAuiPaneInfo().
@@ -291,17 +291,20 @@ void MainFrame::AddThumbnailListSingleThread()
 
 void MainFrame::OnThreadAddImage(wxCommandEvent& event)
 {
-    int frame = event.GetInt();
-    wxString filename = wxString::Format(_T("poc %d.bmp"), frame);
-    m_StrMemFileName.Add(filename);
-    wxArrayString arr;
-    wxMemoryFSHandler::AddFile(wxString::Format(_T("poc %d.bmp"), frame), m_pImageList->GetBitmap(frame),wxBITMAP_TYPE_BMP);
-    wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:poc %d.bmp\"><br></p><span text-align=center>poc%d </span>"), frame, frame);
-    arr.Add(label);
-    m_pThumbnalList->Append(arr);
-    m_pThumbnalList->RefreshAll();
-
-    m_mgr.Update();
+   int frame = event.GetInt();
+   long framenumber = event.GetExtraLong();
+   wxArrayString arr;
+   for(int i = 0;  i < (int)framenumber; i++)
+   {
+       int tmp = frame-framenumber+i;
+       wxString filename = wxString::Format(_T("poc %d.bmp"), tmp);
+       m_StrMemFileName.Add(filename);
+       wxMemoryFSHandler::AddFile(wxString::Format(_T("poc %d.bmp"), tmp), m_pImageList->GetBitmap(tmp),wxBITMAP_TYPE_BMP);
+       wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:poc %d.bmp\"><br></p><span text-align=center>poc%d </span><br>"), tmp, tmp);
+       arr.Add(label);
+   }
+   m_pThumbnalList->Append(arr);
+   m_pThumbnalList->RefreshAll();
 }
 
 void MainFrame::OnThreadEnd(wxCommandEvent& event)
@@ -315,6 +318,8 @@ void MainFrame::ClearThumbnalMemory()
     for(int i = 0; i < m_StrMemFileName.GetCount(); i++)
         wxMemoryFSHandler::RemoveFile(m_StrMemFileName[i]);
     m_StrMemFileName.Clear();
+    m_pThumbnalList->Clear();
+    m_pThumbnalList->RefreshAll();
 }
 
 void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
