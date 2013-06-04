@@ -2,7 +2,6 @@
 #define THUMBNAILTHREAD_H_INCLUDED
 
 #include "HEVCAnalyser.h"
-#include "../TLibVideoIO/TVideoIOYuv.h"
 #include "HEVCodecApp.h"
 
 class MainFrame;

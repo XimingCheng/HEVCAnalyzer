@@ -15,6 +15,7 @@
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-Wno-attributes" />
 					<Add option="-D__WXDEBUG__" />
 					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll/mswud" />
 				</Compiler>
@@ -74,6 +75,7 @@
 		<Linker>
 			<Add option="-mthreads" />
 		</Linker>
+		<Unit filename="HEVCAnalyser/HEVCAnalyser.cpp" />
 		<Unit filename="HEVCAnalyser/HEVCAnalyser.h" />
 		<Unit filename="HEVCAnalyser/HEVCodecApp.cpp" />
 		<Unit filename="HEVCAnalyser/HEVCodecApp.h" />

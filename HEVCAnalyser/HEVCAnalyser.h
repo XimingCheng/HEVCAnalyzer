@@ -1,7 +1,6 @@
 #ifndef HEVCANALYSER_H_INCLUDED
 #define HEVCANALYSER_H_INCLUDED
 
-
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
 #include <wx/aui/auibook.h>
@@ -15,5 +14,8 @@
 #include <wx/htmllbox.h>
 #include <wx/imaglist.h>
 #include <wx/arrstr.h>
+#include "../TLibVideoIO/TVideoIOYuv.h"
+
+void g_tranformYUV2RGB(int w, int h, TComPicYuv*  pcPicYuvOrg, int iYUVBit, wxBitmap& bmp);
 
 #endif // HEVCANALYSER_H_INCLUDED

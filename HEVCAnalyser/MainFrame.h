@@ -4,7 +4,6 @@
 #include "HEVCAnalyser.h"
 #include "ThumbnailThread.h"
 #include "PicViewCtrl.h"
-#include "../TLibVideoIO/TVideoIOYuv.h"
 
 DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_END_THREAD, wxID_ANY)
@@ -58,8 +57,10 @@ private:
 
     int                  m_iSourceWidth;
     int                  m_iSourceHeight;
+    int                  m_iYUVBit;
 
     TVideoIOYuv          m_cYUVIO;
+    TComPicYuv*          m_pcPicYuvOrg;
     ThumbnailThread*     m_pThumbThread;
 
     DECLARE_EVENT_TABLE()

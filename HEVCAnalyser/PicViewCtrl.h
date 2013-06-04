@@ -10,21 +10,24 @@ public:
 
     PicViewCtrl() {}
     PicViewCtrl(wxWindow* parent, wxWindowID id)
-        : wxControl (parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE), m_pViewBitmap(NULL)
+        : wxControl (parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE),
+        m_bClearFlag(true)
     { }
     void SetScale(const double dScale);
     //void SetSize(const wxSize& size) { m_CtrlSize = size; }
-    void SetBitmap(wxBitmap& bitmap);
+    void SetBitmap(wxBitmap bitmap);
     void SetLCUSize(const wxSize& size);
+    void SetClear(bool bClr = true) { m_bClearFlag = bClr; }
 
 private:
     void OnPaint(wxPaintEvent& event);
 
 private:
+    bool       m_bClearFlag;
     double     m_dScaleRate;
     wxSize     m_CtrlSize;
     wxSize     m_LCUSize;
-    wxBitmap*  m_pViewBitmap;
+    wxBitmap   m_cViewBitmap;
 
     DECLARE_EVENT_TABLE();
 };

@@ -43,7 +43,7 @@ END_EVENT_TABLE()
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos,
             const wxSize& size, long style)
             : wxFrame(parent, id, title, pos, size, style),
-            m_bYUVFile(false), m_bOPened(false), m_pThumbThread(NULL)
+            m_bYUVFile(false), m_bOPened(false), m_pcPicYuvOrg(NULL), m_pThumbThread(NULL)
 {
     m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
     m_mgr.SetManagedWindow(this);
@@ -177,10 +177,13 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_bOPened = true;
         m_iSourceWidth = cdlg.GetWidth();
         m_iSourceHeight = cdlg.GetHeight();
-        int bit = (cdlg.Is10bitYUV() ? 10 : 8);
+        m_iYUVBit = (cdlg.Is10bitYUV() ? 10 : 8);
+        m_cYUVIO.open((char *)sfile.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
+        m_pcPicYuvOrg = new TComPicYuv;
+        m_pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
         double scaleRate = 165.0/m_iSourceWidth;
         m_pImageList = new wxImageList((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
-        m_pThumbThread = new ThumbnailThread(this, m_pImageList, m_iSourceWidth, m_iSourceHeight, bit, sfile);
+        m_pThumbThread = new ThumbnailThread(this, m_pImageList, m_iSourceWidth, m_iSourceHeight, m_iYUVBit, sfile);
         if(m_pThumbThread->Create() != wxTHREAD_NO_ERROR)
         {
             wxLogError(wxT("Can't create the thread!"));
@@ -218,6 +221,14 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
                     m_pThumbThread->Delete();
                 m_pThumbThread = NULL;
             }
+            if(m_pcPicYuvOrg)
+            {
+                m_pcPicYuvOrg->destroy();
+                delete m_pcPicYuvOrg;
+                m_pcPicYuvOrg = NULL;
+            }
+            m_pPicViewCtrl->SetClear();
+            m_pPicViewCtrl->Refresh();
             m_pImageList->RemoveAll();
             if(m_StrMemFileName.GetCount())
                 ClearThumbnalMemory();
@@ -295,11 +306,11 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
     wxArrayString arr;
     for(int i = 0;  i < (int)framenumber; i++)
     {
-        int tmp = frame-framenumber+i;
+        int tmp = frame-framenumber+i+1;
         wxString filename = wxString::Format(_T("poc %d.bmp"), tmp);
         m_StrMemFileName.Add(filename);
         wxMemoryFSHandler::AddFile(wxString::Format(_T("poc %d.bmp"), tmp), m_pImageList->GetBitmap(tmp),wxBITMAP_TYPE_BMP);
-        wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:poc %d.bmp\"><br></p><span text-align=center>poc%d </span><br>"), tmp, tmp);
+        wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:poc %d.bmp\"><br></p><span text-align=center>POC %d </span><br>"), tmp, tmp);
         arr.Add(label);
     }
     m_pThumbnalList->Freeze();
@@ -308,6 +319,13 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
     m_pThumbnalList->ScrollToLine(cnt);
     m_pThumbnalList->Thaw();
     m_pThumbnalList->RefreshAll();
+    if(frame == framenumber-1)
+    {
+        event.SetInt(0);
+        OnThumbnailLboxSelect(event);
+        m_pThumbnalList->SetSelection(0);
+        m_pThumbnalList->SetFocus();
+    }
 }
 
 void MainFrame::OnThreadEnd(wxCommandEvent& event)
@@ -318,7 +336,7 @@ void MainFrame::OnThreadEnd(wxCommandEvent& event)
 
 void MainFrame::ClearThumbnalMemory()
 {
-    for(int i = 0; i < m_StrMemFileName.GetCount(); i++)
+    for(int i = 0; i < (int)m_StrMemFileName.GetCount(); i++)
         wxMemoryFSHandler::RemoveFile(m_StrMemFileName[i]);
     m_StrMemFileName.Clear();
     m_pThumbnalList->Clear();
@@ -327,5 +345,14 @@ void MainFrame::ClearThumbnalMemory()
 
 void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
 {
-
+    int frame = event.GetInt();
+    m_cYUVIO.reset();
+    m_cYUVIO.skipFrames(frame, m_iSourceWidth, m_iSourceHeight);
+    int pad[] = {0, 0};
+    m_cYUVIO.read(m_pcPicYuvOrg, pad);
+    wxBitmap bmp(m_iSourceWidth, m_iSourceHeight, 24);
+    g_tranformYUV2RGB(m_iSourceWidth, m_iSourceHeight, m_pcPicYuvOrg, m_iYUVBit, bmp);
+    //bmp.SaveFile(_("test.bmp"), wxBITMAP_TYPE_BMP);
+    m_pPicViewCtrl->SetBitmap(bmp);
+    m_pDecodeScrolledWin->FitInside();
 }

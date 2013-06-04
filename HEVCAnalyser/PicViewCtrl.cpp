@@ -9,15 +9,35 @@ END_EVENT_TABLE()
 void PicViewCtrl::OnPaint(wxPaintEvent& event)
 {
     wxPaintDC dc(this);
-    if(m_pViewBitmap)
-        dc.DrawBitmap(*m_pViewBitmap, 0, 0, true);
+    if(m_bClearFlag)
+    {
+        dc.Clear();
+        int w, height;
+        wxSize size = GetClientSize();
+        wxString s;
+        s.Printf(_T("No picture to show!"), size.x, size.y);
+        dc.SetFont(*wxNORMAL_FONT);
+        dc.GetTextExtent(s, &w, &height);
+        height += 3;
+        dc.SetBrush(*wxWHITE_BRUSH);
+        dc.SetPen(*wxWHITE_PEN);
+        dc.DrawRectangle(0, 0, size.x, size.y);
+        dc.SetPen(*wxLIGHT_GREY_PEN);
+        dc.DrawLine(0, 0, size.x, size.y);
+        dc.DrawLine(0, size.y, size.x, 0);
+        dc.DrawText(s, (size.x-w)/2, ((size.y-(height))/2));
+        return;
+    }
+    if(m_cViewBitmap.IsOk())
+        dc.DrawBitmap(m_cViewBitmap, 0, 0, true);
 }
 
-void PicViewCtrl::SetBitmap(wxBitmap& bitmap)
+void PicViewCtrl::SetBitmap(wxBitmap bitmap)
 {
-    m_pViewBitmap = &bitmap;
-    m_CtrlSize.SetWidth(m_pViewBitmap->GetWidth());
-    m_CtrlSize.SetHeight(m_pViewBitmap->GetHeight());
+    m_bClearFlag = false;
+    m_cViewBitmap = bitmap;
+    m_CtrlSize.SetWidth(m_cViewBitmap.GetWidth());
+    m_CtrlSize.SetHeight(m_cViewBitmap.GetHeight());
     this->SetSizeHints(m_CtrlSize);
     Refresh();
 }
