@@ -78,10 +78,10 @@ void* ThumbnailThread::Entry()
     }
     if(framenumbers > 0)
     {
-            wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);
-            event.SetExtraLong(framenumbers);
-            event.SetInt(frame);
-            wxPostEvent(m_pFrame, event);
+        wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);
+        event.SetExtraLong(framenumbers);
+        event.SetInt(frame);
+        wxPostEvent(m_pFrame, event);
     }
 
     m_pcPicYuvOrg->destroy();

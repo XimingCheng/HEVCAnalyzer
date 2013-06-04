@@ -27,6 +27,7 @@
 					<Add library="libwxpngd.a" />
 					<Add library="libwxzlibd.a" />
 					<Add library="libwxmsw28ud_aui.a" />
+					<Add library="libwxmsw28ud_html.a" />
 					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll" />
 				</Linker>
 			</Target>
@@ -50,6 +51,7 @@
 					<Add library="libwxpng.a" />
 					<Add library="libwxzlib.a" />
 					<Add library="libwxmsw28u_aui.a" />
+					<Add library="libwxmsw28u_html.a" />
 					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll" />
 				</Linker>
 			</Target>
@@ -77,6 +79,8 @@
 		<Unit filename="HEVCAnalyser/HEVCodecApp.h" />
 		<Unit filename="HEVCAnalyser/MainFrame.cpp" />
 		<Unit filename="HEVCAnalyser/MainFrame.h" />
+		<Unit filename="HEVCAnalyser/PicViewCtrl.cpp" />
+		<Unit filename="HEVCAnalyser/PicViewCtrl.h" />
 		<Unit filename="HEVCAnalyser/ThumbnailThread.cpp" />
 		<Unit filename="HEVCAnalyser/ThumbnailThread.h" />
 		<Unit filename="HEVCAnalyser/YUVConfigDlg.cpp" />

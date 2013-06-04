@@ -138,10 +138,11 @@ wxNotebook* MainFrame::CreateCenterNotebook()
     wxGridSizer* gSizer = new wxGridSizer( 1, 0, 0 );
     wxPanel* pDecodePanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
     //wxScrolledWindow
-    m_pDecodeScrolledWin = new wxScrolledWindow( pDecodePanel, -1, wxDefaultPosition, wxDefaultSize,
-                        wxSUNKEN_BORDER|wxScrolledWindowStyle);
-
+    m_pDecodeScrolledWin = new wxScrolledWindow( pDecodePanel, -1, wxDefaultPosition, wxDefaultSize, wxScrolledWindowStyle);
+    m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY);
+    m_pPicViewCtrl->SetSizeHints(300, 300);
     wxGridSizer* innerSizer = new wxGridSizer( 1, 0, 0 );
+    innerSizer->Add(m_pPicViewCtrl, 1, wxALIGN_CENTER);
 
     m_pDecodeScrolledWin->SetScrollRate( 5, 5 );
     m_pDecodeScrolledWin->SetSizer( innerSizer );
@@ -179,7 +180,6 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         int bit = (cdlg.Is10bitYUV() ? 10 : 8);
         double scaleRate = 165.0/m_iSourceWidth;
         m_pImageList = new wxImageList((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
-//        m_pThumbnalList->SetImageList(m_pImageList, wxIMAGE_LIST_NORMAL);
         m_pThumbThread = new ThumbnailThread(this, m_pImageList, m_iSourceWidth, m_iSourceHeight, bit, sfile);
         if(m_pThumbThread->Create() != wxTHREAD_NO_ERROR)
         {
@@ -219,7 +219,6 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
                 m_pThumbThread = NULL;
             }
             m_pImageList->RemoveAll();
-            m_pThumbnalList->Clear();
             if(m_StrMemFileName.GetCount())
                 ClearThumbnalMemory();
         }
@@ -291,20 +290,24 @@ void MainFrame::AddThumbnailListSingleThread()
 
 void MainFrame::OnThreadAddImage(wxCommandEvent& event)
 {
-   int frame = event.GetInt();
-   long framenumber = event.GetExtraLong();
-   wxArrayString arr;
-   for(int i = 0;  i < (int)framenumber; i++)
-   {
-       int tmp = frame-framenumber+i;
-       wxString filename = wxString::Format(_T("poc %d.bmp"), tmp);
-       m_StrMemFileName.Add(filename);
-       wxMemoryFSHandler::AddFile(wxString::Format(_T("poc %d.bmp"), tmp), m_pImageList->GetBitmap(tmp),wxBITMAP_TYPE_BMP);
-       wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:poc %d.bmp\"><br></p><span text-align=center>poc%d </span><br>"), tmp, tmp);
-       arr.Add(label);
-   }
-   m_pThumbnalList->Append(arr);
-   m_pThumbnalList->RefreshAll();
+    int frame = event.GetInt();
+    long framenumber = event.GetExtraLong();
+    wxArrayString arr;
+    for(int i = 0;  i < (int)framenumber; i++)
+    {
+        int tmp = frame-framenumber+i;
+        wxString filename = wxString::Format(_T("poc %d.bmp"), tmp);
+        m_StrMemFileName.Add(filename);
+        wxMemoryFSHandler::AddFile(wxString::Format(_T("poc %d.bmp"), tmp), m_pImageList->GetBitmap(tmp),wxBITMAP_TYPE_BMP);
+        wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:poc %d.bmp\"><br></p><span text-align=center>poc%d </span><br>"), tmp, tmp);
+        arr.Add(label);
+    }
+    m_pThumbnalList->Freeze();
+    unsigned int cnt = m_pThumbnalList->GetFirstVisibleLine();
+    m_pThumbnalList->Append(arr);
+    m_pThumbnalList->ScrollToLine(cnt);
+    m_pThumbnalList->Thaw();
+    m_pThumbnalList->RefreshAll();
 }
 
 void MainFrame::OnThreadEnd(wxCommandEvent& event)

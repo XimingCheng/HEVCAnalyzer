@@ -3,6 +3,7 @@
 
 #include "HEVCAnalyser.h"
 #include "ThumbnailThread.h"
+#include "PicViewCtrl.h"
 #include "../TLibVideoIO/TVideoIOYuv.h"
 
 DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
@@ -18,8 +19,6 @@ public:
         ID_NoteBookLeftPane = wxID_HIGHEST+1,
         ID_NoteBookBottomPane,
         ID_NoteBookCenterPane,
-        ID_OPEN_FILE,
-        ID_CLOSE_FILE,
     };
 
     MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos = wxDefaultPosition,
@@ -50,12 +49,12 @@ private:
     wxImageList*         m_pImageList;
     wxArrayString        m_StrMemFileName;
     wxScrolledWindow*    m_pDecodeScrolledWin;
+    PicViewCtrl*         m_pPicViewCtrl;
 
     long                 m_notebook_style;
     long                 m_notebook_theme;
     bool                 m_bYUVFile;
     bool                 m_bOPened;
-
 
     int                  m_iSourceWidth;
     int                  m_iSourceHeight;

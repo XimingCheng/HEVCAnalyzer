@@ -54,6 +54,7 @@ using namespace std;
 class TVideoIOYuv
 {
 private:
+  Bool      m_bOpened;
   fstream   m_cHandle;                                      ///< file handle
   Int m_fileBitDepthY; ///< bitdepth of input/output video file luma component
   Int m_fileBitDepthC; ///< bitdepth of input/output video file chroma component
@@ -61,11 +62,13 @@ private:
   Int m_bitDepthShiftC;  ///< number of bits to increase or decrease chroma by before/after write/read
 
 public:
-  TVideoIOYuv()           {}
+  TVideoIOYuv() : m_bOpened(false)           {}
   virtual ~TVideoIOYuv()  {}
 
   Void  open  ( Char* pchFile, Bool bWriteMode, Int fileBitDepthY, Int fileBitDepthC, Int internalBitDepthY, Int internalBitDepthC ); ///< open or create file
   Void  close ();                                           ///< close file
+  Bool  isOpen() const { return m_bOpened; }
+  Void  reset ();
 
   void skipFrames(UInt numFrames, UInt width, UInt height);
 

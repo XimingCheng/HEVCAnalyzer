@@ -153,6 +153,7 @@ static void scalePlane(Pel* img, UInt stride, UInt width, UInt height,
  */
 Void TVideoIOYuv::open( Char* pchFile, Bool bWriteMode, Int fileBitDepthY, Int fileBitDepthC, Int internalBitDepthY, Int internalBitDepthC)
 {
+  m_bOpened        = true;
   m_bitDepthShiftY = internalBitDepthY - fileBitDepthY;
   m_bitDepthShiftC = internalBitDepthC - fileBitDepthC;
   m_fileBitDepthY = fileBitDepthY;
@@ -184,6 +185,7 @@ Void TVideoIOYuv::open( Char* pchFile, Bool bWriteMode, Int fileBitDepthY, Int f
 
 Void TVideoIOYuv::close()
 {
+  m_bOpened = false;
   m_cHandle.close();
 }
 
@@ -500,3 +502,10 @@ exit:
   return retval;
 }
 
+Void TVideoIOYuv::reset()
+{
+  if(m_bOpened)
+  {
+    m_cHandle.seekg(ios_base::beg);
+  }
+}
