@@ -14,7 +14,7 @@ public:
     : m_sYUVPath(path), m_iSourceWidth(w), m_iSourceHeight(h), m_iYUVBit(bit), m_pImageList(pImageList), m_pFrame(pFrame),
       m_iFrameNumbers(framenumbers)
     { }
-    ~ThumbnailThread() { }
+    ~ThumbnailThread() {};
 
 protected:
     virtual void* Entry();
