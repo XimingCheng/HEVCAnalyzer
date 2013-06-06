@@ -18,4 +18,12 @@
 
 void g_tranformYUV2RGB(int w, int h, TComPicYuv*  pcPicYuvOrg, int iYUVBit, wxBitmap& bmp);
 
+extern wxTextCtrl *g_pLogWin ; 
+
+void wxMyLogMessage(wxString);
+void wxMyLogError(wxString);
+void wxMyLogWarning(wxString);
+void SetActiveTarget(wxTextCtrl *pTC);
+
+
 #endif // HEVCANALYSER_H_INCLUDED

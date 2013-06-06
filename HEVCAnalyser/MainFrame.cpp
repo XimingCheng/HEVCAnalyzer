@@ -1,5 +1,7 @@
 #include "MainFrame.h"
 #include "YUVConfigDlg.h"
+#include "HEVCAnalyser.h"
+//extern wxTextCtrl *g_pLogWin;
 
 enum wxbuildinfoformat {
     short_f, long_f };
@@ -58,6 +60,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
     CreateNoteBookPane();
 
     Centre();
+    wxMyLogMessage(_T("HEVC Analyser load sucessfully"));
 
     m_mgr.Update();
 }
@@ -101,9 +104,10 @@ void MainFrame::CreateNoteBookPane()
     m_mgr.AddPane(CreateLeftNotebook(), wxAuiPaneInfo().Name(_T("Left NoteBook")).Caption(_T("YUV info")).
                   BestSize(wxSize(300,100)).MaxSize(wxSize(500,100)).Left().Layer(1));
     m_mgr.AddPane(CreateCenterNotebook(), wxAuiPaneInfo().Name(_T("Center NoteBook")).Center().Layer(0));
-    m_mgr.AddPane(new wxTextCtrl(this,wxID_ANY, _T("test"),
-                          wxPoint(0,0), wxSize(150,90),
-                          wxNO_BORDER | wxTE_MULTILINE), wxAuiPaneInfo().Name(_T("Bottom NoteBook")).Bottom().Layer(1));
+//    m_mgr.AddPane(new wxTextCtrl(this,wxID_ANY, _T("test"),
+//                          wxPoint(0,0), wxSize(150,90),
+//                          wxNO_BORDER | wxTE_MULTILINE), wxAuiPaneInfo().Name(_T("Bottom NoteBook")).Bottom().Layer(1));
+    m_mgr.AddPane(CreateBottomNotebook(), wxAuiPaneInfo().Name(_T("Bottom NoteBook")).Bottom().Layer(1));
 }
 
 MainFrame::~MainFrame()
@@ -117,6 +121,25 @@ void MainFrame::OnExit(wxCommandEvent& evt)
     Close(true);
 }
 
+wxNotebook* MainFrame::CreateBottomNotebook()
+{
+    wxNotebook* ctrl = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0 );
+    wxGridSizer* gSizer = new wxGridSizer( 1, 0, 0 );
+    wxPanel* pLogPanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    m_pTCLogWin= new wxTextCtrl(pLogPanel, wxID_ANY, _T(""), wxPoint(0, 0), wxSize(150, 90), wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH);
+    SetActiveTarget(m_pTCLogWin);
+
+    gSizer->Add(m_pTCLogWin, 0, wxEXPAND, 5 );
+    pLogPanel->SetSizer( gSizer );
+    pLogPanel->Layout();
+    ctrl->AddPage( pLogPanel, _T("Log Window"), true );
+    wxPanel* m_panel7 = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    ctrl->AddPage( m_panel7, _T("Other information"), false );
+    wxMyLogMessage(_T("Message"));
+    wxMyLogError(_T("Error"));
+    wxMyLogWarning(_T("Warning"));
+    return ctrl;
+}
 wxNotebook* MainFrame::CreateLeftNotebook()
 {
     wxNotebook* ctrl = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0 );
@@ -157,15 +180,19 @@ wxNotebook* MainFrame::CreateCenterNotebook()
 
 void MainFrame::OnOpenFile(wxCommandEvent& event)
 {
-    wxFileDialog dlg(this, wxT("Open YUV file or HEVC stream file"), wxT(""), wxT(""),
-                     wxT("YUV files (*.yuv)|*.yuv"), wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+    wxFileDialog dlg(this, wxT("Open YUV file or HEVC stream file"), _T(""), _T(""),
+                     _T("YUV files (*.yuv)|*.yuv"), wxFD_OPEN|wxFD_FILE_MUST_EXIST);
     if (dlg.ShowModal() == wxID_CANCEL)
         return;
     wxString sfile = dlg.GetPath();
-    if(sfile.EndsWith(wxT(".yuv")))
+ //   if(sfile.EndsWith(_T(".yuv")) || sfile.EndsWith(_T(".YUV")))
+    if(sfile.Lower().EndsWith(_T(".yuv")))
         m_bYUVFile = true;
     else
+    {
         m_bYUVFile = false;
+        wxMyLogError(_T("The file to be open must be YUV file"));
+    }
 
     if(m_bYUVFile)
     {
@@ -186,7 +213,7 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_pThumbThread = new ThumbnailThread(this, m_pImageList, m_iSourceWidth, m_iSourceHeight, m_iYUVBit, sfile);
         if(m_pThumbThread->Create() != wxTHREAD_NO_ERROR)
         {
-            wxLogError(wxT("Can't create the thread!"));
+            wxMyLogError(wxT("Can't create the thread!"));
             delete m_pThumbThread;
             m_pThumbThread = NULL;
         }
@@ -194,7 +221,7 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         {
             if(m_pThumbThread->Run() != wxTHREAD_NO_ERROR)
             {
-                wxLogError(wxT("Can't create the thread!"));
+                wxMyLogError(wxT("Can't create the thread!"));
                 delete m_pThumbThread;
                 m_pThumbThread = NULL;
             }

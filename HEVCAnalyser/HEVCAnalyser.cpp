@@ -1,5 +1,7 @@
 #include "HEVCAnalyser.h"
 
+wxTextCtrl *g_pLogWin = NULL;
+
 void g_tranformYUV2RGB(int w, int h, TComPicYuv*  pcPicYuvOrg, int iYUVBit, wxBitmap& bmp)
 {
     wxNativePixelData img(bmp);
@@ -39,4 +41,54 @@ void g_tranformYUV2RGB(int w, int h, TComPicYuv*  pcPicYuvOrg, int iYUVBit, wxBi
         p = rowStart;
         p.OffsetY(img, 1);
     }
+}
+
+void wxMyLogMessage(wxString message)
+{
+    if(g_pLogWin==NULL)
+        wxLogMessage(message);
+    else
+    {
+        message.Trim();
+        g_pLogWin->SetForegroundColour(*wxGREEN);
+        g_pLogWin->WriteText(wxDateTime::Now().FormatTime());
+        g_pLogWin->WriteText(_T(" [Message] "));
+        g_pLogWin->WriteText(message);
+        g_pLogWin->WriteText(_T("\n"));
+    }
+}
+
+void wxMyLogError(wxString error)
+{
+    if(g_pLogWin==NULL)
+        wxLogError(error);
+    else
+    {
+        g_pLogWin->SetForegroundColour(*wxRED);
+        g_pLogWin->WriteText(wxDateTime::Now().FormatTime());
+        g_pLogWin->WriteText(_T(" [Error] "));
+        error.Trim();
+        g_pLogWin->WriteText(error);
+        g_pLogWin->WriteText(_T("\n"));
+    }
+}
+
+void wxMyLogWarning(wxString warning)
+{
+    if(g_pLogWin==NULL)
+        wxLogWarning(warning);
+    else
+    {
+        g_pLogWin->SetForegroundColour(wxColour(174, 174, 0));
+        g_pLogWin->WriteText(wxDateTime::Now().FormatTime());
+        g_pLogWin->WriteText(_T(" [Warning] "));
+        warning.Trim();
+        g_pLogWin->WriteText(warning);
+        g_pLogWin->WriteText(_T("\n"));
+    }
+}
+
+void SetActiveTarget(wxTextCtrl *pTC)
+{
+    g_pLogWin = pTC;
 }

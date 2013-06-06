@@ -32,6 +32,7 @@ private:
     void           CreateNoteBookPane();
     wxNotebook*    CreateLeftNotebook();
     wxNotebook*    CreateCenterNotebook();
+    wxNotebook*    CreateBottomNotebook();
     // File IO operators
     void           OnOpenFile(wxCommandEvent& event);
     void           OnCloseFile(wxCommandEvent& event);
@@ -49,6 +50,7 @@ private:
     wxArrayString        m_StrMemFileName;
     wxScrolledWindow*    m_pDecodeScrolledWin;
     PicViewCtrl*         m_pPicViewCtrl;
+    wxTextCtrl*          m_pTCLogWin;
 
     long                 m_notebook_style;
     long                 m_notebook_theme;
