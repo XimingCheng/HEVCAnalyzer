@@ -4,32 +4,23 @@ IMPLEMENT_DYNAMIC_CLASS(PicViewCtrl, wxControl);
 
 BEGIN_EVENT_TABLE(PicViewCtrl, wxControl)
     EVT_PAINT(PicViewCtrl::OnPaint)
+    EVT_ERASE_BACKGROUND(PicViewCtrl::OnEraseBkg)
+    EVT_MOTION(PicViewCtrl::OnMouseMove)
 END_EVENT_TABLE()
 
 void PicViewCtrl::OnPaint(wxPaintEvent& event)
 {
     wxPaintDC dc(this);
-    if(m_bClearFlag)
+    Render(dc);
+}
+
+void PicViewCtrl::Render(wxDC& dc)
+{
+    if(!m_bClearFlag)
     {
-        dc.Clear();
-        int w, height;
-        wxSize size = GetClientSize();
-        wxString s;
-        s.Printf(_T("No picture to show!"), size.x, size.y);
-        dc.SetFont(*wxNORMAL_FONT);
-        dc.GetTextExtent(s, &w, &height);
-        height += 3;
-        dc.SetBrush(*wxWHITE_BRUSH);
-        dc.SetPen(*wxWHITE_PEN);
-        dc.DrawRectangle(0, 0, size.x, size.y);
-        dc.SetPen(*wxLIGHT_GREY_PEN);
-        dc.DrawLine(0, 0, size.x, size.y);
-        dc.DrawLine(0, size.y, size.x, 0);
-        dc.DrawText(s, (size.x-w)/2, ((size.y-(height))/2));
-        return;
+        dc.SetBrush(wxBrush(wxColor(255,0,0,128)));
+        dc.DrawRectangle(m_curLCUStart, wxSize(m_curLCUEnd.x - m_curLCUStart.x, m_curLCUEnd.y - m_curLCUStart.y));
     }
-    if(m_cViewBitmap.IsOk())
-        dc.DrawBitmap(m_cViewBitmap, 0, 0, true);
 }
 
 void PicViewCtrl::SetBitmap(wxBitmap bitmap)
@@ -50,4 +41,69 @@ void PicViewCtrl::SetScale(const double dScale)
 void PicViewCtrl::SetLCUSize(const wxSize& size)
 {
     m_LCUSize = size;
+}
+
+void PicViewCtrl::OnMouseMove(wxMouseEvent& event)
+{
+    if(!m_bClearFlag)
+    {
+        int id = GetCurLCURasterID(event.m_x, event.m_y);
+        if(id != m_iLCURasterID)
+        {
+            m_iLCURasterID = id;
+            if(id != -1)
+                Refresh();
+        }
+    }
+}
+
+void PicViewCtrl::OnEraseBkg(wxEraseEvent& event)
+{
+    wxClientDC* clientDC = NULL;
+    if (!event.GetDC())
+        clientDC = new wxClientDC(this);
+    wxDC* pDC = clientDC ? clientDC : event.GetDC();
+    if(m_bClearFlag)
+    {
+        pDC->Clear();
+        int w, height;
+        wxSize size = GetClientSize();
+        wxString s;
+        s.Printf(_T("No picture to show!"), size.x, size.y);
+        pDC->SetFont(*wxNORMAL_FONT);
+        pDC->GetTextExtent(s, &w, &height);
+        height += 3;
+        pDC->SetBrush(*wxTRANSPARENT_BRUSH);
+        pDC->SetPen(*wxLIGHT_GREY_PEN);
+        pDC->DrawLine(0, 0, size.x, size.y);
+        pDC->DrawLine(0, size.y, size.x, 0);
+        pDC->DrawText(s, (size.x-w)/2, ((size.y-(height))/2));
+        wxBitmap::CleanUpHandlers();
+        return;
+    }
+    if(m_cViewBitmap.IsOk())
+        pDC->DrawBitmap(m_cViewBitmap, 0, 0, true);
+    if(clientDC)
+        delete clientDC;
+}
+
+int PicViewCtrl::GetCurLCURasterID(long x, long y)
+{
+    int cuw = m_LCUSize.GetWidth();
+    int cuh = m_LCUSize.GetHeight();
+    int col_num = m_CtrlSize.GetWidth()/cuw + (m_CtrlSize.GetWidth()%cuw != 0);
+    int row_num = m_CtrlSize.GetHeight()/cuh + (m_CtrlSize.GetHeight()%cuh != 0);
+    int col = x/cuw;
+    int row = y/cuh;
+    if(col>= 0 && col < col_num && row >= 0 && row < row_num)
+    {
+        int x = (col+1)*cuw;
+        int y = (row+1)*cuh;
+        m_curLCUStart.x = col*cuw;
+        m_curLCUStart.y = row*cuh;
+        m_curLCUEnd.x   = (x > m_CtrlSize.GetWidth() ? m_CtrlSize.GetWidth() : x);
+        m_curLCUEnd.y   = (y > m_CtrlSize.GetHeight() ? m_CtrlSize.GetHeight(): y);
+        return (row*col_num + col);
+    }
+    return -1;
 }

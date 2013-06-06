@@ -86,9 +86,8 @@ void MainFrame::CreateMenuToolBar()
 
     wxAuiToolBar* tb = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE);
     tb->SetToolBitmapSize(wxSize(16, 16));
-    wxBitmap tb_bmp1 = wxArtProvider::GetBitmap(wxART_QUESTION, wxART_OTHER, wxSize(16, 16));
-    tb->AddTool(wxID_OPEN, wxT("Open File"), tb_bmp1, wxT("Open File"), wxITEM_NORMAL);
-    tb->AddTool(wxID_CLOSE, wxT("CLose File"), tb_bmp1, wxT("Close File"), wxITEM_NORMAL);
+    wxBitmap tb_open = wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_OTHER, wxSize(16, 16));
+    tb->AddTool(wxID_OPEN, wxT("Open File"), tb_open, wxT("Open File"), wxITEM_NORMAL);
     tb->Realize();
 
     m_mgr.AddPane(tb, wxAuiPaneInfo().
@@ -372,6 +371,7 @@ void MainFrame::ClearThumbnalMemory()
 
 void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
 {
+    wxBusyCursor wait;
     int frame = event.GetInt();
     m_cYUVIO.reset();
     m_cYUVIO.skipFrames(frame, m_iSourceWidth, m_iSourceHeight);
@@ -380,6 +380,7 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
     wxBitmap bmp(m_iSourceWidth, m_iSourceHeight, 24);
     g_tranformYUV2RGB(m_iSourceWidth, m_iSourceHeight, m_pcPicYuvOrg, m_iYUVBit, bmp);
     //bmp.SaveFile(_("test.bmp"), wxBITMAP_TYPE_BMP);
+    m_pPicViewCtrl->SetLCUSize(wxSize(64, 64));
     m_pPicViewCtrl->SetBitmap(bmp);
     m_pDecodeScrolledWin->FitInside();
 }

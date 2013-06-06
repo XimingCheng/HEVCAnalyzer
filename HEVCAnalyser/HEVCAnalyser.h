@@ -14,6 +14,8 @@
 #include <wx/htmllbox.h>
 #include <wx/imaglist.h>
 #include <wx/arrstr.h>
+#include <wx/graphics.h>
+
 #include "../TLibVideoIO/TVideoIOYuv.h"
 
 void g_tranformYUV2RGB(int w, int h, TComPicYuv*  pcPicYuvOrg, int iYUVBit, wxBitmap& bmp);
