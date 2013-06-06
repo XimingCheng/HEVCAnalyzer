@@ -60,7 +60,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
     CreateNoteBookPane();
 
     Centre();
-    wxMyLogMessage(_T("HEVC Analyser load sucessfully"));
+    g_LogMessage(_T("HEVC Analyser load sucessfully"));
 
     m_mgr.Update();
 }
@@ -126,7 +126,7 @@ wxNotebook* MainFrame::CreateBottomNotebook()
     wxGridSizer* gSizer = new wxGridSizer( 1, 0, 0 );
     wxPanel* pLogPanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
     m_pTCLogWin= new wxTextCtrl(pLogPanel, wxID_ANY, _T(""), wxPoint(0, 0), wxSize(150, 90), wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH);
-    SetActiveTarget(m_pTCLogWin);
+    g_SetActiveTarget(m_pTCLogWin);
 
     gSizer->Add(m_pTCLogWin, 0, wxEXPAND, 5 );
     pLogPanel->SetSizer( gSizer );
@@ -134,9 +134,9 @@ wxNotebook* MainFrame::CreateBottomNotebook()
     ctrl->AddPage( pLogPanel, _T("Log Window"), true );
     wxPanel* m_panel7 = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
     ctrl->AddPage( m_panel7, _T("Other information"), false );
-    wxMyLogMessage(_T("Message"));
-    wxMyLogError(_T("Error"));
-    wxMyLogWarning(_T("Warning"));
+    g_LogMessage(_T("Message"));
+    g_LogError(_T("Error"));
+    g_LogWarning(_T("Warning"));
     return ctrl;
 }
 wxNotebook* MainFrame::CreateLeftNotebook()
@@ -190,7 +190,7 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
     else
     {
         m_bYUVFile = false;
-        wxMyLogError(_T("The file to be open must be YUV file"));
+        g_LogError(_T("The file to be open must be YUV file"));
     }
 
     if(m_bYUVFile)
@@ -212,7 +212,7 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_pThumbThread = new ThumbnailThread(this, m_pImageList, m_iSourceWidth, m_iSourceHeight, m_iYUVBit, sfile);
         if(m_pThumbThread->Create() != wxTHREAD_NO_ERROR)
         {
-            wxMyLogError(wxT("Can't create the thread!"));
+            g_LogError(wxT("Can't create the thread!"));
             delete m_pThumbThread;
             m_pThumbThread = NULL;
         }
@@ -220,7 +220,7 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         {
             if(m_pThumbThread->Run() != wxTHREAD_NO_ERROR)
             {
-                wxMyLogError(wxT("Can't create the thread!"));
+                g_LogError(wxT("Can't create the thread!"));
                 delete m_pThumbThread;
                 m_pThumbThread = NULL;
             }
@@ -258,6 +258,7 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
             m_pImageList->RemoveAll();
             if(m_StrMemFileName.GetCount())
                 ClearThumbnalMemory();
+            g_ClearLog();
         }
         else
         {

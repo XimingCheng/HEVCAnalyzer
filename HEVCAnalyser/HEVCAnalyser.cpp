@@ -43,52 +43,55 @@ void g_tranformYUV2RGB(int w, int h, TComPicYuv*  pcPicYuvOrg, int iYUVBit, wxBi
     }
 }
 
-void wxMyLogMessage(wxString message)
+void g_LogMessage(wxString message)
 {
     if(g_pLogWin==NULL)
         wxLogMessage(message);
     else
     {
         message.Trim();
-        g_pLogWin->SetForegroundColour(*wxGREEN);
-        g_pLogWin->WriteText(wxDateTime::Now().FormatTime());
-        g_pLogWin->WriteText(_T(" [Message] "));
-        g_pLogWin->WriteText(message);
-        g_pLogWin->WriteText(_T("\n"));
+        long startpos = g_pLogWin->GetLastPosition();
+        g_pLogWin->WriteText(wxDateTime::Now().FormatTime()+_T(" [Message] ")+message+_T("\n"));
+        long endpos = g_pLogWin->GetLastPosition();
+        g_pLogWin->SetStyle(startpos, endpos, *wxGREEN);
     }
 }
 
-void wxMyLogError(wxString error)
+void g_LogError(wxString error)
 {
     if(g_pLogWin==NULL)
         wxLogError(error);
     else
     {
-        g_pLogWin->SetForegroundColour(*wxRED);
-        g_pLogWin->WriteText(wxDateTime::Now().FormatTime());
-        g_pLogWin->WriteText(_T(" [Error] "));
+        long startpos = g_pLogWin->GetLastPosition();
         error.Trim();
-        g_pLogWin->WriteText(error);
-        g_pLogWin->WriteText(_T("\n"));
+        g_pLogWin->WriteText(wxDateTime::Now().FormatTime()+_T(" [ Error ] ")+error+_T("\n"));
+        long endpos = g_pLogWin->GetLastPosition();
+        g_pLogWin->SetStyle(startpos, endpos, *wxRED);
     }
 }
 
-void wxMyLogWarning(wxString warning)
+void g_LogWarning(wxString warning)
 {
     if(g_pLogWin==NULL)
         wxLogWarning(warning);
     else
     {
-        g_pLogWin->SetForegroundColour(wxColour(174, 174, 0));
-        g_pLogWin->WriteText(wxDateTime::Now().FormatTime());
-        g_pLogWin->WriteText(_T(" [Warning] "));
+        long startpos = g_pLogWin->GetLastPosition();
         warning.Trim();
-        g_pLogWin->WriteText(warning);
-        g_pLogWin->WriteText(_T("\n"));
+        g_pLogWin->WriteText(wxDateTime::Now().FormatTime()+_T(" [Warning] ")+warning+_T("\n"));
+        long endpos = g_pLogWin->GetLastPosition();
+        g_pLogWin->SetStyle(startpos, endpos, wxColour(174, 174, 0));
     }
 }
 
-void SetActiveTarget(wxTextCtrl *pTC)
+void g_SetActiveTarget(wxTextCtrl *pTC)
 {
     g_pLogWin = pTC;
+}
+
+void g_ClearLog()
+{
+    if (g_pLogWin != NULL)
+        g_pLogWin->Clear();
 }
