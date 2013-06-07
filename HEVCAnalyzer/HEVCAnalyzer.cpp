@@ -51,7 +51,7 @@ void g_LogMessage(wxString message)
     {
         message.Trim();
         long startpos = g_pLogWin->GetLastPosition();
-        g_pLogWin->WriteText(wxDateTime::Now().FormatTime()+_T(" [Message] ")+message+_T("\n"));
+        g_pLogWin->AppendText(wxDateTime::Now().FormatTime()+_T(" [Message] ")+message+_T("\n"));
         long endpos = g_pLogWin->GetLastPosition();
         g_pLogWin->SetStyle(startpos, endpos, *wxGREEN);
     }
@@ -65,7 +65,7 @@ void g_LogError(wxString error)
     {
         long startpos = g_pLogWin->GetLastPosition();
         error.Trim();
-        g_pLogWin->WriteText(wxDateTime::Now().FormatTime()+_T(" [ Error ] ")+error+_T("\n"));
+        g_pLogWin->AppendText(wxDateTime::Now().FormatTime()+_T(" [ Error ] ")+error+_T("\n"));
         long endpos = g_pLogWin->GetLastPosition();
         g_pLogWin->SetStyle(startpos, endpos, *wxRED);
     }
@@ -79,7 +79,7 @@ void g_LogWarning(wxString warning)
     {
         long startpos = g_pLogWin->GetLastPosition();
         warning.Trim();
-        g_pLogWin->WriteText(wxDateTime::Now().FormatTime()+_T(" [Warning] ")+warning+_T("\n"));
+        g_pLogWin->AppendText(wxDateTime::Now().FormatTime()+_T(" [Warning] ")+warning+_T("\n"));
         long endpos = g_pLogWin->GetLastPosition();
         g_pLogWin->SetStyle(startpos, endpos, wxColour(174, 174, 0));
     }

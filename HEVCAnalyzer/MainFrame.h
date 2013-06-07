@@ -38,8 +38,6 @@ private:
     void           OnCloseFile(wxCommandEvent& event);
 
     void           OnThumbnailLboxSelect(wxCommandEvent& event);
-
-    void           AddThumbnailListSingleThread();
     void           OnThreadEnd(wxCommandEvent& event);
     void           ClearThumbnalMemory();
 

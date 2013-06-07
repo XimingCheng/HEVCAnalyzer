@@ -160,7 +160,7 @@ wxNotebook* MainFrame::CreateCenterNotebook()
     wxPanel* pDecodePanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
     //wxScrolledWindow
     m_pDecodeScrolledWin = new wxScrolledWindow( pDecodePanel, -1, wxDefaultPosition, wxDefaultSize, wxScrolledWindowStyle);
-    m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY);
+    m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY, m_pThumbnalList);
     m_pPicViewCtrl->SetSizeHints(300, 300);
     wxGridSizer* innerSizer = new wxGridSizer( 1, 0, 0 );
     innerSizer->Add(m_pPicViewCtrl, 1, wxALIGN_CENTER);
@@ -202,6 +202,7 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_bOPened = true;
         m_iSourceWidth = cdlg.GetWidth();
         m_iSourceHeight = cdlg.GetHeight();
+        m_pPicViewCtrl->SetScale(1.0);
         m_iYUVBit = (cdlg.Is10bitYUV() ? 10 : 8);
         m_cYUVIO.open((char *)sfile.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
         m_pcPicYuvOrg = new TComPicYuv;
@@ -267,64 +268,6 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
     }
 }
 
-void MainFrame::AddThumbnailListSingleThread()
-{
-    TComPicYuv* pcPicYuvOrg = new TComPicYuv;
-    pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
-    m_pImageList = new wxImageList((int)m_iSourceWidth*0.2, (int)m_iSourceHeight*0.2);
-    wxBitmap bmp(m_iSourceWidth, m_iSourceHeight, 24);
-    int frame = 0;
-    while(!m_cYUVIO.isEof())
-    {
-        int pad[] = {0, 0};
-        m_cYUVIO.read(pcPicYuvOrg, pad);
-        wxNativePixelData img(bmp);
-        wxNativePixelData::Iterator p(img);
-        for(int j = 0; j < m_iSourceHeight; j++)
-        {
-            wxNativePixelData::Iterator rowStart = p;
-            Pel* pY = pcPicYuvOrg->getLumaAddr() + j*pcPicYuvOrg->getStride();
-            Pel* pU = pcPicYuvOrg->getCbAddr()   + (j/2)*pcPicYuvOrg->getCStride();
-            Pel* pV = pcPicYuvOrg->getCrAddr()   + (j/2)*pcPicYuvOrg->getCStride();
-            for(int i = 0; i < m_iSourceWidth; i++)
-            {
-                Pel y = pY[i];
-                Pel u = pU[i/2];
-                Pel v = pV[i/2];
-                int r = y + 1.402*(v-128);
-                int g = y - 0.344*(u-128) - 0.714*(v-128);
-                int b = y + 1.722*(u-128);
-                r = r>255? 255 : r<0 ? 0 : r;
-                g = g>255? 255 : g<0 ? 0 : g;
-                b = b>255? 255 : b<0 ? 0 : b;
-                p.Red() = r;
-                p.Green() = g;
-                p.Blue() = b;
-                p++;
-            }
-            p = rowStart;
-            p.OffsetY(img, 1);
-        }
-        //bmp.SaveFile(_("test.bmp"), wxBITMAP_TYPE_BMP);
-        wxImage bimg = bmp.ConvertToImage();
-        wxImage simg = bimg.Scale((int)m_iSourceWidth*0.2, (int)m_iSourceHeight*0.2);
-        wxBitmap newbmp(simg);
-        m_pImageList->Add(newbmp);
-        wxListItem item;
-        item.SetId(frame);
-        wxString text;
-        text.Printf(wxT("POC %d"), frame);
-        item.SetText(text);
-        item.SetImage(frame);
-        //m_pThumbnalList->InsertItem(item);
-        frame++;
-    }
-
-    pcPicYuvOrg->destroy();
-    delete pcPicYuvOrg;
-    pcPicYuvOrg = NULL;
-}
-
 void MainFrame::OnThreadAddImage(wxCommandEvent& event)
 {
     int frame = event.GetInt();
@@ -382,5 +325,4 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
     //bmp.SaveFile(_("test.bmp"), wxBITMAP_TYPE_BMP);
     m_pPicViewCtrl->SetLCUSize(wxSize(64, 64));
     m_pPicViewCtrl->SetBitmap(bmp);
-    m_pDecodeScrolledWin->FitInside();
 }
