@@ -1,7 +1,7 @@
 #ifndef THUMBNAILTHREAD_H_INCLUDED
 #define THUMBNAILTHREAD_H_INCLUDED
 
-#include "HEVCAnalyser.h"
+#include "HEVCAnalyzer.h"
 #include "HEVCodecApp.h"
 
 class MainFrame;

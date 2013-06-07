@@ -1,7 +1,7 @@
 #ifndef MAINFRAME_H_INCLUDED
 #define MAINFRAME_H_INCLUDED
 
-#include "HEVCAnalyser.h"
+#include "HEVCAnalyzer.h"
 #include "ThumbnailThread.h"
 #include "PicViewCtrl.h"
 

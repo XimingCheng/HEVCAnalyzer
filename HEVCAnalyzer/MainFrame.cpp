@@ -1,7 +1,6 @@
 #include "MainFrame.h"
 #include "YUVConfigDlg.h"
-#include "HEVCAnalyser.h"
-//extern wxTextCtrl *g_pLogWin;
+#include "HEVCAnalyzer.h"
 
 enum wxbuildinfoformat {
     short_f, long_f };
@@ -60,7 +59,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
     CreateNoteBookPane();
 
     Centre();
-    g_LogMessage(_T("HEVC Analyser load sucessfully"));
+    g_LogMessage(_T("HEVC Analyzer load sucessfully"));
 
     m_mgr.Update();
 }
@@ -73,7 +72,7 @@ void MainFrame::CreateMenuToolBar()
     file_menu->Append(wxID_CLOSE, _T("Close Current File"));
     file_menu->Append(wxID_EXIT, _T("Exit"));
     wxMenu* help_menu = new wxMenu;
-    help_menu->Append(wxID_ABOUT, _T("About HEVC Analyser"));
+    help_menu->Append(wxID_ABOUT, _T("About HEVC Analyzer"));
 
     mb->Append(file_menu, _T("File"));
     mb->Append(help_menu, _T("Help"));

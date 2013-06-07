@@ -1,4 +1,4 @@
-HEVCAnalyser
+HEVCAnalyzer
 ============
 
-HEVC stream and YUV file GUI Analyser based on wxWidgets
+HEVC stream and YUV file GUI Analyzer based on wxWidgets

@@ -1,5 +1,4 @@
 #include "ThumbnailThread.h"
-#include "HEVCAnalyser.h"
 
 extern const wxEventType wxEVT_ADDANIMAGE_THREAD;
 extern const wxEventType wxEVT_END_THREAD;

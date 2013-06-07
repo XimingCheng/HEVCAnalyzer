@@ -1,7 +1,7 @@
 #ifndef PICVIEWCTRL_H_INCLUDED
 #define PICVIEWCTRL_H_INCLUDED
 
-#include "HEVCAnalyser.h"
+#include "HEVCAnalyzer.h"
 
 class PicViewCtrl : public wxControl
 {

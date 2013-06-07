@@ -1,4 +1,4 @@
-#include "HEVCAnalyser.h"
+#include "HEVCAnalyzer.h"
 
 wxTextCtrl *g_pLogWin = NULL;
 
