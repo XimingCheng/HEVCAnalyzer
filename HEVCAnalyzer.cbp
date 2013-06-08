@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="HEVCAnalyser" />
+		<Option title="HEVCAnalyzer" />
 		<Option pch_mode="2" />
 		<Option default_target="Release" />
 		<Option compiler="gcc" />
@@ -75,18 +75,18 @@
 		<Linker>
 			<Add option="-mthreads" />
 		</Linker>
-		<Unit filename="HEVCAnalyser/HEVCAnalyser.cpp" />
-		<Unit filename="HEVCAnalyser/HEVCAnalyser.h" />
-		<Unit filename="HEVCAnalyser/HEVCodecApp.cpp" />
-		<Unit filename="HEVCAnalyser/HEVCodecApp.h" />
-		<Unit filename="HEVCAnalyser/MainFrame.cpp" />
-		<Unit filename="HEVCAnalyser/MainFrame.h" />
-		<Unit filename="HEVCAnalyser/PicViewCtrl.cpp" />
-		<Unit filename="HEVCAnalyser/PicViewCtrl.h" />
-		<Unit filename="HEVCAnalyser/ThumbnailThread.cpp" />
-		<Unit filename="HEVCAnalyser/ThumbnailThread.h" />
-		<Unit filename="HEVCAnalyser/YUVConfigDlg.cpp" />
-		<Unit filename="HEVCAnalyser/YUVConfigDlg.h" />
+		<Unit filename="HEVCAnalyzer/HEVCAnalyzer.cpp" />
+		<Unit filename="HEVCAnalyzer/HEVCAnalyzer.h" />
+		<Unit filename="HEVCAnalyzer/HEVCodecApp.cpp" />
+		<Unit filename="HEVCAnalyzer/HEVCodecApp.h" />
+		<Unit filename="HEVCAnalyzer/MainFrame.cpp" />
+		<Unit filename="HEVCAnalyzer/MainFrame.h" />
+		<Unit filename="HEVCAnalyzer/PicViewCtrl.cpp" />
+		<Unit filename="HEVCAnalyzer/PicViewCtrl.h" />
+		<Unit filename="HEVCAnalyzer/ThumbnailThread.cpp" />
+		<Unit filename="HEVCAnalyzer/ThumbnailThread.h" />
+		<Unit filename="HEVCAnalyzer/YUVConfigDlg.cpp" />
+		<Unit filename="HEVCAnalyzer/YUVConfigDlg.h" />
 		<Unit filename="TLibCommon/CommonDef.h" />
 		<Unit filename="TLibCommon/TComPicYuv.cpp" />
 		<Unit filename="TLibCommon/TComPicYuv.h" />

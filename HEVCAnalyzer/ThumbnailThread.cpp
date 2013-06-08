@@ -1,5 +1,4 @@
 #include "ThumbnailThread.h"
-#include "HEVCAnalyser.h"
 
 extern const wxEventType wxEVT_ADDANIMAGE_THREAD;
 extern const wxEventType wxEVT_END_THREAD;
@@ -50,7 +49,7 @@ void* ThumbnailThread::Entry()
         event.SetInt(frame-1);
         wxPostEvent(m_pFrame, event);
     }
-
+    cYUVIO.close();
     m_pcPicYuvOrg->destroy();
     delete m_pcPicYuvOrg;
     m_pcPicYuvOrg = NULL;

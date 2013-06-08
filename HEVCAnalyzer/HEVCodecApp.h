@@ -1,7 +1,7 @@
 #ifndef HEVCODECAPP_H_INCLUDED
 #define HEVCODECAPP_H_INCLUDED
 
-#include "HEVCAnalyser.h"
+#include "HEVCAnalyzer.h"
 #include "MainFrame.h"
 #if defined(__UNIX__)
 #include <X11/Xlib.h>

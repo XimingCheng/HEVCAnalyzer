@@ -1,7 +1,7 @@
 #ifndef YUVCONFIGDLG_H_INCLUDED
 #define YUVCONFIGDLG_H_INCLUDED
 
-#include "HEVCAnalyser.h"
+#include "HEVCAnalyzer.h"
 
 class YUVConfigDlg : public wxDialog
 {

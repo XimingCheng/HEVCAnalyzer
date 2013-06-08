@@ -1,5 +1,5 @@
-#ifndef HEVCANALYSER_H_INCLUDED
-#define HEVCANALYSER_H_INCLUDED
+#ifndef HEVCANALYZER_H_INCLUDED
+#define HEVCANALYZER_H_INCLUDED
 
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
@@ -29,4 +29,4 @@ void g_SetActiveTarget(wxTextCtrl *pTC);
 void g_ClearLog();
 
 
-#endif // HEVCANALYSER_H_INCLUDED
+#endif // HEVCANALYZER_H_INCLUDED

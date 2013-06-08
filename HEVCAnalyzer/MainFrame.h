@@ -1,7 +1,7 @@
 #ifndef MAINFRAME_H_INCLUDED
 #define MAINFRAME_H_INCLUDED
 
-#include "HEVCAnalyser.h"
+#include "HEVCAnalyzer.h"
 #include "ThumbnailThread.h"
 #include "PicViewCtrl.h"
 
@@ -38,8 +38,6 @@ private:
     void           OnCloseFile(wxCommandEvent& event);
 
     void           OnThumbnailLboxSelect(wxCommandEvent& event);
-
-    void           AddThumbnailListSingleThread();
     void           OnThreadEnd(wxCommandEvent& event);
     void           ClearThumbnalMemory();
 
