@@ -125,7 +125,7 @@ wxNotebook* MainFrame::CreateBottomNotebook()
     wxNotebook* ctrl = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0 );
     wxGridSizer* gSizer = new wxGridSizer( 1, 0, 0 );
     wxPanel* pLogPanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-    m_pTCLogWin= new wxTextCtrl(pLogPanel, wxID_ANY, _T(""), wxPoint(0, 0), wxSize(150, 90), wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH);
+    m_pTCLogWin= new wxTextCtrl(pLogPanel, wxID_ANY, _T(""), wxPoint(0, 0), wxSize(150, 90), wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH|wxHSCROLL);
     g_SetActiveTarget(m_pTCLogWin);
 
     gSizer->Add(m_pTCLogWin, 0, wxEXPAND, 5 );
