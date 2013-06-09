@@ -7,12 +7,20 @@ class PicViewCtrl : public wxControl
 {
 public:
     DECLARE_DYNAMIC_CLASS(PicViewCtrl);
+    enum Direction
+    {
+        MOVE_UP    = 0,
+        MOVE_DOWN,
+        MOVE_LEFT,
+        MOVE_RIGHT,
+    };
 
     PicViewCtrl() {}
-    PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* pList)
-        : wxControl (parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE),
+    PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* pList, wxFrame* pFrame)
+        : wxControl (parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxWANTS_CHARS),
         m_bClearFlag(true), m_bFitMode(true), m_dScaleRate(1.0), m_dMinScaleRate(0.1), m_dMaxScaleRate(2.0), m_dFitScaleRate(1.0),
-        m_dScaleRateStep(0.02), m_delta(-1, -1), m_curLCUStart(-1, -1), m_curLCUEnd(-1, -1), m_iLCURasterID(-1), m_pList(pList)
+        m_dScaleRateStep(0.02), m_delta(-1, -1), m_curLCUStart(-1, -1), m_curLCUEnd(-1, -1), m_iLCURasterID(-1), m_pList(pList),
+        m_pFrame(pFrame)
     { }
     void SetScale(const double dScale);
     //void SetSize(const wxSize& size) { m_CtrlSize = size; }
@@ -31,9 +39,14 @@ private:
     void OnMouseWheel(wxMouseEvent& event);
     void OnPaint(wxPaintEvent& event);
     void OnEraseBkg(wxEraseEvent& event);
+    void OnKeyDown(wxKeyEvent& event);
+
     void Render(wxDC& dc);
     void ChangeScaleRate(const double rate);
     int  GetCurLCURasterID(const double x, const double y);
+    void MoveLCURect(const Direction& d);
+    bool ShowPageByDiffNumber(const int diff);
+    void CalStartEndPointByLCUId(const int id);
 
 private:
     bool                 m_bClearFlag;
@@ -52,6 +65,7 @@ private:
     wxPoint              m_curLCUEnd;
     int                  m_iLCURasterID;
     wxSimpleHtmlListBox* m_pList;
+    wxFrame*             m_pFrame;
 
     DECLARE_EVENT_TABLE();
 };

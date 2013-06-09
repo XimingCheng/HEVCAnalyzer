@@ -46,7 +46,7 @@ END_EVENT_TABLE()
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos,
             const wxSize& size, long style)
             : wxFrame(parent, id, title, pos, size, style),
-            m_bYUVFile(false), m_bOPened(false), m_pcPicYuvOrg(NULL), m_pThumbThread(NULL)
+            m_pPicViewCtrl(NULL), m_bYUVFile(false), m_bOPened(false), m_pcPicYuvOrg(NULL), m_pThumbThread(NULL)
 {
     m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
     m_mgr.SetManagedWindow(this);
@@ -162,7 +162,7 @@ wxNotebook* MainFrame::CreateCenterNotebook()
     wxPanel* pDecodePanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
     //wxScrolledWindow
     m_pDecodeScrolledWin = new wxScrolledWindow( pDecodePanel, -1, wxDefaultPosition, wxDefaultSize, wxScrolledWindowStyle);
-    m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY, m_pThumbnalList);
+    m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY, m_pThumbnalList, this);
     m_pPicViewCtrl->SetSizeHints(300, 300);
     wxGridSizer* innerSizer = new wxGridSizer( 1, 0, 0 );
     innerSizer->Add(m_pPicViewCtrl, 1, wxALIGN_CENTER);
@@ -345,3 +345,4 @@ void MainFrame::OnIdle(wxIdleEvent& event)
         event.RequestMore(false);
     }
 }
+
