@@ -38,6 +38,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_CLOSE, MainFrame::OnCloseFile)
     EVT_COMMAND(wxID_ANY, wxEVT_ADDANIMAGE_THREAD, MainFrame::OnThreadAddImage)
     EVT_COMMAND(wxID_ANY, wxEVT_END_THREAD, MainFrame::OnThreadEnd)
+    EVT_SIZE(MainFrame::OnMainFrameSizeChange)
+    EVT_IDLE(MainFrame::OnIdle)
     EVT_LISTBOX(wxID_ANY, MainFrame::OnThumbnailLboxSelect)
 END_EVENT_TABLE()
 
@@ -322,7 +324,24 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
     m_cYUVIO.read(m_pcPicYuvOrg, pad);
     wxBitmap bmp(m_iSourceWidth, m_iSourceHeight, 24);
     g_tranformYUV2RGB(m_iSourceWidth, m_iSourceHeight, m_pcPicYuvOrg, m_iYUVBit, bmp);
-    //bmp.SaveFile(_("test.bmp"), wxBITMAP_TYPE_BMP);
     m_pPicViewCtrl->SetLCUSize(wxSize(64, 64));
+    m_pPicViewCtrl->CalMinMaxScaleRate();
     m_pPicViewCtrl->SetBitmap(bmp);
+}
+
+void MainFrame::OnMainFrameSizeChange(wxSizeEvent& event)
+{
+    if(m_pPicViewCtrl)
+    {
+        m_pPicViewCtrl->CalFitScaleRate();
+    }
+}
+
+void MainFrame::OnIdle(wxIdleEvent& event)
+{
+    if(m_pPicViewCtrl)
+    {
+        m_pPicViewCtrl->CalFitScaleRate();
+        event.RequestMore(false);
+    }
 }
