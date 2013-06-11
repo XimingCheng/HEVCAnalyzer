@@ -204,10 +204,13 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_iSourceHeight = cdlg.GetHeight();
         m_pPicViewCtrl->SetScale(1.0);
         m_iYUVBit = (cdlg.Is10bitYUV() ? 10 : 8);
+        m_FileLength = wxFile((const wxChar*)sfile).Length();
         m_cYUVIO.open((char *)sfile.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
         m_pcPicYuvOrg = new TComPicYuv;
         m_pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
         double scaleRate = 165.0/m_iSourceWidth;
+        InitThumbnailListView();
+        g_LogMessage(_T("Initialize thumbnail finished"));
         m_pImageList = new wxImageList((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
         m_pThumbThread = new ThumbnailThread(this, m_pImageList, m_iSourceWidth, m_iSourceHeight, m_iYUVBit, sfile);
         if(m_pThumbThread->Create() != wxTHREAD_NO_ERROR)
@@ -258,6 +261,7 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
             m_pImageList->RemoveAll();
             if(m_StrMemFileName.GetCount())
                 ClearThumbnalMemory();
+            m_FileLength = 0;
             g_ClearLog();
         }
         else
@@ -272,7 +276,8 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
 {
     int frame = event.GetInt();
     long framenumber = event.GetExtraLong();
-    wxArrayString arr;
+//    wxArrayString arr;
+    g_LogMessage(wxString::Format(_T("Add some images frome %d to %d"), frame-framenumber+1, frame));
     for(int i = 0;  i < (int)framenumber; i++)
     {
         int tmp = frame-framenumber+i+1;
@@ -280,11 +285,14 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
         m_StrMemFileName.Add(filename);
         wxMemoryFSHandler::AddFile(wxString::Format(_T("poc %d.bmp"), tmp), m_pImageList->GetBitmap(tmp),wxBITMAP_TYPE_BMP);
         wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:poc %d.bmp\"><br></p><span text-align=center>POC %d </span><br>"), tmp, tmp);
-        arr.Add(label);
+//        m_pThumbnalList->Insert(label, tmp);
+//        m_pThumbnalList->Delete(tmp+1);
+//       arr.Add(label);
+        m_pThumbnalList->SetString(tmp, label);
     }
     m_pThumbnalList->Freeze();
     unsigned int cnt = m_pThumbnalList->GetFirstVisibleLine();
-    m_pThumbnalList->Append(arr);
+//   m_pThumbnalList->Append(arr);
     m_pThumbnalList->ScrollToLine(cnt);
     m_pThumbnalList->Thaw();
     m_pThumbnalList->RefreshAll();
@@ -326,3 +334,17 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
     m_pPicViewCtrl->SetLCUSize(wxSize(64, 64));
     m_pPicViewCtrl->SetBitmap(bmp);
 }
+void MainFrame::InitThumbnailListView()
+{
+    int framenumber = m_FileLength/(m_iSourceWidth*m_iSourceHeight*1.5*(m_iYUVBit==10?2:1));
+    g_LogMessage(wxString::Format(_T("frame numbes: %d\n"), framenumber));
+    wxArrayString arr;
+    for(int i = 0;  i < framenumber; i++)
+    {
+        wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"/home/luqingbo/Downloads/horse.bmp\"><br></p><span text-align=center>POC %d </span><br>"), i);
+        arr.Add(label);
+    }
+    m_pThumbnalList->Append(arr);
+}
+
+

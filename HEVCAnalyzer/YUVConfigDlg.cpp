@@ -27,14 +27,14 @@ YUVConfigDlg::YUVConfigDlg(wxWindow *parent)
     staticTextW->Wrap( -1 );
     fgSizer->Add( staticTextW, 0, wxALIGN_CENTER|wxALL, 5 );
 
-    m_textCtrlW = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, tv );
+    m_textCtrlW = new wxTextCtrl( this, wxID_ANY, _T("832"), wxDefaultPosition, wxDefaultSize, 0, tv );
     fgSizer->Add( m_textCtrlW, 0, wxALIGN_CENTER|wxALL, 5 );
 
     wxStaticText* staticTextH = new wxStaticText( this, wxID_ANY, wxT("YUV Height"), wxDefaultPosition, wxDefaultSize, 0 );
     staticTextH->Wrap( -1 );
     fgSizer->Add( staticTextH, 0, wxALIGN_CENTER|wxALL, 5 );
 
-    m_textCtrlH = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, tv );
+    m_textCtrlH = new wxTextCtrl( this, wxID_ANY, _T("480"), wxDefaultPosition, wxDefaultSize, 0, tv );
     fgSizer->Add( m_textCtrlH, 0, wxALIGN_CENTER|wxALL, 5 );
 
     wxStaticText* staticTextBit = new wxStaticText( this, wxID_ANY, wxT("YUV Bits"), wxDefaultPosition, wxDefaultSize, 0 );

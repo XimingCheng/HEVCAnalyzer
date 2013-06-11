@@ -40,6 +40,7 @@ private:
     void           OnThumbnailLboxSelect(wxCommandEvent& event);
     void           OnThreadEnd(wxCommandEvent& event);
     void           ClearThumbnalMemory();
+    void           InitThumbnailListView();
 
 private:
     wxAuiManager         m_mgr;
@@ -58,6 +59,7 @@ private:
     int                  m_iSourceWidth;
     int                  m_iSourceHeight;
     int                  m_iYUVBit;
+    wxFileOffset         m_FileLength;
 
     TVideoIOYuv          m_cYUVIO;
     TComPicYuv*          m_pcPicYuvOrg;

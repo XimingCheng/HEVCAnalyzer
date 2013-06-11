@@ -27,7 +27,7 @@ private:
     void OnMouseWheel(wxMouseEvent& event);
     void OnPaint(wxPaintEvent& event);
     void OnEraseBkg(wxEraseEvent& event);
-    void Render(wxDC& dc);
+    void Render(wxGraphicsContext& dc);
     int  GetCurLCURasterID(double x, double y);
 
 private:

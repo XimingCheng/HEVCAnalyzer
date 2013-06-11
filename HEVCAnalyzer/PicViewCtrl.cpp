@@ -13,17 +13,21 @@ END_EVENT_TABLE()
 
 void PicViewCtrl::OnPaint(wxPaintEvent& event)
 {
-    wxPaintDC dc(this);
-    Render(dc);
+    //wxPaintDC dc(this);
+    wxGraphicsContext *dc = wxGraphicsContext::Create(this);
+    Render(*dc);
+    delete dc;
 }
 
-void PicViewCtrl::Render(wxDC& dc)
+void PicViewCtrl::Render(wxGraphicsContext& dc)
 {
     if(!m_bClearFlag)
     {
-        dc.SetUserScale(m_dScaleRate, m_dScaleRate);
+        //dc.SetUserScale(m_dScaleRate, m_dScaleRate);
+        dc.Scale(m_dScaleRate, m_dScaleRate);
         dc.SetBrush(wxBrush(wxColor(255,0,0,128)));
-        dc.DrawRectangle(m_curLCUStart, wxSize(m_curLCUEnd.x - m_curLCUStart.x, m_curLCUEnd.y - m_curLCUStart.y));
+        //dc.DrawRectangle(m_curLCUStart, wxSize(m_curLCUEnd.x - m_curLCUStart.x, m_curLCUEnd.y - m_curLCUStart.y));
+        dc.DrawRectangle(m_curLCUStart.x, m_curLCUStart.y, m_curLCUEnd.x-m_curLCUStart.x, m_curLCUEnd.y-m_curLCUStart.y);
     }
 }
 
@@ -156,7 +160,7 @@ void PicViewCtrl::OnMouseWheel(wxMouseEvent& event)
         m_CtrlSize.SetHeight(m_dScaleRate*m_cViewBitmap.GetHeight());
         this->SetSizeHints(m_CtrlSize);
         GetParent()->FitInside();
-        g_LogMessage(wxString::Format(_T("OnMouseWheel m_dScaleRate %f"), m_dScaleRate));
+        Refresh();
     }
     else
     {
