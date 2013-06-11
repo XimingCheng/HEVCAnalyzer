@@ -15,6 +15,7 @@
 #include <wx/imaglist.h>
 #include <wx/arrstr.h>
 #include <wx/graphics.h>
+#include <wx/dcbuffer.h>
 
 #include "../TLibVideoIO/TVideoIOYuv.h"
 

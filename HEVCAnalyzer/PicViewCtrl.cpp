@@ -16,18 +16,22 @@ END_EVENT_TABLE()
 
 void PicViewCtrl::OnPaint(wxPaintEvent& event)
 {
-    wxPaintDC dc(this);
-    Render(dc);
+    wxAutoBufferedPaintDC dc(this);
+    wxGraphicsContext *gc = wxGraphicsContext::Create(dc);
+    Render(gc);
 }
 
-void PicViewCtrl::Render(wxDC& dc)
+void PicViewCtrl::Render(wxGraphicsContext* gc)
 {
     if(!m_bClearFlag)
     {
-        dc.SetUserScale(m_dScaleRate, m_dScaleRate);
-        dc.SetBrush(wxBrush(wxColor(255,0,0,128)));
-        dc.DrawRectangle(m_curLCUStart, wxSize(m_curLCUEnd.x - m_curLCUStart.x, m_curLCUEnd.y - m_curLCUStart.y));
+        gc->Scale(m_dScaleRate, m_dScaleRate);
+        DrawBackGround(gc);
+        gc->SetBrush(wxBrush(wxColor(255, 0, 0, 128)));
+        gc->DrawRectangle(m_curLCUStart.x, m_curLCUStart.y, m_curLCUEnd.x - m_curLCUStart.x, m_curLCUEnd.y - m_curLCUStart.y);
     }
+    else
+        DrawNoPictureTips(gc);
 }
 
 void PicViewCtrl::SetBitmap(wxBitmap bitmap)
@@ -79,33 +83,6 @@ void PicViewCtrl::OnMouseMove(wxMouseEvent& event)
 
 void PicViewCtrl::OnEraseBkg(wxEraseEvent& event)
 {
-    wxClientDC* clientDC = NULL;
-    if (!event.GetDC())
-        clientDC = new wxClientDC(this);
-    wxDC* pDC = clientDC ? clientDC : event.GetDC();
-    if(m_bClearFlag)
-    {
-        pDC->Clear();
-        int w, height;
-        wxSize size = GetClientSize();
-        wxString s;
-        s.Printf(_T("No picture to show!"), size.x, size.y);
-        pDC->SetFont(*wxNORMAL_FONT);
-        pDC->GetTextExtent(s, &w, &height);
-        height += 3;
-        pDC->SetBrush(*wxTRANSPARENT_BRUSH);
-        pDC->SetPen(*wxLIGHT_GREY_PEN);
-        pDC->DrawLine(0, 0, size.x, size.y);
-        pDC->DrawLine(0, size.y, size.x, 0);
-        pDC->DrawText(s, (size.x-w)/2, ((size.y-(height))/2));
-        wxBitmap::CleanUpHandlers();
-        return;
-    }
-    pDC->SetUserScale(m_dScaleRate, m_dScaleRate);
-    if(m_cViewBitmap.IsOk())
-        pDC->DrawBitmap(m_cViewBitmap, 0, 0, true);
-    if(clientDC)
-        delete clientDC;
 }
 
 int PicViewCtrl::GetCurLCURasterID(const double x, const double y)
@@ -148,12 +125,15 @@ void PicViewCtrl::OnMouseLButtonUp(wxMouseEvent& event)
 void PicViewCtrl::OnMouseWheel(wxMouseEvent& event)
 {
     if(m_bClearFlag)
+    {
+        event.Skip();
         return;
+    }
     int direction = event.GetWheelRotation();
     int delta     = event.GetWheelDelta();
     if(event.CmdDown()) // scale
     {
-        double bigger = (direction/delta)*0.01;
+        double bigger = (direction/delta)*m_dScaleRateStep;
         double rate   = ((m_dScaleRate + bigger) > m_dMaxScaleRate ? m_dMaxScaleRate : (m_dScaleRate + bigger));
         rate          = rate < m_dMinScaleRate ? m_dMinScaleRate : rate;
         if(fabs(rate - m_dScaleRate) > MINDIFF)
@@ -163,8 +143,13 @@ void PicViewCtrl::OnMouseWheel(wxMouseEvent& event)
     }
     else
     {
-        int pages  = -(direction/delta);
-        ShowPageByDiffNumber(pages);
+        if(m_bMouseWheelPageUpDown)
+        {
+            int pages = -(direction/delta);
+            ShowPageByDiffNumber(pages);
+        }
+        else
+            event.Skip();
     }
 }
 
@@ -182,8 +167,16 @@ void PicViewCtrl::CalMinMaxScaleRate()
         double sratew = scrwidth/static_cast<double>(width);
         double srateh = scrheight/static_cast<double>(height);
         double srate  = sratew < srateh ? sratew : srateh;
-        m_dMaxScaleRate = 1.5*srate;
-        m_dMinScaleRate = 50/static_cast<double>(width);
+        m_dMaxScaleRate  = 1.5*srate < 2.0 ? 2.0 : 1.5*srate;
+        m_dMinScaleRate  = 50/static_cast<double>(width);
+        if(m_dMinScaleRate > m_dMaxScaleRate)
+        {
+            // this situation may be terrible, here just exchange each other
+            double tmp      = m_dMinScaleRate;
+            m_dMinScaleRate = m_dMaxScaleRate;
+            m_dMaxScaleRate = tmp;
+        }
+        m_dScaleRateStep = (m_dMaxScaleRate - m_dMinScaleRate)/100.0;
     }
 }
 
@@ -266,6 +259,7 @@ void PicViewCtrl::MoveLCURect(const Direction& d)
         id = m_iLCURasterID + 1;
         break;
     default:
+        assert(0);
         break;
     }
     if(id == -1 && d == MOVE_LEFT) id = 0;
@@ -309,6 +303,7 @@ void PicViewCtrl::OnKeyDown(wxKeyEvent& event)
         MoveLCURect(MOVE_RIGHT);
         break;
     default:
+        event.Skip();
         break;
     }
 }
@@ -330,4 +325,50 @@ void PicViewCtrl::CalStartEndPointByLCUId(const int id)
         m_curLCUEnd.x   = (x > m_cViewBitmap.GetWidth() ? m_cViewBitmap.GetWidth() : x);
         m_curLCUEnd.y   = (y > m_cViewBitmap.GetHeight() ? m_cViewBitmap.GetHeight() : y);
     }
+}
+
+void PicViewCtrl::DrawGrid(wxGraphicsContext* gc)
+{
+    int cuw = m_LCUSize.GetWidth();
+    int cuh = m_LCUSize.GetHeight();
+    int col_num = m_cViewBitmap.GetWidth()/cuw + (m_cViewBitmap.GetWidth()%cuw != 0);
+    int row_num = m_cViewBitmap.GetHeight()/cuh + (m_cViewBitmap.GetHeight()%cuh != 0);
+    gc->SetPen(*wxBLACK_PEN);
+    for(int i = 1; i < row_num; i++)
+        gc->StrokeLine(0, i*cuh, m_cViewBitmap.GetWidth(), i*cuh);
+    for(int i = 1; i < col_num; i++)
+        gc->StrokeLine(i*cuw, 0, i*cuw, m_cViewBitmap.GetHeight());
+}
+
+void PicViewCtrl::DrawBackGround(wxGraphicsContext* gc)
+{
+    gc->DrawBitmap(m_cViewBitmap, 0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
+    if(m_bShowPUType)
+    {
+        gc->SetPen(*wxTRANSPARENT_PEN);
+        gc->SetBrush(wxBrush(wxColor(255, 0, 0, 50)));
+        gc->DrawRectangle(0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
+    }
+    if(m_bShowGrid)
+        DrawGrid(gc);
+}
+
+void PicViewCtrl::DrawNoPictureTips(wxGraphicsContext* gc)
+{
+    double w, h, descent, externalLeading;
+    wxSize size = GetClientSize();
+    wxString s;
+    s.Printf(_T("No picture to show!"), size.x, size.y);
+    gc->SetFont(*wxNORMAL_FONT, *wxBLACK);
+    gc->SetPen(*wxBLACK_PEN);
+    gc->GetTextExtent(s, &w, &h, &descent, &externalLeading);
+    gc->SetBrush(wxBrush(wxColor(255, 255, 255, 255)));
+    gc->DrawRectangle(0, 0, size.GetWidth()-1, size.GetHeight()-1);
+    h += 3;
+    gc->SetBrush(*wxTRANSPARENT_BRUSH);
+    gc->SetPen(*wxLIGHT_GREY_PEN);
+    gc->StrokeLine(0, 0, size.x, size.y);
+    gc->StrokeLine(0, size.y, size.x, 0);
+    gc->DrawText(s, (size.x-w)/2, ((size.y-(h))/2));
+    wxBitmap::CleanUpHandlers();
 }

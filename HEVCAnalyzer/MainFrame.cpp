@@ -206,6 +206,7 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_iSourceHeight = cdlg.GetHeight();
         m_pPicViewCtrl->SetScale(1.0);
         m_iYUVBit = (cdlg.Is10bitYUV() ? 10 : 8);
+        m_pPicViewCtrl->SetFitMode(true);
         m_cYUVIO.open((char *)sfile.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
         m_pcPicYuvOrg = new TComPicYuv;
         m_pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );

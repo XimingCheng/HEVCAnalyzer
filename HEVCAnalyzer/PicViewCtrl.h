@@ -17,11 +17,11 @@ public:
 
     PicViewCtrl() {}
     PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* pList, wxFrame* pFrame)
-        : wxControl (parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxWANTS_CHARS),
+        : wxControl (parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxWANTS_CHARS ),
         m_bClearFlag(true), m_bFitMode(true), m_dScaleRate(1.0), m_dMinScaleRate(0.1), m_dMaxScaleRate(2.0), m_dFitScaleRate(1.0),
         m_dScaleRateStep(0.02), m_delta(-1, -1), m_curLCUStart(-1, -1), m_curLCUEnd(-1, -1), m_iLCURasterID(-1), m_pList(pList),
-        m_pFrame(pFrame)
-    { }
+        m_pFrame(pFrame), m_bShowGrid(true), m_bMouseWheelPageUpDown(false), m_bShowPUType(true)
+    { SetBackgroundStyle(wxBG_STYLE_CUSTOM); }
     void SetScale(const double dScale);
     //void SetSize(const wxSize& size) { m_CtrlSize = size; }
     void SetBitmap(wxBitmap bitmap);
@@ -31,6 +31,12 @@ public:
     void CalFitScaleRate();
     bool GetFitMode() const { return m_bFitMode; }
     void SetFitMode(const bool b) { m_bFitMode = b; }
+    bool IsShowGrid() const { return m_bShowGrid; }
+    void SetShowGrid(const bool b) { m_bShowGrid = b; }
+    bool IsMouseWheelPageUpDown() const { return m_bMouseWheelPageUpDown; }
+    void SetMouseWheelPageUpDown(const bool b) { m_bMouseWheelPageUpDown = b; }
+    bool IsShowPUType() const { return m_bShowPUType; }
+    void SetShowPUType(const bool b) { m_bShowPUType = b; }
 
 private:
     void OnMouseMove(wxMouseEvent& event);
@@ -41,12 +47,15 @@ private:
     void OnEraseBkg(wxEraseEvent& event);
     void OnKeyDown(wxKeyEvent& event);
 
-    void Render(wxDC& dc);
+    void Render(wxGraphicsContext* gc);
     void ChangeScaleRate(const double rate);
     int  GetCurLCURasterID(const double x, const double y);
     void MoveLCURect(const Direction& d);
     bool ShowPageByDiffNumber(const int diff);
     void CalStartEndPointByLCUId(const int id);
+    void DrawBackGround(wxGraphicsContext* gc);
+    void DrawNoPictureTips(wxGraphicsContext* gc);
+    void DrawGrid(wxGraphicsContext* gc);
 
 private:
     bool                 m_bClearFlag;
@@ -66,6 +75,9 @@ private:
     int                  m_iLCURasterID;
     wxSimpleHtmlListBox* m_pList;
     wxFrame*             m_pFrame;
+    bool                 m_bShowGrid;
+    bool                 m_bMouseWheelPageUpDown;
+    bool                 m_bShowPUType;
 
     DECLARE_EVENT_TABLE();
 };
