@@ -2,13 +2,24 @@
 
 wxTextCtrl *g_pLogWin = NULL;
 
-void g_tranformYUV2RGB(int w, int h, TComPicYuv*  pcPicYuvOrg, int iYUVBit, wxBitmap& bmp)
+void g_tranformYUV2RGB(const int w, const int h, TComPicYuv* pcPicYuvOrg, const int iYUVBit,
+                       wxBitmap& bmp, wxBitmap& bmp_Y, wxBitmap& bmp_U, wxBitmap& bmp_V, bool bUseYUV)
 {
     wxNativePixelData img(bmp);
     wxNativePixelData::Iterator p(img);
+    wxNativePixelData imgY(bmp_Y);
+    wxNativePixelData::Iterator pIY(imgY);
+    wxNativePixelData imgU(bmp_U);
+    wxNativePixelData::Iterator pIU(imgU);
+    wxNativePixelData imgV(bmp_V);
+    wxNativePixelData::Iterator pIV(imgV);
     for(int j = 0; j < h; j++)
     {
-        wxNativePixelData::Iterator rowStart = p;
+        wxNativePixelData::Iterator rowStart  = p;
+        wxNativePixelData::Iterator rowStartY = pIY;
+        wxNativePixelData::Iterator rowStartU = pIU;
+        wxNativePixelData::Iterator rowStartV = pIV;
+
         Pel* pY = pcPicYuvOrg->getLumaAddr() + j*pcPicYuvOrg->getStride();
         Pel* pU = pcPicYuvOrg->getCbAddr()   + (j/2)*pcPicYuvOrg->getCStride();
         Pel* pV = pcPicYuvOrg->getCrAddr()   + (j/2)*pcPicYuvOrg->getCStride();
@@ -36,10 +47,34 @@ void g_tranformYUV2RGB(int w, int h, TComPicYuv*  pcPicYuvOrg, int iYUVBit, wxBi
             p.Red() = r;
             p.Green() = g;
             p.Blue() = b;
+            if(bUseYUV)
+            {
+                pIY.Red() = y;
+                pIY.Green() = y;
+                pIY.Blue() = y;
+                pIU.Red() = u;
+                pIU.Green() = u;
+                pIU.Blue() = u;
+                pIV.Red() = v;
+                pIV.Green() = v;
+                pIV.Blue() = v;
+                pIY++;
+                pIU++;
+                pIV++;
+            }
             p++;
         }
         p = rowStart;
         p.OffsetY(img, 1);
+        if(bUseYUV)
+        {
+            pIY = rowStartY;
+            pIY.OffsetY(imgY, 1);
+            pIU = rowStartU;
+            pIU.OffsetY(imgU, 1);
+            pIV = rowStartV;
+            pIV.OffsetY(imgV, 1);
+        }
     }
 }
 

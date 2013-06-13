@@ -20,11 +20,14 @@ public:
         : wxControl (parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxWANTS_CHARS ),
         m_bClearFlag(true), m_bFitMode(true), m_dScaleRate(1.0), m_dMinScaleRate(0.1), m_dMaxScaleRate(2.0), m_dFitScaleRate(1.0),
         m_dScaleRateStep(0.02), m_delta(-1, -1), m_curLCUStart(-1, -1), m_curLCUEnd(-1, -1), m_iLCURasterID(-1), m_pList(pList),
-        m_pFrame(pFrame), m_bShowGrid(true), m_bMouseWheelPageUpDown(false), m_bShowPUType(true)
-    { SetBackgroundStyle(wxBG_STYLE_CUSTOM); }
+        m_pFrame(pFrame), m_bShowGrid(true), m_bMouseWheelPageUpDown(false), m_bShowPUType(true), m_pBuffer(NULL),
+        m_iYUVBit(8), m_iShowWhich_O_Y_U_V(0)
+    {
+        SetBackgroundStyle(wxBG_STYLE_CUSTOM);
+    }
     void SetScale(const double dScale);
     //void SetSize(const wxSize& size) { m_CtrlSize = size; }
-    void SetBitmap(wxBitmap bitmap);
+    void SetBitmap(wxBitmap bitmap, wxBitmap bitmapY, wxBitmap bitmapU, wxBitmap bitmapV);
     void SetLCUSize(const wxSize& size);
     void SetClear(bool bClr = true) { m_bClearFlag = bClr; }
     void CalMinMaxScaleRate();
@@ -37,6 +40,9 @@ public:
     void SetMouseWheelPageUpDown(const bool b) { m_bMouseWheelPageUpDown = b; }
     bool IsShowPUType() const { return m_bShowPUType; }
     void SetShowPUType(const bool b) { m_bShowPUType = b; }
+    int  WhichTobeShown() const { return m_iShowWhich_O_Y_U_V; }
+    void SetWhichTobeShown(const int which) { m_iShowWhich_O_Y_U_V = which; }
+    void SetPicYuvBuffer(TComPicYuv* pBuffer, const int w, const int h, const int bit);
 
 private:
     void OnMouseMove(wxMouseEvent& event);
@@ -68,6 +74,9 @@ private:
     wxSize               m_CtrlSize;
     wxSize               m_LCUSize;
     wxBitmap             m_cViewBitmap;
+    wxBitmap             m_cViewBitmapY;
+    wxBitmap             m_cViewBitmapU;
+    wxBitmap             m_cViewBitmapV;
     wxPoint              m_delta;
     // Mouse moving LCU location
     wxPoint              m_curLCUStart;
@@ -78,6 +87,9 @@ private:
     bool                 m_bShowGrid;
     bool                 m_bMouseWheelPageUpDown;
     bool                 m_bShowPUType;
+    TComPicYuv*          m_pBuffer;
+    int                  m_iYUVBit;
+    int                  m_iShowWhich_O_Y_U_V;  /**< 0 - original 1 - Y 2 - U 3 - V */
 
     DECLARE_EVENT_TABLE();
 };

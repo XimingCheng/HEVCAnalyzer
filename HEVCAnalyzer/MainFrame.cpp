@@ -140,6 +140,7 @@ wxNotebook* MainFrame::CreateBottomNotebook()
     g_LogWarning(_T("Warning"));
     return ctrl;
 }
+
 wxNotebook* MainFrame::CreateLeftNotebook()
 {
     wxNotebook* ctrl = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0 );
@@ -336,11 +337,7 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
     m_cYUVIO.skipFrames(frame, m_iSourceWidth, m_iSourceHeight);
     int pad[] = {0, 0};
     m_cYUVIO.read(m_pcPicYuvOrg, pad);
-    wxBitmap bmp(m_iSourceWidth, m_iSourceHeight, 24);
-    g_tranformYUV2RGB(m_iSourceWidth, m_iSourceHeight, m_pcPicYuvOrg, m_iYUVBit, bmp);
-    m_pPicViewCtrl->SetLCUSize(wxSize(64, 64));
-    m_pPicViewCtrl->SetBitmap(bmp);
-    m_pPicViewCtrl->CalMinMaxScaleRate();
+    m_pPicViewCtrl->SetPicYuvBuffer(m_pcPicYuvOrg, m_iSourceWidth, m_iSourceHeight, m_iYUVBit);
 }
 
 void MainFrame::InitThumbnailListView()

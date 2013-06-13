@@ -19,7 +19,7 @@ void* ThumbnailThread::Entry()
         // here read may be failed
         if(!m_cYUVIO.read(m_pcPicYuvOrg, pad))
             break;
-        g_tranformYUV2RGB(m_iSourceWidth, m_iSourceHeight, m_pcPicYuvOrg, m_iYUVBit, bmp);
+        g_tranformYUV2RGB(m_iSourceWidth, m_iSourceHeight, m_pcPicYuvOrg, m_iYUVBit, bmp, bmp, bmp, bmp);
         //bmp.SaveFile(wxString::Format(_("test_%d.bmp"), frame), wxBITMAP_TYPE_BMP);
         wxImage bimg = bmp.ConvertToImage();
         double scaleRate = 165.0/m_iSourceWidth;

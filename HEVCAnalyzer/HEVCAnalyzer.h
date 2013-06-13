@@ -24,7 +24,8 @@
 
 #define MINDIFF 1e-15
 
-void g_tranformYUV2RGB(int w, int h, TComPicYuv*  pcPicYuvOrg, int iYUVBit, wxBitmap& bmp);
+void g_tranformYUV2RGB(const int w, const int h, TComPicYuv* pcPicYuvOrg, const int iYUVBit,
+                       wxBitmap& bmp, wxBitmap& bmp_Y, wxBitmap& bmp_U, wxBitmap& bmp_V, bool bUseYUV = false);
 
 extern wxTextCtrl *g_pLogWin ;
 

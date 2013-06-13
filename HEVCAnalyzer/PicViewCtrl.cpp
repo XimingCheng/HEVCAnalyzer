@@ -26,17 +26,24 @@ void PicViewCtrl::Render(wxGraphicsContext* gc)
     {
         gc->Scale(m_dScaleRate, m_dScaleRate);
         DrawBackGround(gc);
-        gc->SetBrush(wxBrush(wxColor(255, 0, 0, 128)));
+        gc->SetBrush(wxBrush(wxColor(255, 255, 255, 100)));
+        gc->SetPen(wxPen(wxColor(255, 0, 0, 255)));
+        gc->StrokeLine(0, m_curLCUStart.y, m_curLCUStart.x, m_curLCUStart.y);
+        gc->StrokeLine(m_curLCUStart.x, 0, m_curLCUStart.x, m_curLCUStart.y);
+        gc->SetPen(wxPen(wxColor(255, 255, 255, 100)));
         gc->DrawRectangle(m_curLCUStart.x, m_curLCUStart.y, m_curLCUEnd.x - m_curLCUStart.x, m_curLCUEnd.y - m_curLCUStart.y);
     }
     else
         DrawNoPictureTips(gc);
 }
 
-void PicViewCtrl::SetBitmap(wxBitmap bitmap)
+void PicViewCtrl::SetBitmap(wxBitmap bitmap, wxBitmap bitmapY, wxBitmap bitmapU, wxBitmap bitmapV)
 {
-    m_bClearFlag = false;
-    m_cViewBitmap = bitmap;
+    m_bClearFlag   = false;
+    m_cViewBitmap  = bitmap;
+    m_cViewBitmapY = bitmapY;
+    m_cViewBitmapU = bitmapU;
+    m_cViewBitmapV = bitmapV;
     CalFitScaleRate();
     m_CtrlSize.SetWidth(m_dScaleRate*m_cViewBitmap.GetWidth());
     m_CtrlSize.SetHeight(m_dScaleRate*m_cViewBitmap.GetHeight());
@@ -133,7 +140,7 @@ void PicViewCtrl::OnMouseWheel(wxMouseEvent& event)
     if(event.CmdDown()) // scale
     {
         double bigger = (direction/delta)*m_dScaleRateStep;
-        double rate   = ((m_dScaleRate + bigger) > m_dMaxScaleRate  ? m_dMaxScaleRate  : (m_dScaleRate + bigger));
+        double rate   = ((m_dScaleRate + bigger) > m_dMaxScaleRate ? m_dMaxScaleRate : (m_dScaleRate + bigger));
         rate          = rate < m_dMinScaleRate ? m_dMinScaleRate : rate;
         if(fabs(rate - m_dScaleRate) > MINDIFF)
             m_bFitMode = false;
@@ -340,12 +347,30 @@ void PicViewCtrl::DrawGrid(wxGraphicsContext* gc)
 
 void PicViewCtrl::DrawBackGround(wxGraphicsContext* gc)
 {
-    gc->DrawBitmap(m_cViewBitmap, 0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
+    switch(m_iShowWhich_O_Y_U_V)
+    {
+    case 0:
+        gc->DrawBitmap(m_cViewBitmap, 0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
+        break;
+    case 1:
+        gc->DrawBitmap(m_cViewBitmapY, 0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
+        break;
+    case 2:
+        gc->DrawBitmap(m_cViewBitmapU, 0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
+        break;
+    case 3:
+        gc->DrawBitmap(m_cViewBitmapV, 0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
+        break;
+    default:
+        assert(0);
+        break;
+    }
+
     if(m_bShowPUType)
     {
-        gc->SetPen(*wxTRANSPARENT_PEN);
-        gc->SetBrush(wxBrush(wxColor(255, 0, 0, 50)));
-        gc->DrawRectangle(0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
+//        gc->SetPen(*wxTRANSPARENT_PEN);
+//        gc->SetBrush(wxBrush(wxColor(255, 0, 0, 50)));
+//        gc->DrawRectangle(0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
     }
     if(m_bShowGrid)
         DrawGrid(gc);
@@ -369,4 +394,18 @@ void PicViewCtrl::DrawNoPictureTips(wxGraphicsContext* gc)
     gc->StrokeLine(0, size.y, size.x, 0);
     gc->DrawText(s, (size.x-w)/2, ((size.y-(h))/2));
     wxBitmap::CleanUpHandlers();
+}
+
+void PicViewCtrl::SetPicYuvBuffer(TComPicYuv* pBuffer, const int w, const int h, const int bit)
+{
+    m_pBuffer = pBuffer;
+    m_iYUVBit = bit;
+    wxBitmap bmp(w, h, 24);
+    wxBitmap bmpY(w, h, 24);
+    wxBitmap bmpU(w, h, 24);
+    wxBitmap bmpV(w, h, 24);
+    g_tranformYUV2RGB(w, h, m_pBuffer, m_iYUVBit, bmp, bmpY, bmpU, bmpV, true);
+    SetLCUSize(wxSize(64, 64));
+    SetBitmap(bmp, bmpY, bmpU, bmpV);
+    CalMinMaxScaleRate();
 }
