@@ -150,8 +150,13 @@ wxNotebook* MainFrame::CreateLeftNotebook()
     pThumbnalListPanel->SetSizer( gSizer );
     pThumbnalListPanel->Layout();
     ctrl->AddPage( pThumbnalListPanel, _T("Thumbnails"), true );
-    wxPanel* m_panel7 = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-    ctrl->AddPage( m_panel7, _T("CU Pixels"), false );
+    wxPanel* pCUPixelPanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    m_pPixelViewCtrl = new PixelViewCtrl(pCUPixelPanel, wxID_ANY);
+    wxGridSizer* pixelSizer = new wxGridSizer(1, 0, 0);
+    pixelSizer->Add(m_pPixelViewCtrl, 0, wxEXPAND, 5 );
+    pCUPixelPanel->SetSizer(pixelSizer);
+    pCUPixelPanel->Layout();
+    ctrl->AddPage( pCUPixelPanel, _T("CU Pixels"), false);
     return ctrl;
 }
 

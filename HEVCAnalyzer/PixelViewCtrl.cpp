@@ -1,16 +1,21 @@
 #include "PixelViewCtrl.h"
 
-IMPLEMENT_DYNAMIC_CLASS(PixelViewCtrl, wxScrolledWindos);
+IMPLEMENT_DYNAMIC_CLASS(PixelViewCtrl, wxScrolledWindow);
 
 BEGIN_EVENT_TABLE(PixelViewCtrl, wxScrolledWindow)
 END_EVENT_TABLE()
 
 void PixelViewCtrl::OnDraw(wxDC& dc)
 {
+    //wxAutoBufferedPaintDC tmpdc(this);
+    DrawGrid(dc);
+    DrawFocusLine(dc);
 }
+
 void PixelViewCtrl::OnEraseBkg(wxEraseEvent& event)
 {
 }
+
 void PixelViewCtrl::DrawGrid(wxDC& dc)
 {
     int XOffset = 20;
@@ -22,16 +27,17 @@ void PixelViewCtrl::DrawGrid(wxDC& dc)
                     XOffset+m_iCUWidth*m_iWidthPerPixel, YOffset+i*m_iHeightPerPixel);
     for(int i = 0; i <= m_iCUWidth; i++)
         dc.DrawLine(XOffset+i*m_iWidthPerPixel, YOffset, 
-                    XOffset+i*m_iWidthPerPixel, YOffset+m_iCUHeight*m_iWidthPerPixel);
+                    XOffset+i*m_iWidthPerPixel, YOffset+m_iCUHeight*m_iHeightPerPixel);
     dc.SetPen(oldpen);
 }
+
 void PixelViewCtrl::DrawFocusLine(wxDC& dc)
 {
     int XOffset = 20;
     int YOffset = 20;
 
     wxPen oldpen = dc.GetPen();
-    wxPen newpen(*wxRED_PEN, 2);
+    wxPen newpen(*wxRED, 2);
     dc.SetPen(newpen);
 
     int xpos = m_FocusPos.x;
