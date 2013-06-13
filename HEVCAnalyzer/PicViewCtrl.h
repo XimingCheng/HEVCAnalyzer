@@ -45,7 +45,6 @@ private:
     void OnMouseWheel(wxMouseEvent& event);
     void OnPaint(wxPaintEvent& event);
     void OnEraseBkg(wxEraseEvent& event);
-    void Render(wxGraphicsContext dc);
     void OnKeyDown(wxKeyEvent& event);
 
     void Render(wxGraphicsContext* gc);

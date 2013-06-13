@@ -7,7 +7,6 @@ enum wxbuildinfoformat {
 
 wxString wxbuildinfo(wxbuildinfoformat format)
 {
-
     wxString wxbuild(wxVERSION_STRING);
 
     if (format == long_f )
@@ -338,6 +337,7 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
     m_pPicViewCtrl->SetBitmap(bmp);
     m_pPicViewCtrl->CalMinMaxScaleRate();
 }
+
 void MainFrame::InitThumbnailListView()
 {
     int framenumber = m_FileLength/(m_iSourceWidth*m_iSourceHeight*1.5*(m_iYUVBit==10?2:1));
@@ -350,7 +350,6 @@ void MainFrame::InitThumbnailListView()
     }
     m_pThumbnalList->Append(arr);
 }
-
 
 void MainFrame::OnMainFrameSizeChange(wxSizeEvent& event)
 {

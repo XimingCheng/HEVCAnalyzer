@@ -1,6 +1,9 @@
 #ifndef HEVCANALYZER_H_INCLUDED
 #define HEVCANALYZER_H_INCLUDED
 
+#include <cmath>
+#include <cassert>
+
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
 #include <wx/aui/auibook.h>

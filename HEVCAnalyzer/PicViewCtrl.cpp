@@ -1,6 +1,4 @@
 #include "PicViewCtrl.h"
-#include <cmath>
-#include <cassert>
 
 IMPLEMENT_DYNAMIC_CLASS(PicViewCtrl, wxControl);
 
@@ -16,10 +14,10 @@ END_EVENT_TABLE()
 
 void PicViewCtrl::OnPaint(wxPaintEvent& event)
 {
-    //wxPaintDC dc(this);
-    wxGraphicsContext *dc = wxGraphicsContext::Create(this);
-    Render(dc);
-    delete dc;
+    wxAutoBufferedPaintDC dc(this);
+    wxGraphicsContext *gc = wxGraphicsContext::Create(dc);
+    Render(gc);
+    delete gc;
 }
 
 void PicViewCtrl::Render(wxGraphicsContext* gc)
@@ -134,15 +132,13 @@ void PicViewCtrl::OnMouseWheel(wxMouseEvent& event)
     int delta     = event.GetWheelDelta();
     if(event.CmdDown()) // scale
     {
-        double bigger = (direction/delta)*0.1;
-        double rate   = ((m_dScaleRate + bigger) > 2.0 ? 2.0 : (m_dScaleRate + bigger));
-        rate          = rate < 0.1 ? 0.1 : rate;
-        m_dScaleRate  = rate;
-        m_CtrlSize.SetWidth(m_dScaleRate*m_cViewBitmap.GetWidth());
-        m_CtrlSize.SetHeight(m_dScaleRate*m_cViewBitmap.GetHeight());
-        this->SetSizeHints(m_CtrlSize);
-        GetParent()->FitInside();
-        Refresh();
+        double bigger = (direction/delta)*m_dScaleRateStep;
+        double rate   = ((m_dScaleRate + bigger) > m_dMaxScaleRate  ? m_dMaxScaleRate  : (m_dScaleRate + bigger));
+        rate          = rate < m_dMinScaleRate ? m_dMinScaleRate : rate;
+        if(fabs(rate - m_dScaleRate) > MINDIFF)
+            m_bFitMode = false;
+        ChangeScaleRate(rate);
+        g_LogMessage(wxString::Format(_T("OnMouseWheel m_dScaleRate %f"), m_dScaleRate));
     }
     else
     {
