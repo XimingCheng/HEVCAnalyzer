@@ -7,6 +7,7 @@ enum wxbuildinfoformat {
 
 wxString wxbuildinfo(wxbuildinfoformat format)
 {
+
     wxString wxbuild(wxVERSION_STRING);
 
     if (format == long_f )
@@ -38,13 +39,15 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_CLOSE, MainFrame::OnCloseFile)
     EVT_COMMAND(wxID_ANY, wxEVT_ADDANIMAGE_THREAD, MainFrame::OnThreadAddImage)
     EVT_COMMAND(wxID_ANY, wxEVT_END_THREAD, MainFrame::OnThreadEnd)
+    EVT_SIZE(MainFrame::OnMainFrameSizeChange)
+    EVT_IDLE(MainFrame::OnIdle)
     EVT_LISTBOX(wxID_ANY, MainFrame::OnThumbnailLboxSelect)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos,
             const wxSize& size, long style)
             : wxFrame(parent, id, title, pos, size, style),
-            m_bYUVFile(false), m_bOPened(false), m_pcPicYuvOrg(NULL), m_pThumbThread(NULL)
+            m_pPicViewCtrl(NULL), m_bYUVFile(false), m_bOPened(false), m_pcPicYuvOrg(NULL), m_pThumbThread(NULL)
 {
     m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
     m_mgr.SetManagedWindow(this);
@@ -160,7 +163,7 @@ wxNotebook* MainFrame::CreateCenterNotebook()
     wxPanel* pDecodePanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
     //wxScrolledWindow
     m_pDecodeScrolledWin = new wxScrolledWindow( pDecodePanel, -1, wxDefaultPosition, wxDefaultSize, wxScrolledWindowStyle);
-    m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY, m_pThumbnalList);
+    m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY, m_pThumbnalList, this);
     m_pPicViewCtrl->SetSizeHints(300, 300);
     wxGridSizer* innerSizer = new wxGridSizer( 1, 0, 0 );
     innerSizer->Add(m_pPicViewCtrl, 1, wxALIGN_CENTER);
@@ -205,6 +208,7 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_pPicViewCtrl->SetScale(1.0);
         m_iYUVBit = (cdlg.Is10bitYUV() ? 10 : 8);
         m_FileLength = wxFile((const wxChar*)sfile).Length();
+        m_pPicViewCtrl->SetFitMode(true);
         m_cYUVIO.open((char *)sfile.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
         m_pcPicYuvOrg = new TComPicYuv;
         m_pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
@@ -330,8 +334,8 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
     m_cYUVIO.read(m_pcPicYuvOrg, pad);
     wxBitmap bmp(m_iSourceWidth, m_iSourceHeight, 24);
     g_tranformYUV2RGB(m_iSourceWidth, m_iSourceHeight, m_pcPicYuvOrg, m_iYUVBit, bmp);
-    //bmp.SaveFile(_("test.bmp"), wxBITMAP_TYPE_BMP);
     m_pPicViewCtrl->SetLCUSize(wxSize(64, 64));
+    m_pPicViewCtrl->CalMinMaxScaleRate();
     m_pPicViewCtrl->SetBitmap(bmp);
 }
 void MainFrame::InitThumbnailListView()
@@ -347,4 +351,21 @@ void MainFrame::InitThumbnailListView()
     m_pThumbnalList->Append(arr);
 }
 
+
+void MainFrame::OnMainFrameSizeChange(wxSizeEvent& event)
+{
+    if(m_pPicViewCtrl)
+    {
+        m_pPicViewCtrl->CalFitScaleRate();
+    }
+}
+
+void MainFrame::OnIdle(wxIdleEvent& event)
+{
+    if(m_pPicViewCtrl)
+    {
+        m_pPicViewCtrl->CalFitScaleRate();
+        event.RequestMore(false);
+    }
+}
 

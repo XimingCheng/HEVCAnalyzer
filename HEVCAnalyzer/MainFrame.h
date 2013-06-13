@@ -27,6 +27,8 @@ public:
 private:
     void           OnExit(wxCommandEvent& evt);
     void           OnThreadAddImage(wxCommandEvent& event);
+    void           OnMainFrameSizeChange(wxSizeEvent& event);
+    void           OnIdle(wxIdleEvent& event);
     // UI creator functions
     void           CreateMenuToolBar();
     void           CreateNoteBookPane();

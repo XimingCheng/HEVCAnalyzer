@@ -6,8 +6,7 @@ extern const wxEventType wxEVT_END_THREAD;
 void* ThumbnailThread::Entry()
 {
     m_pImageList->RemoveAll();
-    TVideoIOYuv cYUVIO;
-    cYUVIO.open((char *)m_sYUVPath.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
+    m_cYUVIO.open((char *)m_sYUVPath.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
     m_pcPicYuvOrg = new TComPicYuv;
     m_pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
 
@@ -15,10 +14,10 @@ void* ThumbnailThread::Entry()
     int pad[] = {0, 0};
     int frame = 0;
     long framenumbers = 0;
-    while(!cYUVIO.isEof() && !cYUVIO.isFail() && !TestDestroy())
+    while(!m_cYUVIO.isEof() && !m_cYUVIO.isFail() && !TestDestroy())
     {
         // here read may be failed
-        if(!cYUVIO.read(m_pcPicYuvOrg, pad))
+        if(!m_cYUVIO.read(m_pcPicYuvOrg, pad))
             break;
         g_tranformYUV2RGB(m_iSourceWidth, m_iSourceHeight, m_pcPicYuvOrg, m_iYUVBit, bmp);
         //bmp.SaveFile(wxString::Format(_("test_%d.bmp"), frame), wxBITMAP_TYPE_BMP);
@@ -49,7 +48,7 @@ void* ThumbnailThread::Entry()
         event.SetInt(frame-1);
         wxPostEvent(m_pFrame, event);
     }
-    cYUVIO.close();
+    m_cYUVIO.close();
     m_pcPicYuvOrg->destroy();
     delete m_pcPicYuvOrg;
     m_pcPicYuvOrg = NULL;
@@ -60,6 +59,8 @@ void* ThumbnailThread::Entry()
 
 ThumbnailThread::~ThumbnailThread()
 {
+    if(m_cYUVIO.isOpen())
+        m_cYUVIO.close();
     if(m_pcPicYuvOrg)
     {
         m_pcPicYuvOrg->destroy();

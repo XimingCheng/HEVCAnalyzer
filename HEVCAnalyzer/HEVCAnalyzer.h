@@ -15,12 +15,15 @@
 #include <wx/imaglist.h>
 #include <wx/arrstr.h>
 #include <wx/graphics.h>
+#include <wx/dcbuffer.h>
 
 #include "../TLibVideoIO/TVideoIOYuv.h"
 
+#define MINDIFF 1e-15
+
 void g_tranformYUV2RGB(int w, int h, TComPicYuv*  pcPicYuvOrg, int iYUVBit, wxBitmap& bmp);
 
-extern wxTextCtrl *g_pLogWin ; 
+extern wxTextCtrl *g_pLogWin ;
 
 void g_LogMessage(wxString);
 void g_LogError(wxString);
