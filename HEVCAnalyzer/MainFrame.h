@@ -4,6 +4,7 @@
 #include "HEVCAnalyzer.h"
 #include "ThumbnailThread.h"
 #include "PicViewCtrl.h"
+#include "PixelViewCtrl.h"
 
 DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_END_THREAD, wxID_ANY)
@@ -52,6 +53,8 @@ private:
     wxScrolledWindow*    m_pDecodeScrolledWin;
     PicViewCtrl*         m_pPicViewCtrl;
     wxTextCtrl*          m_pTCLogWin;
+    PixelViewCtrl*       m_pPixelViewCtrl;
+
 
     long                 m_notebook_style;
     long                 m_notebook_theme;
