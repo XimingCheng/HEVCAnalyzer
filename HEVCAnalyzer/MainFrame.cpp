@@ -326,8 +326,8 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
     wxBitmap bmp(m_iSourceWidth, m_iSourceHeight, 24);
     g_tranformYUV2RGB(m_iSourceWidth, m_iSourceHeight, m_pcPicYuvOrg, m_iYUVBit, bmp);
     m_pPicViewCtrl->SetLCUSize(wxSize(64, 64));
-    m_pPicViewCtrl->CalMinMaxScaleRate();
     m_pPicViewCtrl->SetBitmap(bmp);
+    m_pPicViewCtrl->CalMinMaxScaleRate();
 }
 
 void MainFrame::OnMainFrameSizeChange(wxSizeEvent& event)

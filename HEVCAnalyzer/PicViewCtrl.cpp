@@ -155,10 +155,8 @@ void PicViewCtrl::OnMouseWheel(wxMouseEvent& event)
 
 void PicViewCtrl::CalMinMaxScaleRate()
 {
-    if(!m_bClearFlag && !m_cViewBitmap.IsNull());
+    if(!m_bClearFlag && m_cViewBitmap.IsOk())
     {
-        if(!m_cViewBitmap.IsOk())
-            return;
         int width    = m_cViewBitmap.GetWidth();
         int height   = m_cViewBitmap.GetHeight();
         // get the screen size to cal min max scale rate
@@ -167,7 +165,7 @@ void PicViewCtrl::CalMinMaxScaleRate()
         double sratew = scrwidth/static_cast<double>(width);
         double srateh = scrheight/static_cast<double>(height);
         double srate  = sratew < srateh ? sratew : srateh;
-        m_dMaxScaleRate  = 1.5*srate < 2.0 ? 2.0 : 1.5*srate;
+        m_dMaxScaleRate  = 1.5*srate < 4.0 ? 4.0 : 1.5*srate;
         m_dMinScaleRate  = 50/static_cast<double>(width);
         if(m_dMinScaleRate > m_dMaxScaleRate)
         {
@@ -182,10 +180,8 @@ void PicViewCtrl::CalMinMaxScaleRate()
 
 void PicViewCtrl::CalFitScaleRate()
 {
-    if(!m_bClearFlag && !m_cViewBitmap.IsNull());
+    if(!m_bClearFlag && m_cViewBitmap.IsOk())
     {
-        if(!m_cViewBitmap.IsOk())
-            return;
         // get the FitScaleRate, which is the smaller one frome ratew and rateh
         int width    = m_cViewBitmap.GetWidth();
         int height   = m_cViewBitmap.GetHeight();
@@ -280,7 +276,10 @@ void PicViewCtrl::MoveLCURect(const Direction& d)
 void PicViewCtrl::OnKeyDown(wxKeyEvent& event)
 {
     if(m_bClearFlag)
+    {
+        event.Skip();
         return;
+    }
     int key = event.GetKeyCode();
     switch(key)
     {
