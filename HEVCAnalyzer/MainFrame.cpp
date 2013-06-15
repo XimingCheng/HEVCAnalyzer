@@ -164,8 +164,22 @@ wxNotebook* MainFrame::CreateLeftNotebook()
 wxNotebook* MainFrame::CreateCenterNotebook()
 {
     wxNotebook* ctrl = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0 );
-    wxGridSizer* gSizer = new wxGridSizer( 1, 0, 0 );
-    wxPanel* pDecodePanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    wxFlexGridSizer* fgSizerUp = new wxFlexGridSizer(2, 1, 0, 0);
+    wxFlexGridSizer* fgSizerLeft = new wxFlexGridSizer(1, 2, 0, 0);
+    fgSizerUp->AddGrowableCol(0);
+    fgSizerUp->AddGrowableRow(1);
+    fgSizerUp->SetFlexibleDirection(wxBOTH);
+    fgSizerUp->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
+    fgSizerLeft->AddGrowableCol(1);
+    fgSizerLeft->AddGrowableRow(0);
+    fgSizerLeft->SetFlexibleDirection(wxBOTH);
+    fgSizerLeft->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
+
+    wxPanel* pDecodePanel = new wxPanel(ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+    RulerCtrl* pHRuler = new RulerCtrl(pDecodePanel, wxID_ANY);
+    RulerCtrl* pVRuler = new RulerCtrl(pDecodePanel, wxID_ANY, true);
+    fgSizerUp->Add(pHRuler, 0, wxEXPAND, 5);//Add(pHRuler, 1, wxEXPAND);
+    fgSizerLeft->Add(pVRuler, 0, wxEXPAND, 5);
     //wxScrolledWindow
     m_pDecodeScrolledWin = new wxScrolledWindow( pDecodePanel, -1, wxDefaultPosition, wxDefaultSize, wxScrolledWindowStyle);
     m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY, m_pThumbnalList, this);
@@ -175,8 +189,9 @@ wxNotebook* MainFrame::CreateCenterNotebook()
 
     m_pDecodeScrolledWin->SetScrollRate( 5, 5 );
     m_pDecodeScrolledWin->SetSizer( innerSizer );
-    gSizer->Add( m_pDecodeScrolledWin, 1, wxEXPAND );
-    pDecodePanel->SetSizer( gSizer );
+    fgSizerLeft->Add(m_pDecodeScrolledWin, 1, wxEXPAND, 5);
+    fgSizerUp->Add(fgSizerLeft, 1, wxEXPAND, 5);
+    pDecodePanel->SetSizer(fgSizerUp);
     pDecodePanel->Layout();
     ctrl->AddPage( pDecodePanel, _T("Decode Pic"), true );
     wxPanel* m_panel7 = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );

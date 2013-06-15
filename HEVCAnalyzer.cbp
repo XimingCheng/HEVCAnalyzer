@@ -40,6 +40,7 @@
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-Wno-attributes" />
 					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll/mswu" />
 				</Compiler>
 				<ResourceCompiler>
@@ -83,6 +84,10 @@
 		<Unit filename="HEVCAnalyzer/MainFrame.h" />
 		<Unit filename="HEVCAnalyzer/PicViewCtrl.cpp" />
 		<Unit filename="HEVCAnalyzer/PicViewCtrl.h" />
+		<Unit filename="HEVCAnalyzer/PixelViewCtrl.cpp" />
+		<Unit filename="HEVCAnalyzer/PixelViewCtrl.h" />
+		<Unit filename="HEVCAnalyzer/RulerCtrl.cpp" />
+		<Unit filename="HEVCAnalyzer/RulerCtrl.h" />
 		<Unit filename="HEVCAnalyzer/ThumbnailThread.cpp" />
 		<Unit filename="HEVCAnalyzer/ThumbnailThread.h" />
 		<Unit filename="HEVCAnalyzer/YUVConfigDlg.cpp" />
@@ -97,7 +102,7 @@
 		<Unit filename="TLibVideoIO/TVideoIOYuv.h" />
 		<Extensions>
 			<DoxyBlocks>
-				<comment_style block="0" line="0" />
+				<comment_style block="0" line="1" />
 				<doxyfile_project />
 				<doxyfile_build />
 				<doxyfile_warnings />

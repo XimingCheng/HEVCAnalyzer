@@ -15,23 +15,28 @@ END_EVENT_TABLE()
 void PicViewCtrl::OnPaint(wxPaintEvent& event)
 {
     wxAutoBufferedPaintDC dc(this);
+    PrepareDC(dc);
     wxGraphicsContext *gc = wxGraphicsContext::Create(dc);
-    Render(gc);
+    wxGraphicsContext *gct = wxGraphicsContext::Create(dc);
+    Render(gc, gct);
     delete gc;
+    delete gct;
 }
 
-void PicViewCtrl::Render(wxGraphicsContext* gc)
+void PicViewCtrl::Render(wxGraphicsContext* gc, wxGraphicsContext* gct)
 {
     if(!m_bClearFlag)
     {
         gc->Scale(m_dScaleRate, m_dScaleRate);
         DrawBackGround(gc);
-        gc->SetBrush(wxBrush(wxColor(255, 255, 255, 100)));
-        gc->SetPen(wxPen(wxColor(255, 0, 0, 255)));
-        gc->StrokeLine(0, m_curLCUStart.y, m_curLCUStart.x, m_curLCUStart.y);
-        gc->StrokeLine(m_curLCUStart.x, 0, m_curLCUStart.x, m_curLCUStart.y);
-        gc->SetPen(wxPen(wxColor(255, 255, 255, 100)));
-        gc->DrawRectangle(m_curLCUStart.x, m_curLCUStart.y, m_curLCUEnd.x - m_curLCUStart.x, m_curLCUEnd.y - m_curLCUStart.y);
+        gct->Scale(1, 1);
+        gct->SetBrush(wxBrush(wxColor(255, 255, 255, 100)));
+        gct->SetPen(wxPen(wxColor(255, 0, 0, 255)));
+        gct->StrokeLine(0, m_curLCUStart.y*m_dScaleRate, m_curLCUStart.x*m_dScaleRate, m_curLCUStart.y*m_dScaleRate);
+        gct->StrokeLine(m_curLCUStart.x*m_dScaleRate, 0, m_curLCUStart.x*m_dScaleRate, m_curLCUStart.y*m_dScaleRate);
+        gct->SetPen(wxPen(wxColor(255, 255, 255, 100)));
+        gct->DrawRectangle(m_curLCUStart.x*m_dScaleRate, m_curLCUStart.y*m_dScaleRate, (m_curLCUEnd.x - m_curLCUStart.x)*m_dScaleRate,
+                           (m_curLCUEnd.y - m_curLCUStart.y)*m_dScaleRate);
     }
     else
         DrawNoPictureTips(gc);
@@ -349,16 +354,16 @@ void PicViewCtrl::DrawBackGround(wxGraphicsContext* gc)
 {
     switch(m_iShowWhich_O_Y_U_V)
     {
-    case 0:
+    case MODE_ORG:
         gc->DrawBitmap(m_cViewBitmap, 0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
         break;
-    case 1:
+    case MODE_Y:
         gc->DrawBitmap(m_cViewBitmapY, 0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
         break;
-    case 2:
+    case MODE_U:
         gc->DrawBitmap(m_cViewBitmapU, 0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
         break;
-    case 3:
+    case MODE_V:
         gc->DrawBitmap(m_cViewBitmapV, 0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
         break;
     default:
