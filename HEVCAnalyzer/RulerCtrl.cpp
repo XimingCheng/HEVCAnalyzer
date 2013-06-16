@@ -5,19 +5,18 @@ IMPLEMENT_DYNAMIC_CLASS(RulerCtrl, wxControl);
 BEGIN_EVENT_TABLE(RulerCtrl, wxControl)
     EVT_PAINT(RulerCtrl::OnPaint)
     EVT_ERASE_BACKGROUND(RulerCtrl::OnEraseBkg)
-    EVT_SIZE(RulerCtrl::OnSize)
 END_EVENT_TABLE()
 
 RulerCtrl::RulerCtrl(wxWindow* parent, wxWindowID id, bool bV)
-    : wxControl (parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE),
-    m_bVertical(bV), m_iStartPos(24), m_iEndPos(0), m_iStartValue(0), m_iValuePerUnit(4),
-    m_dScaleRate(1.0), m_iLongMarkLen(16), m_iTextMarkLen(64), m_iRulerWidth(24)
+    : wxControl (parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxFULL_REPAINT_ON_RESIZE),
+    m_bVertical(bV), m_dStartPos(24), m_dEndPos(0), m_iStartValue(0.0), m_iEndValue(0), m_iValuePerUnit(4),
+    m_dScaleRate(1.0), m_iLongMarkLen(16), m_iTextMarkLen(64), m_iRulerWidth(24), m_iTagValue(-1)
 {
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
     if(m_bVertical)
     {
         SetMinSize(wxSize(m_iRulerWidth, -1));
-        m_iStartPos = 0;
+        m_dStartPos = 0;
     }
     else
         SetMinSize(wxSize(-1, m_iRulerWidth));
@@ -45,23 +44,25 @@ void RulerCtrl::Render(wxGraphicsContext *gc)
     if(m_bVertical)
     {
         gc->StrokeLine(size.x-1, 0, size.x-1, size.y);
-        m_iEndPos = size.y;
+        m_dEndPos = size.y;
     }
     else
     {
         gc->StrokeLine(m_iRulerWidth, size.y-1, size.x, size.y-1);
-        m_iEndPos = size.x;
+        m_dEndPos = size.x;
     }
     gc->SetFont(*wxSMALL_FONT, *wxBLACK);
-    for(int i = 0; m_iStartPos+i*m_iValuePerUnit*m_dScaleRate < m_iEndPos; i++)
+    for(int i = 0; m_dStartPos + i*m_iValuePerUnit*m_dScaleRate < m_dEndPos; i++)
     {
         int lineLen = 7;
         int pixel   = i*m_iValuePerUnit;
         int value   = pixel + m_iStartValue;
-        double step = m_iStartPos + pixel*m_dScaleRate;
-        if(pixel % m_iLongMarkLen == 0)
+        if(value > m_iEndValue) break;
+        double step = m_dStartPos + pixel*m_dScaleRate;
+        if(!m_bVertical && step < m_iRulerWidth) continue;
+        if(value % m_iLongMarkLen == 0)
             lineLen += 4;
-        if(pixel % m_iTextMarkLen == 0)
+        if(value % m_iTextMarkLen == 0)
         {
             wxString v;
             v.Printf(_T("%d"), value);
@@ -79,10 +80,97 @@ void RulerCtrl::Render(wxGraphicsContext *gc)
             gc->StrokeLine(size.x-1, step, size.x-1-lineLen, step);
         else
             gc->StrokeLine(step, size.y-1, step, size.y-1-lineLen);
+        if(value == m_iTagValue)
+        {
+            wxPen red(wxColor(255, 0, 0, 128));
+            red.SetWidth(2);
+            gc->SetPen(red);
+            if(m_bVertical)
+                gc->StrokeLine(size.x-1, step, 0, step);
+            else
+                gc->StrokeLine(step, size.y-1, step, 0);
+            gc->SetPen(*wxGREY_PEN);
+        }
     }
 }
 
-void RulerCtrl::OnSize(wxSizeEvent& event)
+void RulerCtrl::SetStartPos(const double start)
 {
-    Refresh();
+    if(fabs(start - m_dStartPos) > MINDIFF)
+    {
+        m_dStartPos = start;
+        Refresh();
+    }
+}
+
+void RulerCtrl::SetEndPos(const double end)
+{
+    if(fabs(end - m_dEndPos) > MINDIFF)
+    {
+        m_dEndPos = end;
+        Refresh();
+    }
+}
+
+void RulerCtrl::SetStartValue(const int start)
+{
+    if(start != m_iStartValue)
+    {
+        m_iStartValue = start;
+        Refresh();
+    }
+}
+
+void RulerCtrl::SetEndValue(const int end)
+{
+    if(end != m_iEndValue)
+    {
+        m_iEndValue = end;
+        Refresh();
+    }
+}
+
+void RulerCtrl::SetValuePerUnit(const int value)
+{
+    if(value != m_iValuePerUnit)
+    {
+        m_iValuePerUnit = value;
+        Refresh();
+    }
+}
+
+void RulerCtrl::SetLongMarkLen(const int len)
+{
+    if(len != m_iLongMarkLen)
+    {
+        m_iLongMarkLen = len;
+        Refresh();
+    }
+}
+
+void RulerCtrl::SetTextMarkLen(const int len)
+{
+    if(len != m_iTextMarkLen)
+    {
+        m_iTextMarkLen = len;
+        Refresh();
+    }
+}
+
+void RulerCtrl::SetScaleRate(const double rate)
+{
+    if(fabs(rate - m_dScaleRate) > MINDIFF)
+    {
+        m_dScaleRate = rate;
+        Refresh();
+    }
+}
+
+void RulerCtrl::SetTagValue(const int value)
+{
+    if(value != m_iTagValue)
+    {
+        m_iTagValue = value;
+        Refresh();
+    }
 }

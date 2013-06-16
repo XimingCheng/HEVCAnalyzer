@@ -53,6 +53,8 @@ private:
     wxArrayString        m_StrMemFileName;
     wxScrolledWindow*    m_pDecodeScrolledWin;
     PicViewCtrl*         m_pPicViewCtrl;
+    RulerCtrl*           m_pPicHRuler;
+    RulerCtrl*           m_pPicVRuler;
     wxTextCtrl*          m_pTCLogWin;
     PixelViewCtrl*       m_pPixelViewCtrl;
 

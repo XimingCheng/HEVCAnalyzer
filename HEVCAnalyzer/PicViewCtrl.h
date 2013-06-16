@@ -2,6 +2,7 @@
 #define PICVIEWCTRL_H_INCLUDED
 
 #include "HEVCAnalyzer.h"
+#include "RulerCtrl.h"
 
 class PicViewCtrl : public wxControl
 {
@@ -24,12 +25,12 @@ public:
     };
 
     PicViewCtrl() {}
-    PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* pList, wxFrame* pFrame)
-        : wxControl (parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxWANTS_CHARS ),
+    PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* pList, RulerCtrl* pHRuler, RulerCtrl* pVRuler, wxFrame* pFrame)
+        : wxControl(parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxWANTS_CHARS),
         m_bClearFlag(true), m_bFitMode(true), m_dScaleRate(1.0), m_dMinScaleRate(0.1), m_dMaxScaleRate(2.0), m_dFitScaleRate(1.0),
         m_dScaleRateStep(0.02), m_delta(-1, -1), m_curLCUStart(-1, -1), m_curLCUEnd(-1, -1), m_iLCURasterID(-1), m_pList(pList),
         m_pFrame(pFrame), m_bShowGrid(true), m_bMouseWheelPageUpDown(false), m_bShowPUType(true), m_pBuffer(NULL),
-        m_iYUVBit(8), m_iShowWhich_O_Y_U_V(MODE_ORG)
+        m_iYUVBit(8), m_iShowWhich_O_Y_U_V(MODE_ORG), m_pHRuler(pHRuler), m_pVRuler(pVRuler)
     {
         SetBackgroundStyle(wxBG_STYLE_CUSTOM);
     }
@@ -52,6 +53,7 @@ public:
     int  WhichTobeShown() const { return m_iShowWhich_O_Y_U_V; }
     void SetWhichTobeShown(const ShowMode& which) { m_iShowWhich_O_Y_U_V = which; }
     void SetPicYuvBuffer(TComPicYuv* pBuffer, const int w, const int h, const int bit);
+    void SetRulerCtrlFited();
 
 private:
     void OnMouseMove(wxMouseEvent& event);
@@ -71,6 +73,7 @@ private:
     void DrawBackGround(wxGraphicsContext* gc);
     void DrawNoPictureTips(wxGraphicsContext* gc);
     void DrawGrid(wxGraphicsContext* gc);
+    void GetCurPicViewCtrlPosOnParent(wxPoint& pt1, wxPoint& pt2);
 
 private:
     bool                 m_bClearFlag;
@@ -99,6 +102,8 @@ private:
     TComPicYuv*          m_pBuffer;
     int                  m_iYUVBit;
     ShowMode             m_iShowWhich_O_Y_U_V;  //!< 0 - original 1 - Y 2 - U 3 - V
+    RulerCtrl*           m_pHRuler;
+    RulerCtrl*           m_pVRuler;
 
     DECLARE_EVENT_TABLE();
 };
