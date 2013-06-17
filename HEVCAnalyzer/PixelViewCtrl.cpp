@@ -3,6 +3,7 @@
 IMPLEMENT_DYNAMIC_CLASS(PixelViewCtrl, wxScrolledWindow);
 
 BEGIN_EVENT_TABLE(PixelViewCtrl, wxScrolledWindow)
+    EVT_PAINT(PixelViewCtrl::OnPaint)
     EVT_ERASE_BACKGROUND(PixelViewCtrl::OnEraseBkg)
     EVT_MIDDLE_UP(PixelViewCtrl::OnMouseMidUp)
     EVT_LEFT_DOWN(PixelViewCtrl::OnLeftButtonDown)
@@ -13,20 +14,23 @@ BEGIN_EVENT_TABLE(PixelViewCtrl, wxScrolledWindow)
     EVT_ENTER_WINDOW(PixelViewCtrl::OnEnterWindow)
 END_EVENT_TABLE()
 
-void PixelViewCtrl::OnDraw(wxDC& dc)
+void PixelViewCtrl::OnPaint(wxPaintEvent& event)
 {
     wxAutoBufferedPaintDC tmpdc(this);
     DoPrepareDC(tmpdc);
+    Render(tmpdc);
+}
+
+void PixelViewCtrl::Render(wxDC& dc)
+{
     int xbase, ybase;
     CalcUnscrolledPosition(0, 0, &xbase, &ybase);
-//    g_LogMessage(wxString::Format(_T("base x:%d,y:%d"), xbase, xbase));
     int virtualwidth, virtualheight;
     GetClientSize(&virtualwidth, &virtualheight);
-//    g_LogMessage(wxString::Format(_T("size x:%d y:%d"), virtualwidth, virtualheight));
 
-    DrawBackground(tmpdc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
-    DrawGrid(tmpdc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
-    DrawFocusLine(tmpdc);
+    DrawBackground(dc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
+    DrawGrid(dc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
+    DrawFocusLine(dc);
     int xindexstart = max(0, (xbase-m_iXOffset)/m_iWidthPerPixel-1);
     int xindexend = min(m_iCUWidth-1, (xbase+virtualwidth-m_iXOffset)/m_iWidthPerPixel+1);
     int yindexstart = max(0, (ybase-m_iYOffset)/m_iHeightPerPixel-1);
@@ -35,8 +39,7 @@ void PixelViewCtrl::OnDraw(wxDC& dc)
 //    g_LogMessage(wxString::Format(_T("y %d-%d"), yindexstart, yindexend));
     for(int i = xindexstart; i <= xindexend; i++)
         for(int j = yindexstart; j <= yindexend; j++)
-            ShowOneCell(tmpdc, i, j, i, 100, 100);
-//    dc.DrawLine(0, 0, 100, 100);
+            ShowOneCell(dc, i, j, i, 100, 100);
 }
 
 void PixelViewCtrl::OnEraseBkg(wxEraseEvent& event)
@@ -153,13 +156,14 @@ void PixelViewCtrl::OnMouseMove(wxMouseEvent & event)
 //    g_LogMessage(wxString::Format(_T("now size: %d\t %d"), size.GetWidth(), size.GetHeight()));
 //    g_LogMessage(wxString::Format(_T("now pos: %d\t %d"), pt.x, pt.y));
 }
+
 void PixelViewCtrl::OnTimer(wxTimerEvent& event)
 {
     m_iXCurrentUnit += m_iXStep;
     m_iYCurrentUnit += m_iYStep;
     Scroll(m_iXCurrentUnit, m_iYCurrentUnit);
 }
-    
+
 void PixelViewCtrl::OnLeaveWindow(wxMouseEvent& event)
 {
     if(m_bScrollMode)
@@ -178,13 +182,14 @@ void PixelViewCtrl::OnEnterWindow(wxMouseEvent& event)
     }
     g_LogMessage(_T("Enter Window"));
 }
+
 void PixelViewCtrl::ShowOneCell(wxDC& dc, const int xIndex, const int yIndex,
                          const int y, const int u, const int v)
 {
     wxString text;
 #if defined(__WXMSW__)
     if(m_bHexFormat)
-        text = wxString::Format(_T("0x%x\n\r0X%x\n\r0x%x\n\r(%d,%d)"), y, u, v, xIndex, yIndex);
+        text = wxString::Format(_T("0x%x\r\n0x%x\r\n0x%x\r\n(%d,%d)"), y, u, v, xIndex, yIndex);
     else
         text = wxString::Format(_T("%d\n\r%d\n\r%d\n\r(%d, %d)"), y, u, v, xIndex, yIndex);
 #else
@@ -236,15 +241,3 @@ void PixelViewCtrl::SetFocusPos(const wxPoint& pos)
     m_FocusPos.x = pos.x;
     m_FocusPos.y = pos.y;
 }
-
-
-
-
-
-
-
-
-
-
-
-
