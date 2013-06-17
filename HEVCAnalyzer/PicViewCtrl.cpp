@@ -15,23 +15,30 @@ END_EVENT_TABLE()
 void PicViewCtrl::OnPaint(wxPaintEvent& event)
 {
     wxAutoBufferedPaintDC dc(this);
+    PrepareDC(dc);
     wxGraphicsContext *gc = wxGraphicsContext::Create(dc);
-    Render(gc);
+    wxGraphicsContext *gct = wxGraphicsContext::Create(dc);
+    Render(gc, gct);
     delete gc;
+    delete gct;
 }
 
-void PicViewCtrl::Render(wxGraphicsContext* gc)
+void PicViewCtrl::Render(wxGraphicsContext* gc, wxGraphicsContext* gct)
 {
     if(!m_bClearFlag)
     {
         gc->Scale(m_dScaleRate, m_dScaleRate);
         DrawBackGround(gc);
-        gc->SetBrush(wxBrush(wxColor(255, 255, 255, 100)));
-        gc->SetPen(wxPen(wxColor(255, 0, 0, 255)));
-        gc->StrokeLine(0, m_curLCUStart.y, m_curLCUStart.x, m_curLCUStart.y);
-        gc->StrokeLine(m_curLCUStart.x, 0, m_curLCUStart.x, m_curLCUStart.y);
-        gc->SetPen(wxPen(wxColor(255, 255, 255, 100)));
-        gc->DrawRectangle(m_curLCUStart.x, m_curLCUStart.y, m_curLCUEnd.x - m_curLCUStart.x, m_curLCUEnd.y - m_curLCUStart.y);
+        m_pHRuler->SetTagValue(m_curLCUStart.x);
+        m_pVRuler->SetTagValue(m_curLCUStart.y);
+        gct->Scale(1, 1);
+        gct->SetBrush(wxBrush(wxColor(255, 255, 255, 100)));
+        gct->SetPen(wxPen(wxColor(255, 0, 0, 255)));
+        gct->StrokeLine(0, m_curLCUStart.y*m_dScaleRate, m_curLCUStart.x*m_dScaleRate, m_curLCUStart.y*m_dScaleRate);
+        gct->StrokeLine(m_curLCUStart.x*m_dScaleRate, 0, m_curLCUStart.x*m_dScaleRate, m_curLCUStart.y*m_dScaleRate);
+        gct->SetPen(wxPen(wxColor(255, 255, 255, 100)));
+        gct->DrawRectangle(m_curLCUStart.x*m_dScaleRate, m_curLCUStart.y*m_dScaleRate, (m_curLCUEnd.x - m_curLCUStart.x)*m_dScaleRate,
+                           (m_curLCUEnd.y - m_curLCUStart.y)*m_dScaleRate);
     }
     else
         DrawNoPictureTips(gc);
@@ -49,8 +56,8 @@ void PicViewCtrl::SetBitmap(wxBitmap bitmap, wxBitmap bitmapY, wxBitmap bitmapU,
     m_CtrlSize.SetHeight(m_dScaleRate*m_cViewBitmap.GetHeight());
     this->SetSizeHints(m_CtrlSize);
     GetParent()->FitInside();
+    SetRulerCtrlFited();
     Refresh();
-    g_LogMessage(wxString::Format(_T("SetBitmap m_dScaleRate %f"), m_dScaleRate));
 }
 
 void PicViewCtrl::SetScale(const double dScale)
@@ -76,6 +83,7 @@ void PicViewCtrl::OnMouseMove(wxMouseEvent& event)
             wxScrolledWindow* pPar = (wxScrolledWindow*)GetParent();
             pPar->GetScrollPixelsPerUnit(&xper, &yper);
             pPar->Scroll((m_delta.x - pos.x)/xper, (m_delta.y - pos.y)/yper);
+            SetRulerCtrlFited();
         }
         int id = GetCurLCURasterID(event.m_x/m_dScaleRate, event.m_y/m_dScaleRate);
         if(id != m_iLCURasterID)
@@ -145,7 +153,7 @@ void PicViewCtrl::OnMouseWheel(wxMouseEvent& event)
         if(fabs(rate - m_dScaleRate) > MINDIFF)
             m_bFitMode = false;
         ChangeScaleRate(rate);
-        g_LogMessage(wxString::Format(_T("OnMouseWheel m_dScaleRate %f"), m_dScaleRate));
+        SetRulerCtrlFited();
     }
     else
     {
@@ -349,16 +357,16 @@ void PicViewCtrl::DrawBackGround(wxGraphicsContext* gc)
 {
     switch(m_iShowWhich_O_Y_U_V)
     {
-    case 0:
+    case MODE_ORG:
         gc->DrawBitmap(m_cViewBitmap, 0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
         break;
-    case 1:
+    case MODE_Y:
         gc->DrawBitmap(m_cViewBitmapY, 0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
         break;
-    case 2:
+    case MODE_U:
         gc->DrawBitmap(m_cViewBitmapU, 0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
         break;
-    case 3:
+    case MODE_V:
         gc->DrawBitmap(m_cViewBitmapV, 0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
         break;
     default:
@@ -393,6 +401,7 @@ void PicViewCtrl::DrawNoPictureTips(wxGraphicsContext* gc)
     gc->StrokeLine(0, 0, size.x, size.y);
     gc->StrokeLine(0, size.y, size.x, 0);
     gc->DrawText(s, (size.x-w)/2, ((size.y-(h))/2));
+    SetRulerCtrlFited();
     wxBitmap::CleanUpHandlers();
 }
 
@@ -408,4 +417,64 @@ void PicViewCtrl::SetPicYuvBuffer(TComPicYuv* pBuffer, const int w, const int h,
     SetLCUSize(wxSize(64, 64));
     SetBitmap(bmp, bmpY, bmpU, bmpV);
     CalMinMaxScaleRate();
+}
+
+void PicViewCtrl::GetCurPicViewCtrlPosOnParent(wxPoint& pt1, wxPoint& pt2)
+{
+    wxSizer* pSizer = GetParent()->GetSizer();
+    wxSizerItemList itemList = pSizer->GetChildren();
+
+    assert(itemList.size() > 0);
+    pt1 = (*itemList.begin())->GetPosition();
+    wxSize size = GetSize();
+    pt2.x = pt1.x + size.x;
+    pt2.y = pt1.y + size.y;
+}
+
+void PicViewCtrl::SetRulerCtrlFited()
+{
+    wxPoint pt1, pt2;
+    GetCurPicViewCtrlPosOnParent(pt1, pt2);
+    double startx, starty;
+    startx = pt1.x;
+    starty = pt1.y;
+    if(!m_bFitMode || m_bClearFlag)
+    {
+        int xper, yper, x, y;
+        wxScrolledWindow* pPar = (wxScrolledWindow*)GetParent();
+        pPar->GetScrollPixelsPerUnit(&xper, &yper);
+        pPar->GetViewStart(&x, &y);
+        x *= xper;
+        y *= yper;
+        if(pt1.x >= 0 || pt1.y >= 0)
+        {
+            pt1.x  = ((pt1.x > 0) ? pt1.x : 0);
+            pt1.y  = ((pt1.y > 0) ? pt1.y : 0);
+            startx = pt1.x - x;
+            starty = pt1.y - y;
+        }
+        else
+        {
+            startx = -x;
+            starty = -y;
+        }
+    }
+    m_pHRuler->SetStartPos(m_pHRuler->GetRulerWidth() + startx);
+    m_pHRuler->SetStartValue(0);
+    m_pVRuler->SetStartPos(starty);
+    m_pVRuler->SetStartValue(0);
+    if(m_bClearFlag)
+    {
+        m_pHRuler->SetEndValue(300);
+        m_pVRuler->SetEndValue(300);
+        m_pHRuler->SetScaleRate(1.0);
+        m_pVRuler->SetScaleRate(1.0);
+    }
+    else
+    {
+        m_pHRuler->SetEndValue(m_cViewBitmap.GetWidth());
+        m_pVRuler->SetEndValue(m_cViewBitmap.GetHeight());
+        m_pHRuler->SetScaleRate(m_dScaleRate);
+        m_pVRuler->SetScaleRate(m_dScaleRate);
+    }
 }

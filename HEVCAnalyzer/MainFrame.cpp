@@ -164,23 +164,38 @@ wxNotebook* MainFrame::CreateLeftNotebook()
 wxNotebook* MainFrame::CreateCenterNotebook()
 {
     wxNotebook* ctrl = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0 );
-    wxGridSizer* gSizer = new wxGridSizer( 1, 0, 0 );
-    wxPanel* pDecodePanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    wxFlexGridSizer* fgSizerUp = new wxFlexGridSizer(2, 1, 0, 0);
+    wxFlexGridSizer* fgSizerLeft = new wxFlexGridSizer(1, 2, 0, 0);
+    fgSizerUp->AddGrowableCol(0);
+    fgSizerUp->AddGrowableRow(1);
+    fgSizerUp->SetFlexibleDirection(wxBOTH);
+    fgSizerUp->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
+    fgSizerLeft->AddGrowableCol(1);
+    fgSizerLeft->AddGrowableRow(0);
+    fgSizerLeft->SetFlexibleDirection(wxBOTH);
+    fgSizerLeft->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
+
+    wxPanel* pDecodePanel = new wxPanel(ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+    m_pPicHRuler = new RulerCtrl(pDecodePanel, wxID_ANY);
+    m_pPicVRuler = new RulerCtrl(pDecodePanel, wxID_ANY, true);
+    fgSizerUp->Add(m_pPicHRuler, 0, wxEXPAND, 5);
+    fgSizerLeft->Add(m_pPicVRuler, 0, wxEXPAND, 5);
     //wxScrolledWindow
     m_pDecodeScrolledWin = new wxScrolledWindow( pDecodePanel, -1, wxDefaultPosition, wxDefaultSize, wxScrolledWindowStyle);
-    m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY, m_pThumbnalList, this);
+    m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY, m_pThumbnalList, m_pPicHRuler, m_pPicVRuler, this);
     m_pPicViewCtrl->SetSizeHints(300, 300);
-    wxGridSizer* innerSizer = new wxGridSizer( 1, 0, 0 );
+    wxGridSizer* innerSizer = new wxGridSizer(1, 0, 0);
     innerSizer->Add(m_pPicViewCtrl, 1, wxALIGN_CENTER);
 
-    m_pDecodeScrolledWin->SetScrollRate( 5, 5 );
-    m_pDecodeScrolledWin->SetSizer( innerSizer );
-    gSizer->Add( m_pDecodeScrolledWin, 1, wxEXPAND );
-    pDecodePanel->SetSizer( gSizer );
+    m_pDecodeScrolledWin->SetScrollRate(4, 4);
+    m_pDecodeScrolledWin->SetSizer(innerSizer);
+    fgSizerLeft->Add(m_pDecodeScrolledWin, 1, wxEXPAND, 5);
+    fgSizerUp->Add(fgSizerLeft, 1, wxEXPAND, 5);
+    pDecodePanel->SetSizer(fgSizerUp);
     pDecodePanel->Layout();
-    ctrl->AddPage( pDecodePanel, _T("Decode Pic"), true );
+    ctrl->AddPage(pDecodePanel, _T("Decode Pic"), true);
     wxPanel* m_panel7 = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-    ctrl->AddPage( m_panel7, _T("Residual Pic"), false );
+    ctrl->AddPage(m_panel7, _T("Residual Pic"), false);
     return ctrl;
 }
 
@@ -191,7 +206,6 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
     if (dlg.ShowModal() == wxID_CANCEL)
         return;
     wxString sfile = dlg.GetPath();
- //   if(sfile.EndsWith(_T(".yuv")) || sfile.EndsWith(_T(".YUV")))
     if(sfile.Lower().EndsWith(_T(".yuv")))
         m_bYUVFile = true;
     else
@@ -265,12 +279,19 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
                 delete m_pcPicYuvOrg;
                 m_pcPicYuvOrg = NULL;
             }
+            m_pPicViewCtrl->SetSizeHints(300, 300);
+            m_pPicViewCtrl->SetFitMode(true);
+            m_pPicViewCtrl->GetParent()->FitInside();
             m_pPicViewCtrl->SetClear();
             m_pPicViewCtrl->Refresh();
             m_pImageList->RemoveAll();
             if(m_StrMemFileName.GetCount())
                 ClearThumbnalMemory();
             m_FileLength = 0;
+            m_pPicHRuler->SetTagValue(-1);
+            m_pPicVRuler->SetTagValue(-1);
+            m_pPicViewCtrl->CalFitScaleRate();
+            m_pPicViewCtrl->SetRulerCtrlFited();
             g_ClearLog();
         }
         else
@@ -286,7 +307,7 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
     int frame = event.GetInt();
     long framenumber = event.GetExtraLong();
 //    wxArrayString arr;
-    g_LogMessage(wxString::Format(_T("Add some images frome %d to %d"), frame-framenumber+1, frame));
+    //g_LogMessage(wxString::Format(_T("Add some images from %d to %d"), frame-framenumber+1, frame));
     for(int i = 0;  i < (int)framenumber; i++)
     {
         int tmp = frame-framenumber+i+1;
@@ -358,6 +379,7 @@ void MainFrame::OnMainFrameSizeChange(wxSizeEvent& event)
     if(m_pPicViewCtrl)
     {
         m_pPicViewCtrl->CalFitScaleRate();
+        m_pPicViewCtrl->SetRulerCtrlFited();
     }
 }
 
@@ -366,6 +388,7 @@ void MainFrame::OnIdle(wxIdleEvent& event)
     if(m_pPicViewCtrl)
     {
         m_pPicViewCtrl->CalFitScaleRate();
+        m_pPicViewCtrl->SetRulerCtrlFited();
         event.RequestMore(false);
     }
 }

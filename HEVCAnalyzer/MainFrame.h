@@ -5,6 +5,7 @@
 #include "ThumbnailThread.h"
 #include "PicViewCtrl.h"
 #include "PixelViewCtrl.h"
+#include "RulerCtrl.h"
 
 DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_END_THREAD, wxID_ANY)
@@ -52,6 +53,8 @@ private:
     wxArrayString        m_StrMemFileName;
     wxScrolledWindow*    m_pDecodeScrolledWin;
     PicViewCtrl*         m_pPicViewCtrl;
+    RulerCtrl*           m_pPicHRuler;
+    RulerCtrl*           m_pPicVRuler;
     wxTextCtrl*          m_pTCLogWin;
     PixelViewCtrl*       m_pPixelViewCtrl;
 

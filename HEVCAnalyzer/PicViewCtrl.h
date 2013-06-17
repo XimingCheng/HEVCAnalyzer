@@ -2,6 +2,7 @@
 #define PICVIEWCTRL_H_INCLUDED
 
 #include "HEVCAnalyzer.h"
+#include "RulerCtrl.h"
 
 class PicViewCtrl : public wxControl
 {
@@ -9,22 +10,31 @@ public:
     DECLARE_DYNAMIC_CLASS(PicViewCtrl);
     enum Direction
     {
-        MOVE_UP    = 0,
+        MOVE_UP  = 0,
         MOVE_DOWN,
         MOVE_LEFT,
         MOVE_RIGHT,
     };
 
+    enum ShowMode
+    {
+        MODE_ORG = 0,
+        MODE_Y,
+        MODE_U,
+        MODE_V,
+    };
+
     PicViewCtrl() {}
-    PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* pList, wxFrame* pFrame)
-        : wxControl (parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxWANTS_CHARS ),
+    PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* pList, RulerCtrl* pHRuler, RulerCtrl* pVRuler, wxFrame* pFrame)
+        : wxControl(parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxWANTS_CHARS),
         m_bClearFlag(true), m_bFitMode(true), m_dScaleRate(1.0), m_dMinScaleRate(0.1), m_dMaxScaleRate(2.0), m_dFitScaleRate(1.0),
         m_dScaleRateStep(0.02), m_delta(-1, -1), m_curLCUStart(-1, -1), m_curLCUEnd(-1, -1), m_iLCURasterID(-1), m_pList(pList),
         m_pFrame(pFrame), m_bShowGrid(true), m_bMouseWheelPageUpDown(false), m_bShowPUType(true), m_pBuffer(NULL),
-        m_iYUVBit(8), m_iShowWhich_O_Y_U_V(0)
+        m_iYUVBit(8), m_iShowWhich_O_Y_U_V(MODE_ORG), m_pHRuler(pHRuler), m_pVRuler(pVRuler)
     {
         SetBackgroundStyle(wxBG_STYLE_CUSTOM);
     }
+
     void SetScale(const double dScale);
     //void SetSize(const wxSize& size) { m_CtrlSize = size; }
     void SetBitmap(wxBitmap bitmap, wxBitmap bitmapY, wxBitmap bitmapU, wxBitmap bitmapV);
@@ -41,8 +51,9 @@ public:
     bool IsShowPUType() const { return m_bShowPUType; }
     void SetShowPUType(const bool b) { m_bShowPUType = b; }
     int  WhichTobeShown() const { return m_iShowWhich_O_Y_U_V; }
-    void SetWhichTobeShown(const int which) { m_iShowWhich_O_Y_U_V = which; }
+    void SetWhichTobeShown(const ShowMode& which) { m_iShowWhich_O_Y_U_V = which; }
     void SetPicYuvBuffer(TComPicYuv* pBuffer, const int w, const int h, const int bit);
+    void SetRulerCtrlFited();
 
 private:
     void OnMouseMove(wxMouseEvent& event);
@@ -53,7 +64,7 @@ private:
     void OnEraseBkg(wxEraseEvent& event);
     void OnKeyDown(wxKeyEvent& event);
 
-    void Render(wxGraphicsContext* gc);
+    void Render(wxGraphicsContext* gc, wxGraphicsContext* gct);
     void ChangeScaleRate(const double rate);
     int  GetCurLCURasterID(const double x, const double y);
     void MoveLCURect(const Direction& d);
@@ -62,6 +73,7 @@ private:
     void DrawBackGround(wxGraphicsContext* gc);
     void DrawNoPictureTips(wxGraphicsContext* gc);
     void DrawGrid(wxGraphicsContext* gc);
+    void GetCurPicViewCtrlPosOnParent(wxPoint& pt1, wxPoint& pt2);
 
 private:
     bool                 m_bClearFlag;
@@ -89,7 +101,9 @@ private:
     bool                 m_bShowPUType;
     TComPicYuv*          m_pBuffer;
     int                  m_iYUVBit;
-    int                  m_iShowWhich_O_Y_U_V;  /**< 0 - original 1 - Y 2 - U 3 - V */
+    ShowMode             m_iShowWhich_O_Y_U_V;  //!< 0 - original 1 - Y 2 - U 3 - V
+    RulerCtrl*           m_pHRuler;
+    RulerCtrl*           m_pVRuler;
 
     DECLARE_EVENT_TABLE();
 };
