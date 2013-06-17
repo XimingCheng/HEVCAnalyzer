@@ -15,7 +15,8 @@ END_EVENT_TABLE()
 
 void PixelViewCtrl::OnDraw(wxDC& dc)
 {
-    //wxAutoBufferedPaintDC tmpdc(this);
+    wxAutoBufferedPaintDC tmpdc(this);
+    DoPrepareDC(tmpdc);
     int xbase, ybase;
     CalcUnscrolledPosition(0, 0, &xbase, &ybase);
 //    g_LogMessage(wxString::Format(_T("base x:%d,y:%d"), xbase, xbase));
@@ -23,9 +24,9 @@ void PixelViewCtrl::OnDraw(wxDC& dc)
     GetClientSize(&virtualwidth, &virtualheight);
 //    g_LogMessage(wxString::Format(_T("size x:%d y:%d"), virtualwidth, virtualheight));
 
-    DrawBackground(dc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
-    DrawGrid(dc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
-    DrawFocusLine(dc);
+    DrawBackground(tmpdc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
+    DrawGrid(tmpdc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
+    DrawFocusLine(tmpdc);
     int xindexstart = max(0, (xbase-m_iXOffset)/m_iWidthPerPixel-1);
     int xindexend = min(m_iCUWidth-1, (xbase+virtualwidth-m_iXOffset)/m_iWidthPerPixel+1);
     int yindexstart = max(0, (ybase-m_iYOffset)/m_iHeightPerPixel-1);
@@ -34,7 +35,7 @@ void PixelViewCtrl::OnDraw(wxDC& dc)
 //    g_LogMessage(wxString::Format(_T("y %d-%d"), yindexstart, yindexend));
     for(int i = xindexstart; i <= xindexend; i++)
         for(int j = yindexstart; j <= yindexend; j++)
-            ShowOneCell(dc, i, j, i, 100, 100);
+            ShowOneCell(tmpdc, i, j, i, 100, 100);
 //    dc.DrawLine(0, 0, 100, 100);
 }
 
@@ -103,9 +104,9 @@ void PixelViewCtrl::DrawFocusLine(wxDC& dc)
 void PixelViewCtrl::OnMouseMidUp(wxMouseEvent& event)
 {
     m_bScrollMode = !m_bScrollMode;
-    if(true == m_bScrollMode)
+    if(m_bScrollMode)
     {
-        SetCursor(wxCursor(wxCURSOR_CROSS));
+        SetCursor(wxCursor(wxCURSOR_SIZING));
     }
     else
     {
@@ -117,7 +118,7 @@ void PixelViewCtrl::OnMouseMidUp(wxMouseEvent& event)
 
 void PixelViewCtrl::OnMouseMove(wxMouseEvent & event)
 {
-    if (false == m_bScrollMode)
+    if (!m_bScrollMode)
         return;
     wxPoint pt = event.GetPosition();
     int xLogic, yLogic;
@@ -170,9 +171,10 @@ void PixelViewCtrl::OnLeaveWindow(wxMouseEvent& event)
 
 void PixelViewCtrl::OnEnterWindow(wxMouseEvent& event)
 {
+    SetFocus();
     if(m_bScrollMode)
     {
-        SetCursor(wxCursor(wxCURSOR_CROSS));
+        SetCursor(wxCursor(wxCURSOR_SIZING));
     }
     g_LogMessage(_T("Enter Window"));
 }
@@ -180,11 +182,26 @@ void PixelViewCtrl::ShowOneCell(wxDC& dc, const int xIndex, const int yIndex,
                          const int y, const int u, const int v)
 {
     wxString text;
+#if defined(__WXMSW__)
     if(m_bHexFormat)
-        text = wxString::Format(_T("0X%X\n0X%X\n0X%X\n(%d,%d)"), y, u, v, xIndex, yIndex);
+        text = wxString::Format(_T("0x%x\n\r0X%x\n\r0x%x\n\r(%d,%d)"), y, u, v, xIndex, yIndex);
+    else
+        text = wxString::Format(_T("%d\n\r%d\n\r%d\n\r(%d, %d)"), y, u, v, xIndex, yIndex);
+#else
+    if(m_bHexFormat)
+        text = wxString::Format(_T("0x%x\n0x%x\n0x%x\n(%d,%d)"), y, u, v, xIndex, yIndex);
     else
         text = wxString::Format(_T("%d\n%d\n%d\n(%d, %d)"), y, u, v, xIndex, yIndex);
-    dc.DrawText(text, m_iXOffset+xIndex*m_iWidthPerPixel, m_iYOffset+yIndex*m_iHeightPerPixel);
+#endif
+    wxFont oldfont = dc.GetFont();
+    wxColour oldcolor = dc.GetTextForeground();
+    dc.SetFont(*wxNORMAL_FONT);
+    dc.SetTextForeground(wxColour(55, 86, 132));
+    int textwidth, textheight;
+    dc.GetTextExtent(text, &textwidth, &textheight);
+    dc.DrawText(text, m_iXOffset+xIndex*m_iWidthPerPixel+(m_iWidthPerPixel-textwidth)/2, m_iYOffset+yIndex*m_iHeightPerPixel+(m_iHeightPerPixel-textheight)/2);
+    dc.SetFont(oldfont);
+    dc.SetTextForeground(oldcolor);
 }
 
 void PixelViewCtrl::LogicPosToIndex(int xLogic, int yLogic, int *xIndex, int *yIndex)
@@ -192,15 +209,16 @@ void PixelViewCtrl::LogicPosToIndex(int xLogic, int yLogic, int *xIndex, int *yI
     *xIndex = (xLogic-m_iXOffset)/m_iWidthPerPixel;
     *yIndex = (yLogic-m_iYOffset)/m_iHeightPerPixel;
 }
+
 void PixelViewCtrl:: OnLeftButtonDown(wxMouseEvent& event)
 {
     wxPoint pos = event.GetPosition();
     int xlogic, ylogic;
     CalcUnscrolledPosition(pos.x, pos.y, &xlogic, &ylogic);
     LogicPosToIndex(xlogic, ylogic, &(m_LeftDownPos.x), &(m_LeftDownPos.y));
-
     g_LogMessage(wxString::Format(_T("%d %d"), m_LeftDownPos.x, m_LeftDownPos.y));
 }
+
 void PixelViewCtrl:: OnLeftButtonUp(wxMouseEvent& event)
 {
     wxPoint newpos = event.GetPosition();
@@ -212,6 +230,7 @@ void PixelViewCtrl:: OnLeftButtonUp(wxMouseEvent& event)
     SetFocusPos(newpos);
     Refresh();
 }
+
 void PixelViewCtrl::SetFocusPos(const wxPoint& pos)
 {
     m_FocusPos.x = pos.x;

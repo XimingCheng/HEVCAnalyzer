@@ -12,8 +12,8 @@ class PixelViewCtrl : public wxScrolledWindow
         PixelViewCtrl(){}
         PixelViewCtrl(wxWindow *parent, wxWindowID id)
             :wxScrolledWindow(parent, id), m_FocusPos(10, 10),
-            m_iCUHeight(32), m_iCUWidth(32), m_iHeightPerPixel(70),
-            m_iWidthPerPixel(50), m_bHexFormat(true), m_bScrollMode(false), 
+            m_iCUHeight(32), m_iCUWidth(32), m_iHeightPerPixel(90),
+            m_iWidthPerPixel(70), m_bHexFormat(true), m_bScrollMode(false), 
             m_iXOffset(20), m_iYOffset(20)
         {
             SetBackgroundStyle(wxBG_STYLE_CUSTOM);
@@ -23,6 +23,9 @@ class PixelViewCtrl : public wxScrolledWindow
             SetVirtualSize(2*m_iXOffset+m_iCUWidth*m_iWidthPerPixel,
                            2*m_iYOffset+m_iCUHeight*m_iHeightPerPixel);
             m_pTimer = new wxTimer(this, TIMER_ID);
+            //m_pCursorImg = new wxImage(_T("/home/luqingbo/Source/HEVC/HEVCAnalyser/cursor.png"), wxBITMAP_TYPE_PNG);
+            //wxImage::AddHandler(new wxPNGHandler);
+            //m_pMidCursor = new wxCursor(*m_pCursorImg);
         }
 
         void OnDraw(wxDC&);
@@ -65,6 +68,8 @@ class PixelViewCtrl : public wxScrolledWindow
         int             m_iXOffset;
         int             m_iYOffset;
         wxPoint         m_LeftDownPos;
+        wxImage*        m_pCursorImg;
+        wxCursor*       m_pMidCursor;
 
         DECLARE_EVENT_TABLE();
 };
