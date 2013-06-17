@@ -23,6 +23,10 @@ void PixelViewCtrl::OnPaint(wxPaintEvent& event)
 
 void PixelViewCtrl::Render(wxDC& dc)
 {
+    AdaptiveSize(dc);
+    SetVirtualSize(2*m_iXOffset+m_iCUWidth*m_iWidthPerPixel,
+                   2*m_iYOffset+m_iCUHeight*m_iHeightPerPixel);
+    SetScrollRate(m_iWidthPerPixel/5, m_iHeightPerPixel/5);
     int xbase, ybase;
     CalcUnscrolledPosition(0, 0, &xbase, &ybase);
     int virtualwidth, virtualheight;
@@ -186,27 +190,71 @@ void PixelViewCtrl::OnEnterWindow(wxMouseEvent& event)
 void PixelViewCtrl::ShowOneCell(wxDC& dc, const int xIndex, const int yIndex,
                          const int y, const int u, const int v)
 {
-    wxString text;
-#if defined(__WXMSW__)
+    wxString Ystr, Ustr, Vstr, Posstr;
+    Posstr = wxString::Format(_T("(%d,%d)"), xIndex, yIndex);
     if(m_bHexFormat)
-        text = wxString::Format(_T("0x%x\r\n0x%x\r\n0x%x\r\n(%d,%d)"), y, u, v, xIndex, yIndex);
+    {
+        Ystr = wxString::Format(_T("%04x"), y);
+        Ustr = wxString::Format(_T("%04x"), u);
+        Vstr = wxString::Format(_T("%04x"), v);
+    }
     else
-        text = wxString::Format(_T("%d\n\r%d\n\r%d\n\r(%d, %d)"), y, u, v, xIndex, yIndex);
-#else
-    if(m_bHexFormat)
-        text = wxString::Format(_T("0x%x\n0x%x\n0x%x\n(%d,%d)"), y, u, v, xIndex, yIndex);
-    else
-        text = wxString::Format(_T("%d\n%d\n%d\n(%d, %d)"), y, u, v, xIndex, yIndex);
-#endif
+    {
+        Ystr = wxString::Format(_T("%04d"), y);
+        Ustr = wxString::Format(_T("%04d"), u);
+        Vstr = wxString::Format(_T("%04d"), v);
+    }
+
+    int gap = 2;
+    int textheight, textwidth;
+    int xbase = m_iXOffset+xIndex*m_iWidthPerPixel;
+    int ybase = m_iYOffset+yIndex*m_iHeightPerPixel;
+
     wxFont oldfont = dc.GetFont();
     wxColour oldcolor = dc.GetTextForeground();
-    dc.SetFont(*wxNORMAL_FONT);
+    //dc.SetFont(*wxNORMAL_FONT);
+    dc.SetFont(*wxSMALL_FONT);
     dc.SetTextForeground(wxColour(55, 86, 132));
-    int textwidth, textheight;
-    dc.GetTextExtent(text, &textwidth, &textheight);
-    dc.DrawText(text, m_iXOffset+xIndex*m_iWidthPerPixel+(m_iWidthPerPixel-textwidth)/2, m_iYOffset+yIndex*m_iHeightPerPixel+(m_iHeightPerPixel-textheight)/2);
+    dc.GetTextExtent(Ystr, &textwidth, &textheight);
+    int ystart = (m_iHeightPerPixel-3*textheight-2*gap)/2;
+    int xstart = (m_iWidthPerPixel-textwidth)/2;
+    dc.DrawText(Ystr, xbase+xstart, ybase+ystart);
+
+    dc.GetTextExtent(Ustr, &textwidth, &textheight);
+    xstart = (m_iWidthPerPixel-textwidth)/2;
+    dc.DrawText(Ustr, xbase+xstart, ybase+ystart+gap+textheight);
+
+    dc.GetTextExtent(Vstr, &textwidth, &textheight);
+    xstart = (m_iWidthPerPixel-textwidth)/2;
+    dc.DrawText(Vstr, xbase+xstart, ybase+ystart+2*(gap+textheight));
+
+//    dc.GetTextExtent(Posstr, &textwidth, &textheight);
+//    xstart = (m_iWidthPerPixel-textwidth)/2;
+//    dc.DrawText(Posstr, xbase+xstart, ybase+ystart+3*(gap+textheight));
+
     dc.SetFont(oldfont);
     dc.SetTextForeground(oldcolor);
+//    wxString text;
+//#if defined(__WXMSW__)
+//    if(m_bHexFormat)
+//        text = wxString::Format(_T("0x%x\r\n0x%x\r\n0x%x\r\n(%d,%d)"), y, u, v, xIndex, yIndex);
+//    else
+//        text = wxString::Format(_T("%d\n\r%d\n\r%d\n\r(%d, %d)"), y, u, v, xIndex, yIndex);
+//#else
+//    if(m_bHexFormat)
+//        text = wxString::Format(_T("0x%x\n0x%x\n0x%x\n(%d,%d)"), y, u, v, xIndex, yIndex);
+//    else
+//        text = wxString::Format(_T("%d\n%d\n%d\n(%d, %d)"), y, u, v, xIndex, yIndex);
+//#endif
+//    wxFont oldfont = dc.GetFont();
+//    wxColour oldcolor = dc.GetTextForeground();
+//    dc.SetFont(*wxNORMAL_FONT);
+//    dc.SetTextForeground(wxColour(55, 86, 132));
+//    int textwidth, textheight;
+//    dc.GetTextExtent(text, &textwidth, &textheight);
+//    dc.DrawText(text, m_iXOffset+xIndex*m_iWidthPerPixel+(m_iWidthPerPixel-textwidth)/2, m_iYOffset+yIndex*m_iHeightPerPixel+(m_iHeightPerPixel-textheight)/2);
+//    dc.SetFont(oldfont);
+//    dc.SetTextForeground(oldcolor);
 }
 
 void PixelViewCtrl::LogicPosToIndex(int xLogic, int yLogic, int *xIndex, int *yIndex)
@@ -230,6 +278,8 @@ void PixelViewCtrl:: OnLeftButtonUp(wxMouseEvent& event)
     int xlogic, ylogic;
     CalcUnscrolledPosition(newpos.x, newpos.y, &xlogic, &ylogic);
     LogicPosToIndex(xlogic, ylogic, &(newpos.x), &(newpos.y));
+    if(newpos.x >= m_iCUWidth || newpos.y >=m_iCUHeight)
+        return;
     if(m_LeftDownPos.x != newpos.x || m_LeftDownPos.y != newpos.y)
         return;
     SetFocusPos(newpos);
@@ -241,3 +291,18 @@ void PixelViewCtrl::SetFocusPos(const wxPoint& pos)
     m_FocusPos.x = pos.x;
     m_FocusPos.y = pos.y;
 }
+
+void PixelViewCtrl::AdaptiveSize(wxDC& dc)
+{
+    wxFont oldfont = dc.GetFont();
+    //dc.SetFont(*wxNORMAL_FONT);
+    dc.SetFont(*wxSMALL_FONT);
+    int textwidth, textheight;
+    dc.GetTextExtent(_T("ffff"),&textwidth, &textheight);
+    int gap = 1;
+    m_iHeightPerPixel = 3*textheight+2*gap+10;
+    m_iWidthPerPixel = textwidth+30;
+
+    dc.SetFont(oldfont);
+}
+

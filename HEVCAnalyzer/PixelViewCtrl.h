@@ -41,6 +41,7 @@ private:
     void LogicPosToIndex(int xLogic, int yLogic, int *xIndex, int *yIndex);
     void ShowOneCell(wxDC& dc, const int xIndex, const int yIndex,
                      const int y, const int u, const int v);
+    void AdaptiveSize(wxDC& dc);
 
 public:
     void SetFocusPos(const wxPoint& pos);
