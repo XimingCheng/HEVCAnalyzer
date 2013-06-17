@@ -27,6 +27,7 @@ void RulerCtrl::OnPaint(wxPaintEvent& event)
     wxAutoBufferedPaintDC dc(this);
     PrepareDC(dc);
     wxGraphicsContext *gc = wxGraphicsContext::Create(dc);
+    SetAdaptiveMarkLen();
     Render(gc);
 }
 
@@ -71,10 +72,10 @@ void RulerCtrl::Render(wxGraphicsContext *gc)
             if(m_bVertical)
             {
                 int y = ((i == 0) ? step+w/2+3 : step+w/2);
-                gc->DrawText(v, size.x-lineLen-h-1, y, 3.14159/2);
+                gc->DrawText(v, size.x-12-h, y, 3.14159/2);
             }
             else
-                gc->DrawText(v, step-w/2, size.y-lineLen-h-1);
+                gc->DrawText(v, step-w/2, size.y-h-12);
         }
         if(m_bVertical)
             gc->StrokeLine(size.x-1, step, size.x-1-lineLen, step);
@@ -172,5 +173,27 @@ void RulerCtrl::SetTagValue(const int value)
     {
         m_iTagValue = value;
         Refresh();
+    }
+}
+
+void RulerCtrl::SetAdaptiveMarkLen()
+{
+    if(m_dScaleRate < 0.25)
+    {
+        m_iValuePerUnit = 8;
+        m_iLongMarkLen  = 64;
+        m_iTextMarkLen  = 256;
+    }
+    else if(m_dScaleRate > 2)
+    {
+        m_iValuePerUnit = 2;
+        m_iLongMarkLen  = 8;
+        m_iTextMarkLen  = 32;
+    }
+    else // default value
+    {
+        m_iValuePerUnit = 4;
+        m_iLongMarkLen  = 16;
+        m_iTextMarkLen  = 64;
     }
 }

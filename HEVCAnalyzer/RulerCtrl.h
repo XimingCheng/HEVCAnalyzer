@@ -34,6 +34,7 @@ private:
     void OnEraseBkg(wxEraseEvent& event);
 
     void Render(wxGraphicsContext *gc);
+    void SetAdaptiveMarkLen();
 
 private:
     bool       m_bVertical;

@@ -279,12 +279,19 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
                 delete m_pcPicYuvOrg;
                 m_pcPicYuvOrg = NULL;
             }
+            m_pPicViewCtrl->SetSizeHints(300, 300);
+            m_pPicViewCtrl->SetFitMode(true);
+            m_pPicViewCtrl->GetParent()->FitInside();
             m_pPicViewCtrl->SetClear();
             m_pPicViewCtrl->Refresh();
             m_pImageList->RemoveAll();
             if(m_StrMemFileName.GetCount())
                 ClearThumbnalMemory();
             m_FileLength = 0;
+            m_pPicHRuler->SetTagValue(-1);
+            m_pPicVRuler->SetTagValue(-1);
+            m_pPicViewCtrl->CalFitScaleRate();
+            m_pPicViewCtrl->SetRulerCtrlFited();
             g_ClearLog();
         }
         else
