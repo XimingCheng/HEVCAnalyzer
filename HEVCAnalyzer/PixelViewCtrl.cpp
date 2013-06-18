@@ -212,7 +212,6 @@ void PixelViewCtrl::ShowOneCell(wxDC& dc, const int xIndex, const int yIndex,
 
     wxFont oldfont = dc.GetFont();
     wxColour oldcolor = dc.GetTextForeground();
-    //dc.SetFont(*wxNORMAL_FONT);
     dc.SetFont(*wxSMALL_FONT);
     dc.SetTextForeground(wxColour(55, 86, 132));
     dc.GetTextExtent(Ystr, &textwidth, &textheight);
@@ -228,33 +227,8 @@ void PixelViewCtrl::ShowOneCell(wxDC& dc, const int xIndex, const int yIndex,
     xstart = (m_iWidthPerPixel-textwidth)/2;
     dc.DrawText(Vstr, xbase+xstart, ybase+ystart+2*(gap+textheight));
 
-//    dc.GetTextExtent(Posstr, &textwidth, &textheight);
-//    xstart = (m_iWidthPerPixel-textwidth)/2;
-//    dc.DrawText(Posstr, xbase+xstart, ybase+ystart+3*(gap+textheight));
-
     dc.SetFont(oldfont);
     dc.SetTextForeground(oldcolor);
-//    wxString text;
-//#if defined(__WXMSW__)
-//    if(m_bHexFormat)
-//        text = wxString::Format(_T("0x%x\r\n0x%x\r\n0x%x\r\n(%d,%d)"), y, u, v, xIndex, yIndex);
-//    else
-//        text = wxString::Format(_T("%d\n\r%d\n\r%d\n\r(%d, %d)"), y, u, v, xIndex, yIndex);
-//#else
-//    if(m_bHexFormat)
-//        text = wxString::Format(_T("0x%x\n0x%x\n0x%x\n(%d,%d)"), y, u, v, xIndex, yIndex);
-//    else
-//        text = wxString::Format(_T("%d\n%d\n%d\n(%d, %d)"), y, u, v, xIndex, yIndex);
-//#endif
-//    wxFont oldfont = dc.GetFont();
-//    wxColour oldcolor = dc.GetTextForeground();
-//    dc.SetFont(*wxNORMAL_FONT);
-//    dc.SetTextForeground(wxColour(55, 86, 132));
-//    int textwidth, textheight;
-//    dc.GetTextExtent(text, &textwidth, &textheight);
-//    dc.DrawText(text, m_iXOffset+xIndex*m_iWidthPerPixel+(m_iWidthPerPixel-textwidth)/2, m_iYOffset+yIndex*m_iHeightPerPixel+(m_iHeightPerPixel-textheight)/2);
-//    dc.SetFont(oldfont);
-//    dc.SetTextForeground(oldcolor);
 }
 
 void PixelViewCtrl::LogicPosToIndex(int xLogic, int yLogic, int *xIndex, int *yIndex)
@@ -295,7 +269,6 @@ void PixelViewCtrl::SetFocusPos(const wxPoint& pos)
 void PixelViewCtrl::AdaptiveSize(wxDC& dc)
 {
     wxFont oldfont = dc.GetFont();
-    //dc.SetFont(*wxNORMAL_FONT);
     dc.SetFont(*wxSMALL_FONT);
     int textwidth, textheight;
     dc.GetTextExtent(_T("ffff"),&textwidth, &textheight);
