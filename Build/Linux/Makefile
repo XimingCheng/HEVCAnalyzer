@@ -24,9 +24,9 @@ WX_CXXFLAGS ?= `$(WX_CONFIG) --cxxflags`
 HEVCANALYZER_SRCDIR = ../../HEVCAnalyzer
 LIBCOMMON_SRCDIR    = ../../TLibCommon
 LIBVIDEOIO_SRCDIR   = ../../TLibVideoIO
-HEVCANALYZER_OBJDIR = ./HEVCAnalyzer
-LIBCOMMON_OBJDIR    = ./TLibCommon
-LIBVIDEOIO_OBJDIR   = ./TLibVideoIO
+HEVCANALYZER_OBJDIR = ./HEVCAnalyzerObj
+LIBCOMMON_OBJDIR    = ./TLibCommonObj
+LIBVIDEOIO_OBJDIR   = ./TLibVideoIOObj
 BIN_DIR             = ../../bin
 
 DEBUGFLAG = -ggdb
@@ -64,11 +64,11 @@ HEVCANALYZER_OBJECTS_D =  \
 
 ### Targets: ###
 
-all: makedir debug release
+all: debug release
 
-debug: HEVCAnalyzer_d
+debug: makedir $(BIN_DIR)/HEVCAnalyzer_d
 
-release: HEVCAnalyzer
+release: makedir $(BIN_DIR)/HEVCAnalyzer
 
 install: 
 
@@ -84,11 +84,11 @@ clean:
 	rm -f $(BIN_DIR)/HEVCAnalyzer
 	rm -f $(BIN_DIR)/HEVCAnalyzer_d
 
-HEVCAnalyzer: $(HEVCANALYZER_OBJECTS)
-	$(CXX) -o $(BIN_DIR)/$@ $(HEVCANALYZER_OBJECTS)   `$(WX_CONFIG) --libs html,aui,core,base` $(LDFLAGS)
+$(BIN_DIR)/HEVCAnalyzer: $(HEVCANALYZER_OBJECTS)
+	$(CXX) -o $@ $(HEVCANALYZER_OBJECTS)   `$(WX_CONFIG) --libs html,aui,core,base` $(LDFLAGS)
 
-HEVCAnalyzer_d: $(HEVCANALYZER_OBJECTS_D)
-	$(CXX) -o $(BIN_DIR)/$@ $(HEVCANALYZER_OBJECTS_D)   `$(WX_CONFIG) --libs html,aui,core,base` $(LDFLAGS) $(DEBUGFLAG)
+$(BIN_DIR)/HEVCAnalyzer_d: $(HEVCANALYZER_OBJECTS_D)
+	$(CXX) -o $@ $(HEVCANALYZER_OBJECTS_D)   `$(WX_CONFIG) --libs html,aui,core,base` $(LDFLAGS) $(DEBUGFLAG)
 
 $(HEVCANALYZER_OBJDIR)/%.o: $(HEVCANALYZER_SRCDIR)/%.cpp
 	$(CXX) -c -o $@ $(HEVCANALYZER_CXXFLAGS) $(CPPDEPS) $<
@@ -100,23 +100,20 @@ $(LIBVIDEOIO_OBJDIR)/%.o: $(LIBVIDEOIO_SRCDIR)/%.cpp
 $(HEVCANALYZER_OBJDIR)/%_d.o: $(HEVCANALYZER_SRCDIR)/%.cpp
 	$(CXX) -c -o $@ $(HEVCANALYZER_CXXFLAGS) $(CPPDEPS) $< $(DEBUGFLAG)
 $(LIBCOMMON_OBJDIR)/%_d.o: $(LIBCOMMON_SRCDIR)/%.cpp
-	$(CXX) -c -o $@ $(HEVCANALYZER_CXXFLAGS) $(CPPDEPS) $<
+	$(CXX) -c -o $@ $(HEVCANALYZER_CXXFLAGS) $(CPPDEPS) $< $(DEBUGFLAG)
 $(LIBVIDEOIO_OBJDIR)/%_d.o: $(LIBVIDEOIO_SRCDIR)/%.cpp
-	$(CXX) -c -o $@ $(HEVCANALYZER_CXXFLAGS) $(CPPDEPS) $<
+	$(CXX) -c -o $@ $(HEVCANALYZER_CXXFLAGS) $(CPPDEPS) $< $(DEBUGFLAG)
 
-makedir:
-	@if [ ! -d $(HEVCANALYZER_OBJDIR) ]; then\
-		mkdir $(HEVCANALYZER_OBJDIR);\
-	fi
-	@if [ ! -d $(LIBCOMMON_OBJDIR) ]; then\
-		mkdir $(LIBCOMMON_OBJDIR);\
-	fi
-	@if [ ! -d $(LIBVIDEOIO_OBJDIR) ]; then\
-		mkdir $(LIBVIDEOIO_OBJDIR);\
-	fi
-	@if [ ! -d $(BIN_DIR) ]; then\
-		mkdir $(BIN_DIR);\
-	fi
+makedir:$(HEVCANALYZER_OBJDIR) $(LIBCOMMON_OBJDIR) $(LIBVIDEOIO_OBJDIR) $(BIN_DIR)
+
+$(HEVCANALYZER_OBJDIR):
+	mkdir -p $(HEVCANALYZER_OBJDIR)
+$(LIBCOMMON_OBJDIR):
+	mkdir -p $(LIBCOMMON_OBJDIR)
+$(LIBVIDEOIO_OBJDIR):
+	mkdir -p $(LIBVIDEOIO_OBJDIR)
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
 
 .PHONY: all install uninstall clean
 
