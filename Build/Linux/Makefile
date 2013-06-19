@@ -3,7 +3,7 @@
 # -------------------------------------------------------------------------
 
 # C++ compiler 
-CXX = g++
+CXX = clang++
 
 # Standard flags for C++ 
 CXXFLAGS ?= 
@@ -30,8 +30,8 @@ LIBVIDEOIO_OBJDIR   = ./TLibVideoIOObj
 BIN_DIR             = ../../bin
 
 DEBUGFLAG = -ggdb
-CPPDEPS = -MT$@ -MF`echo $@ | sed -e 's,\.o$$,.d,'` -MD -MP
-HEVCANALYZER_CXXFLAGS =  -I.  $(WX_CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS)
+CPPDEPS = -MT$@ -MF`echo $@ | sed -e 's,\.o$$,.d,'` -MMD -MP
+HEVCANALYZER_CXXFLAGS =  -Wall -I.  $(WX_CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS)
 HEVCANALYZER_OBJECTS =  \
 	$(HEVCANALYZER_OBJDIR)/HEVCodecApp.o \
 	$(HEVCANALYZER_OBJDIR)/HEVCAnalyzer.o \
@@ -45,18 +45,7 @@ HEVCANALYZER_OBJECTS =  \
 	$(LIBCOMMON_OBJDIR)/TComRom.o \
 	$(LIBVIDEOIO_OBJDIR)/TVideoIOYuv.o
 
-HEVCANALYZER_OBJECTS_D =  \
-	$(HEVCANALYZER_OBJDIR)/HEVCodecApp_d.o \
-	$(HEVCANALYZER_OBJDIR)/HEVCAnalyzer_d.o \
-	$(HEVCANALYZER_OBJDIR)/MainFrame_d.o \
-	$(HEVCANALYZER_OBJDIR)/ThumbnailThread_d.o \
-	$(HEVCANALYZER_OBJDIR)/YUVConfigDlg_d.o \
-	$(HEVCANALYZER_OBJDIR)/PicViewCtrl_d.o \
-	$(HEVCANALYZER_OBJDIR)/PixelViewCtrl_d.o \
-	$(HEVCANALYZER_OBJDIR)/RulerCtrl_d.o \
-	$(LIBCOMMON_OBJDIR)/TComPicYuv_d.o \
-	$(LIBCOMMON_OBJDIR)/TComRom_d.o \
-	$(LIBVIDEOIO_OBJDIR)/TVideoIOYuv_d.o
+HEVCANALYZER_OBJECTS_D = $(patsubst %.o, %_d.o, $(HEVCANALYZER_OBJECTS))
 
 ### Conditionally set variables: ###
 
@@ -115,5 +104,11 @@ $(LIBVIDEOIO_OBJDIR):
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
+
+
 .PHONY: all install uninstall clean
+
+# Dependencies tracking
+-include $(HEVCANALYZER_OBJDIR)/*.d $(LIBCOMMON_SRCDIR)/*.d $(LIBVIDEOIO_SRCDIR)/*.d
+
 
