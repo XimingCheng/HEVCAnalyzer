@@ -4,6 +4,7 @@
 
 # C++ compiler 
 CXX = clang++
+# CXX = g++
 
 # Standard flags for C++ 
 CXXFLAGS ?= 
@@ -105,10 +106,7 @@ $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
 
-
 .PHONY: all install uninstall clean
 
 # Dependencies tracking
--include $(HEVCANALYZER_OBJDIR)/*.d $(LIBCOMMON_SRCDIR)/*.d $(LIBVIDEOIO_SRCDIR)/*.d
-
-
+-include $(HEVCANALYZER_OBJDIR)/*.d $(LIBCOMMON_OBJDIR)/*.d $(LIBVIDEOIO_OBJDIR)/*.d

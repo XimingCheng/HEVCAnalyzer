@@ -18,6 +18,13 @@ void PicViewCtrl::OnPaint(wxPaintEvent& event)
     PrepareDC(dc);
     wxGraphicsContext *gc = wxGraphicsContext::Create(dc);
     wxGraphicsContext *gct = wxGraphicsContext::Create(dc);
+    if(m_bFullRefresh)
+    {
+        m_rectRefresh.x = 0;
+        m_rectRefresh.y = 0;
+        m_rectRefresh.width  = m_cViewBitmap.GetWidth();
+        m_rectRefresh.height = m_cViewBitmap.GetHeight();
+    }
     Render(gc, gct);
     delete gc;
     delete gct;
@@ -57,6 +64,7 @@ void PicViewCtrl::SetBitmap(wxBitmap bitmap, wxBitmap bitmapY, wxBitmap bitmapU,
     this->SetSizeHints(m_CtrlSize);
     GetParent()->FitInside();
     SetRulerCtrlFited();
+    CalCurScrolledRectOnPicView(m_rectRefresh);
     Refresh();
 }
 
@@ -78,6 +86,7 @@ void PicViewCtrl::OnMouseMove(wxMouseEvent& event)
         wxPoint pt = event.GetPosition();
         if(event.Dragging() && event.LeftIsDown())
         {
+            //g_LogMessage(wxString::Format(_T("OnMouseMove %d %d %d %d"), rect.x, rect.y, rect.width, rect.height));
             int xper, yper;
             wxPoint pos = ClientToScreen(pt);
             wxScrolledWindow* pPar = (wxScrolledWindow*)GetParent();
@@ -85,9 +94,13 @@ void PicViewCtrl::OnMouseMove(wxMouseEvent& event)
             pPar->Scroll((m_delta.x - pos.x)/xper, (m_delta.y - pos.y)/yper);
             SetRulerCtrlFited();
         }
+        wxPoint begin_org = m_curLCUStart;
+        wxPoint end_org   = m_curLCUEnd;
+        wxRect refreshRect;
         int id = GetCurLCURasterID(event.m_x/m_dScaleRate, event.m_y/m_dScaleRate);
         if(id != m_iLCURasterID)
         {
+            CalCurScrolledRectOnPicView(m_rectRefresh);
             m_iLCURasterID = id;
             if(id != -1)
                 Refresh();
@@ -344,12 +357,20 @@ void PicViewCtrl::DrawGrid(wxGraphicsContext* gc)
 {
     int cuw = m_LCUSize.GetWidth();
     int cuh = m_LCUSize.GetHeight();
-    int col_num = m_cViewBitmap.GetWidth()/cuw + (m_cViewBitmap.GetWidth()%cuw != 0);
-    int row_num = m_cViewBitmap.GetHeight()/cuh + (m_cViewBitmap.GetHeight()%cuh != 0);
+    //int col_num = m_cViewBitmap.GetWidth()/cuw + (m_cViewBitmap.GetWidth()%cuw != 0);
+    //int row_num = m_cViewBitmap.GetHeight()/cuh + (m_cViewBitmap.GetHeight()%cuh != 0);
+    int startx = m_rectRefresh.x/cuw;
+    int starty = m_rectRefresh.y/cuh;
+    if(startx < 1) startx = 1;
+    if(starty < 1) starty = 1;
+    int width  = m_rectRefresh.x + m_rectRefresh.width;
+    int height = m_rectRefresh.y + m_rectRefresh.height;
+    int endx   = width/cuw + (width%cuw != 0);
+    int endy   = height/cuh + (height%cuh != 0);
     gc->SetPen(*wxBLACK_PEN);
-    for(int i = 1; i < row_num; i++)
+    for(int i = starty; i < endy; i++)
         gc->StrokeLine(0, i*cuh, m_cViewBitmap.GetWidth(), i*cuh);
-    for(int i = 1; i < col_num; i++)
+    for(int i = startx; i < endx; i++)
         gc->StrokeLine(i*cuw, 0, i*cuw, m_cViewBitmap.GetHeight());
 }
 
@@ -419,6 +440,7 @@ void PicViewCtrl::SetPicYuvBuffer(TComPicYuv* pBuffer, const int w, const int h,
     CalMinMaxScaleRate();
 }
 
+// pt2 is useless and it is a wrong position now
 void PicViewCtrl::GetCurPicViewCtrlPosOnParent(wxPoint& pt1, wxPoint& pt2)
 {
     wxSizer* pSizer = GetParent()->GetSizer();
@@ -426,9 +448,10 @@ void PicViewCtrl::GetCurPicViewCtrlPosOnParent(wxPoint& pt1, wxPoint& pt2)
 
     assert(itemList.size() > 0);
     pt1 = (*itemList.begin())->GetPosition();
-    wxSize size = GetSize();
-    pt2.x = pt1.x + size.x;
-    pt2.y = pt1.y + size.y;
+    // wrong cal
+//    wxSize size = GetSize();
+//    pt2.x = pt1.x + size.x;
+//    pt2.y = pt1.y + size.y;
 }
 
 void PicViewCtrl::SetRulerCtrlFited()
@@ -477,4 +500,63 @@ void PicViewCtrl::SetRulerCtrlFited()
         m_pHRuler->SetScaleRate(m_dScaleRate);
         m_pVRuler->SetScaleRate(m_dScaleRate);
     }
+}
+
+// get the real ScrolledRect to improve the efficiency
+void PicViewCtrl::CalCurScrolledRectOnPicView(wxRect& rect)
+{
+    m_bFullRefresh = false;
+    if(m_bFitMode || m_bClearFlag)
+    {
+        rect.x = 0;
+        rect.y = 0;
+        rect.width  = m_cViewBitmap.GetWidth();
+        rect.height = m_cViewBitmap.GetHeight();
+        return;
+    }
+    int startx, starty, endx, endy;
+    wxPoint pt1, pt2;
+    GetCurPicViewCtrlPosOnParent(pt1, pt2);
+    int xper, yper, x, y;
+    wxScrolledWindow* pPar = (wxScrolledWindow*)GetParent();
+    pPar->GetScrollPixelsPerUnit(&xper, &yper);
+    pPar->GetViewStart(&x, &y);
+    wxSize parSize = pPar->GetSize();
+    x *= xper;
+    y *= yper;
+    if(pt1.x >= 0 || pt1.y >= 0)
+    {
+        pt1.x  = ((pt1.x > 0) ? pt1.x : 0);
+        pt1.y  = ((pt1.y > 0) ? pt1.y : 0);
+        startx = pt1.x - x;
+        starty = pt1.y - y;
+    }
+    else
+    {
+        startx = -x;
+        starty = -y;
+    }
+    wxSize size = m_CtrlSize;
+    endx = startx + size.x;
+    endy = starty + size.y;
+    endx = min(parSize.x, endx);
+    endy = min(parSize.y, endy);
+    if(startx > 0) startx = 0;
+    else startx = -startx;
+    if(starty > 0) starty = 0;
+    else starty = -starty;
+    rect.x = max(startx/m_dScaleRate - 4, 0.0);
+    rect.y = max(starty/m_dScaleRate - 4, 0.0);
+    rect.width = min(endx/m_dScaleRate + 4, (double)m_cViewBitmap.GetWidth());
+    rect.height = min(endy/m_dScaleRate + 4, (double)m_cViewBitmap.GetHeight());
+}
+
+void PicViewCtrl::CalTwoRectsOutsideBox(wxRect& rect, const wxPoint& start, const wxPoint& end)
+{
+    int x2 = max(m_curLCUEnd.x, end.x);
+    int y2 = max(m_curLCUEnd.y, end.y);
+    rect.x = 0;
+    rect.y = 0;
+    rect.width = (x2+4)*m_dScaleRate;
+    rect.height = (y2+4)*m_dScaleRate;
 }

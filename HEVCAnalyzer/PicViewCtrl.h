@@ -30,7 +30,7 @@ public:
         m_bClearFlag(true), m_bFitMode(true), m_dScaleRate(1.0), m_dMinScaleRate(0.1), m_dMaxScaleRate(2.0), m_dFitScaleRate(1.0),
         m_dScaleRateStep(0.02), m_delta(-1, -1), m_curLCUStart(-1, -1), m_curLCUEnd(-1, -1), m_iLCURasterID(-1), m_pList(pList),
         m_pFrame(pFrame), m_bShowGrid(true), m_bMouseWheelPageUpDown(false), m_bShowPUType(true), m_pBuffer(NULL),
-        m_iYUVBit(8), m_iShowWhich_O_Y_U_V(MODE_ORG), m_pHRuler(pHRuler), m_pVRuler(pVRuler)
+        m_iYUVBit(8), m_iShowWhich_O_Y_U_V(MODE_ORG), m_pHRuler(pHRuler), m_pVRuler(pVRuler), m_bFullRefresh(true)
     {
         SetBackgroundStyle(wxBG_STYLE_CUSTOM);
     }
@@ -74,6 +74,8 @@ private:
     void DrawNoPictureTips(wxGraphicsContext* gc);
     void DrawGrid(wxGraphicsContext* gc);
     void GetCurPicViewCtrlPosOnParent(wxPoint& pt1, wxPoint& pt2);
+    void CalCurScrolledRectOnPicView(wxRect& rect);
+    void CalTwoRectsOutsideBox(wxRect& rect, const wxPoint& start, const wxPoint& end);
 
 private:
     bool                 m_bClearFlag;
@@ -104,6 +106,8 @@ private:
     ShowMode             m_iShowWhich_O_Y_U_V;  //!< 0 - original 1 - Y 2 - U 3 - V
     RulerCtrl*           m_pHRuler;
     RulerCtrl*           m_pVRuler;
+    wxRect               m_rectRefresh;
+    bool                 m_bFullRefresh;
 
     DECLARE_EVENT_TABLE();
 };
