@@ -1,5 +1,8 @@
 #include "PixelViewCtrl.h"
 
+DEFINE_EVENT_TYPE(wxEVT_YUVBUFFER_CHANGED)
+DEFINE_EVENT_TYPE(wxEVT_POSITION_CHANGED)
+
 IMPLEMENT_DYNAMIC_CLASS(PixelViewCtrl, wxScrolledWindow);
 
 BEGIN_EVENT_TABLE(PixelViewCtrl, wxScrolledWindow)
@@ -12,13 +15,15 @@ BEGIN_EVENT_TABLE(PixelViewCtrl, wxScrolledWindow)
     EVT_TIMER(TIMER_ID, PixelViewCtrl::OnTimer)
     EVT_LEAVE_WINDOW(PixelViewCtrl::OnLeaveWindow)
     EVT_ENTER_WINDOW(PixelViewCtrl::OnEnterWindow)
+    EVT_COMMAND(wxID_ANY, wxEVT_YUVBUFFER_CHANGED, PixelViewCtrl::OnBufferChanged)
+    EVT_COMMAND(wxID_ANY, wxEVT_POSITION_CHANGED, PixelViewCtrl::OnPosChanged)
 END_EVENT_TABLE()
 
 void PixelViewCtrl::OnPaint(wxPaintEvent& event)
 {
-    wxAutoBufferedPaintDC tmpdc(this);
-    DoPrepareDC(tmpdc);
-    Render(tmpdc);
+    wxAutoBufferedPaintDC dc(this);
+    DoPrepareDC(dc);
+    Render(dc);
 }
 
 void PixelViewCtrl::Render(wxDC& dc)
@@ -279,3 +284,15 @@ void PixelViewCtrl::AdaptiveSize(wxDC& dc)
     dc.SetFont(oldfont);
 }
 
+void PixelViewCtrl::OnBufferChanged(wxCommandEvent& event)
+{
+    //wxMessageBox(_T("OnBufferChanged"));
+}
+
+void PixelViewCtrl::OnPosChanged(wxCommandEvent& event)
+{
+    MSG_block_pos* pData = (MSG_block_pos*)event.GetClientData();
+//    wxMessageBox(wxString::Format(_T("OnPosChanged %d %d %d %d %d"), pData->_iLCUID,
+//                                  pData->_iBlockWidth, pData->_iBlockHeight, pData->_iOffsetX,
+//                                  pData->_iOffsetY));
+}

@@ -3,6 +3,7 @@
 
 #include "HEVCAnalyzer.h"
 #include "RulerCtrl.h"
+#include "PixelViewCtrl.h"
 
 class PicViewCtrl : public wxControl
 {
@@ -25,15 +26,8 @@ public:
     };
 
     PicViewCtrl() {}
-    PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* pList, RulerCtrl* pHRuler, RulerCtrl* pVRuler, wxFrame* pFrame)
-        : wxControl(parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxWANTS_CHARS),
-        m_bClearFlag(true), m_bFitMode(true), m_dScaleRate(1.0), m_dMinScaleRate(0.1), m_dMaxScaleRate(2.0), m_dFitScaleRate(1.0),
-        m_dScaleRateStep(0.02), m_delta(-1, -1), m_curLCUStart(-1, -1), m_curLCUEnd(-1, -1), m_iLCURasterID(-1), m_pList(pList),
-        m_pFrame(pFrame), m_bShowGrid(true), m_bMouseWheelPageUpDown(false), m_bShowPUType(true), m_pBuffer(NULL),
-        m_iYUVBit(8), m_iShowWhich_O_Y_U_V(MODE_ORG), m_pHRuler(pHRuler), m_pVRuler(pVRuler), m_bFullRefresh(true)
-    {
-        SetBackgroundStyle(wxBG_STYLE_CUSTOM);
-    }
+    PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* pList, RulerCtrl* pHRuler, RulerCtrl* pVRuler,
+                wxWindow* pPixelWin, wxFrame* pFrame);
 
     void SetScale(const double dScale);
     //void SetSize(const wxSize& size) { m_CtrlSize = size; }
@@ -108,6 +102,8 @@ private:
     RulerCtrl*           m_pVRuler;
     wxRect               m_rectRefresh;
     bool                 m_bFullRefresh;
+    wxWindow*            m_pPixelCtrl;
+    MSG_block_pos        m_PosData;
 
     DECLARE_EVENT_TABLE();
 };

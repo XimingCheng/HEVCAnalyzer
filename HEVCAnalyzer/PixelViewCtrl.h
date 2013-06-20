@@ -1,9 +1,24 @@
 #ifndef PIXELVIEWCTRL_H_INCLUDED
 #define PIXELVIEWCTRL_H_INCLUDED
+
 #define TIMER_ID  wxID_HIGHEST+100
 
 #include "HEVCAnalyzer.h"
 #include "wx/timer.h"
+
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EVENT_TYPE(wxEVT_YUVBUFFER_CHANGED, wxID_ANY)
+    DECLARE_EVENT_TYPE(wxEVT_POSITION_CHANGED, wxID_ANY)
+END_DECLARE_EVENT_TYPES()
+
+struct MSG_block_pos
+{
+    int _iLCUID;
+    int _iBlockWidth;
+    int _iBlockHeight;
+    int _iOffsetX;
+    int _iOffsetY;
+};
 
 class PixelViewCtrl : public wxScrolledWindow
 {
@@ -42,6 +57,8 @@ private:
     void ShowOneCell(wxDC& dc, const int xIndex, const int yIndex,
                      const int y, const int u, const int v);
     void AdaptiveSize(wxDC& dc);
+    void OnBufferChanged(wxCommandEvent& event);
+    void OnPosChanged(wxCommandEvent& event);
 
 public:
     void SetFocusPos(const wxPoint& pos);

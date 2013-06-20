@@ -1,5 +1,8 @@
 #include "PicViewCtrl.h"
 
+extern const wxEventType wxEVT_YUVBUFFER_CHANGED;
+extern const wxEventType wxEVT_POSITION_CHANGED;
+
 IMPLEMENT_DYNAMIC_CLASS(PicViewCtrl, wxControl);
 
 BEGIN_EVENT_TABLE(PicViewCtrl, wxControl)
@@ -11,6 +14,18 @@ BEGIN_EVENT_TABLE(PicViewCtrl, wxControl)
     EVT_MOUSEWHEEL(PicViewCtrl::OnMouseWheel)
     EVT_KEY_DOWN(PicViewCtrl::OnKeyDown)
 END_EVENT_TABLE()
+
+PicViewCtrl::PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* pList, RulerCtrl* pHRuler, RulerCtrl* pVRuler,
+            wxWindow* pPixelCtrl, wxFrame* pFrame)
+    : wxControl(parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxWANTS_CHARS),
+    m_bClearFlag(true), m_bFitMode(true), m_dScaleRate(1.0), m_dMinScaleRate(0.1), m_dMaxScaleRate(2.0), m_dFitScaleRate(1.0),
+    m_dScaleRateStep(0.02), m_delta(-1, -1), m_curLCUStart(-1, -1), m_curLCUEnd(-1, -1), m_iLCURasterID(-1), m_pList(pList),
+    m_pFrame(pFrame), m_bShowGrid(true), m_bMouseWheelPageUpDown(false), m_bShowPUType(true), m_pBuffer(NULL),
+    m_iYUVBit(8), m_iShowWhich_O_Y_U_V(MODE_ORG), m_pHRuler(pHRuler), m_pVRuler(pVRuler), m_bFullRefresh(true),
+    m_pPixelCtrl(pPixelCtrl)
+{
+    SetBackgroundStyle(wxBG_STYLE_CUSTOM);
+}
 
 void PicViewCtrl::OnPaint(wxPaintEvent& event)
 {
@@ -86,7 +101,7 @@ void PicViewCtrl::OnMouseMove(wxMouseEvent& event)
         wxPoint pt = event.GetPosition();
         if(event.Dragging() && event.LeftIsDown())
         {
-            //g_LogMessage(wxString::Format(_T("OnMouseMove %d %d %d %d"), rect.x, rect.y, rect.width, rect.height));
+            m_bFullRefresh = true;
             int xper, yper;
             wxPoint pos = ClientToScreen(pt);
             wxScrolledWindow* pPar = (wxScrolledWindow*)GetParent();
@@ -94,16 +109,29 @@ void PicViewCtrl::OnMouseMove(wxMouseEvent& event)
             pPar->Scroll((m_delta.x - pos.x)/xper, (m_delta.y - pos.y)/yper);
             SetRulerCtrlFited();
         }
+        m_bFullRefresh = false;
         wxPoint begin_org = m_curLCUStart;
         wxPoint end_org   = m_curLCUEnd;
         wxRect refreshRect;
-        int id = GetCurLCURasterID(event.m_x/m_dScaleRate, event.m_y/m_dScaleRate);
+        int posx = event.m_x/m_dScaleRate;
+        int posy = event.m_y/m_dScaleRate;
+        int id = GetCurLCURasterID(posx, posy);
+        m_PosData._iLCUID = id;
+        m_PosData._iBlockWidth  = m_LCUSize.x;
+        m_PosData._iBlockHeight = m_LCUSize.y;
+        m_PosData._iOffsetX     = posx % m_LCUSize.x;
+        m_PosData._iOffsetY     = posy % m_LCUSize.y;
+        wxCommandEvent event(wxEVT_POSITION_CHANGED, wxID_ANY);
+        event.SetClientData(&m_PosData);
+        wxPostEvent(m_pPixelCtrl, event);
         if(id != m_iLCURasterID)
         {
             CalCurScrolledRectOnPicView(m_rectRefresh);
             m_iLCURasterID = id;
             if(id != -1)
+            {
                 Refresh();
+            }
         }
     }
 }
@@ -231,6 +259,7 @@ void PicViewCtrl::ChangeScaleRate(const double rate)
         m_CtrlSize.SetHeight(m_dScaleRate*m_cViewBitmap.GetHeight());
         this->SetSizeHints(m_CtrlSize);
         GetParent()->FitInside();
+        m_bFullRefresh = true;
         Refresh();
     }
 }
@@ -438,6 +467,9 @@ void PicViewCtrl::SetPicYuvBuffer(TComPicYuv* pBuffer, const int w, const int h,
     SetLCUSize(wxSize(64, 64));
     SetBitmap(bmp, bmpY, bmpU, bmpV);
     CalMinMaxScaleRate();
+    wxCommandEvent event(wxEVT_YUVBUFFER_CHANGED, wxID_ANY);
+    event.SetClientData(pBuffer);
+    wxPostEvent(m_pPixelCtrl, event);
 }
 
 // pt2 is useless and it is a wrong position now

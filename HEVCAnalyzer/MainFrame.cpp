@@ -182,7 +182,8 @@ wxNotebook* MainFrame::CreateCenterNotebook()
     fgSizerLeft->Add(m_pPicVRuler, 0, wxEXPAND, 5);
     //wxScrolledWindow
     m_pDecodeScrolledWin = new wxScrolledWindow( pDecodePanel, -1, wxDefaultPosition, wxDefaultSize, wxScrolledWindowStyle);
-    m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY, m_pThumbnalList, m_pPicHRuler, m_pPicVRuler, this);
+    m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY, m_pThumbnalList, m_pPicHRuler,
+                                     m_pPicVRuler, m_pPixelViewCtrl, this);
     m_pPicViewCtrl->SetSizeHints(300, 300);
     wxGridSizer* innerSizer = new wxGridSizer(1, 0, 0);
     innerSizer->Add(m_pPicViewCtrl, 1, wxALIGN_CENTER);
