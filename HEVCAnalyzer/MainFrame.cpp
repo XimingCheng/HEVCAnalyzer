@@ -293,6 +293,7 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
             m_pPicVRuler->SetTagValue(-1);
             m_pPicViewCtrl->CalFitScaleRate();
             m_pPicViewCtrl->SetRulerCtrlFited();
+            m_pPixelViewCtrl->Clear();
             g_ClearLog();
         }
         else

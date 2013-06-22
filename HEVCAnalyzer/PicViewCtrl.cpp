@@ -33,7 +33,7 @@ void PicViewCtrl::OnPaint(wxPaintEvent& event)
     PrepareDC(dc);
     wxGraphicsContext *gc = wxGraphicsContext::Create(dc);
     wxGraphicsContext *gct = wxGraphicsContext::Create(dc);
-    if(m_bFullRefresh)
+    if(m_bFullRefresh && !m_bClearFlag)
     {
         m_rectRefresh.x = 0;
         m_rectRefresh.y = 0;

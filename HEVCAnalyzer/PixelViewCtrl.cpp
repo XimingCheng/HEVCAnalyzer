@@ -28,27 +28,58 @@ void PixelViewCtrl::OnPaint(wxPaintEvent& event)
 
 void PixelViewCtrl::Render(wxDC& dc)
 {
-    AdaptiveSize(dc);
-    SetVirtualSize(2*m_iXOffset+m_iCUWidth*m_iWidthPerPixel,
-                   2*m_iYOffset+m_iCUHeight*m_iHeightPerPixel);
-    SetScrollRate(m_iWidthPerPixel/5, m_iHeightPerPixel/5);
-    int xbase, ybase;
-    CalcUnscrolledPosition(0, 0, &xbase, &ybase);
-    int virtualwidth, virtualheight;
-    GetClientSize(&virtualwidth, &virtualheight);
+    if(!m_pBuffer)
+    {
+        wxString str = _T("No Pixel Value");
+        wxFont oldfont = dc.GetFont();
+        wxColour oldcolor = dc.GetTextForeground();
+        dc.SetFont(*wxSMALL_FONT);
+        dc.SetTextForeground(wxColour(55, 86, 132));
+        int textwidth, textheight;
+        dc.GetTextExtent(str, &textwidth, &textheight);
+        int clientwidth, clientheight;
+        GetClientSize(&clientwidth, &clientheight);
+        SetVirtualSize(clientwidth, clientheight);
+        dc.DrawText(str, (clientwidth-textwidth)/2, (clientheight-textheight)/2);
 
-    DrawBackground(dc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
-    DrawGrid(dc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
-    DrawFocusLine(dc);
-    int xindexstart = max(0, (xbase-m_iXOffset)/m_iWidthPerPixel-1);
-    int xindexend = min(m_iCUWidth-1, (xbase+virtualwidth-m_iXOffset)/m_iWidthPerPixel+1);
-    int yindexstart = max(0, (ybase-m_iYOffset)/m_iHeightPerPixel-1);
-    int yindexend = min(m_iCUHeight-1, (ybase+virtualheight-m_iYOffset)/m_iHeightPerPixel+1);
-//    g_LogMessage(wxString::Format(_T("x %d-%d"), xindexstart, xindexend));
-//    g_LogMessage(wxString::Format(_T("y %d-%d"), yindexstart, yindexend));
-    for(int i = xindexstart; i <= xindexend; i++)
-        for(int j = yindexstart; j <= yindexend; j++)
-            ShowOneCell(dc, i, j, i, 100, 100);
+        dc.SetFont(oldfont);
+        dc.SetTextForeground(oldcolor);
+
+    }
+    else 
+    {
+        AdaptiveSize(dc);
+        SetVirtualSize(2*m_iXOffset+m_iCUWidth*m_iWidthPerPixel,
+                       2*m_iYOffset+m_iCUHeight*m_iHeightPerPixel);
+        SetScrollRate(m_iWidthPerPixel/5, m_iHeightPerPixel/5);
+        int virtualwidth, virtualheight;
+        GetClientSize(&virtualwidth, &virtualheight);
+        int xbase, ybase;
+        xbase = max(0, m_FocusPos.x*m_iWidthPerPixel+m_iXOffset-(virtualwidth-m_iWidthPerPixel)/2);
+        ybase = max(0, m_FocusPos.y*m_iHeightPerPixel+m_iYOffset-(virtualheight-m_iHeightPerPixel)/2);
+        if(m_bPaintEventSource)
+        {
+            Scroll(xbase/(m_iWidthPerPixel/5), ybase/(m_iHeightPerPixel/5));
+            m_bPaintEventSource = false;
+        }
+        else
+        {
+            CalcUnscrolledPosition(0, 0, &xbase, &ybase);
+        }
+
+        DrawBackground(dc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
+        DrawGrid(dc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
+        DrawFocusLine(dc);
+        int xindexstart = max(0, (xbase-m_iXOffset)/m_iWidthPerPixel-1);
+        int xindexend = min(m_iCUWidth-1, (xbase+virtualwidth-m_iXOffset)/m_iWidthPerPixel+1);
+        int yindexstart = max(0, (ybase-m_iYOffset)/m_iHeightPerPixel-1);
+        int yindexend = min(m_iCUHeight-1, (ybase+virtualheight-m_iYOffset)/m_iHeightPerPixel+1);
+//        g_LogMessage(wxString::Format(_T("x %d-%d"), xindexstart, xindexend));
+//        g_LogMessage(wxString::Format(_T("y %d-%d"), yindexstart, yindexend));
+        for(int i = xindexstart; i <= xindexend; i++)
+            for(int j = yindexstart; j <= yindexend; j++)
+                ShowOneCell(dc, i, j);
+    }
 }
 
 void PixelViewCtrl::OnEraseBkg(wxEraseEvent& event)
@@ -67,7 +98,7 @@ void PixelViewCtrl::DrawGrid(wxDC& dc, int xstart, int ystart, int xend, int yen
     int horstart = ((ystart-m_iYOffset)/m_iHeightPerPixel-1)*m_iHeightPerPixel+m_iYOffset;
     horstart = max(horstart, m_iYOffset);
     int horend = ((yend-m_iYOffset)/m_iHeightPerPixel+1)*m_iHeightPerPixel+m_iYOffset;
-    horend = min(horend, m_iYOffset+m_iHeightPerPixel*m_iHeightPerPixel);
+    horend = min(horend, m_iYOffset+m_iCUHeight*m_iHeightPerPixel);
     for(int i = horstart; i <= horend; i+=m_iHeightPerPixel)
         dc.DrawLine(xstart, i, xend, i);
     /* draw the vertical line */
@@ -192,9 +223,26 @@ void PixelViewCtrl::OnEnterWindow(wxMouseEvent& event)
     g_LogMessage(_T("Enter Window"));
 }
 
-void PixelViewCtrl::ShowOneCell(wxDC& dc, const int xIndex, const int yIndex,
-                         const int y, const int u, const int v)
+void PixelViewCtrl::ShowOneCell(wxDC& dc, const int xIndex, const int yIndex)
 {
+    int i, j;
+    if(!m_pBlockInfo)
+    {
+        i = 0;
+        j = 0;
+    }
+    else
+    {
+        j = yIndex + m_pBlockInfo->_iBlockY;
+        i = xIndex + m_pBlockInfo->_iBlockX;
+    }
+    Pel* pY = m_pBuffer->getLumaAddr() + j*m_pBuffer->getStride();
+    Pel* pU = m_pBuffer->getCbAddr()   + (j/2)*m_pBuffer->getCStride();
+    Pel* pV = m_pBuffer->getCrAddr()   + (j/2)*m_pBuffer->getCStride();
+    int  y = pY[i];
+    int  u = pU[i/2];
+    int  v = pV[i/2];
+
     wxString Ystr, Ustr, Vstr, Posstr;
     Posstr = wxString::Format(_T("(%d,%d)"), xIndex, yIndex);
     if(m_bHexFormat)
@@ -286,9 +334,35 @@ void PixelViewCtrl::AdaptiveSize(wxDC& dc)
 
 void PixelViewCtrl::OnBufferChanged(wxCommandEvent& event)
 {
+    m_pBuffer = (TComPicYuv*)event.GetClientData();
+    m_FocusPos.x = 0;
+    m_FocusPos.y = 0;
+    Refresh();
+
 }
 
 void PixelViewCtrl::OnPosChanged(wxCommandEvent& event)
 {
-    MSG_block_pos* pData = (MSG_block_pos*)event.GetClientData();
+    m_pBlockInfo = (MSG_block_pos*)event.GetClientData();
+    SetCUHeight(m_pBlockInfo->_iBlockHeight);
+    SetCUWidth(m_pBlockInfo->_iBlockWidth);
+    m_FocusPos.x = m_pBlockInfo->_iOffsetX;
+    m_FocusPos.y = m_pBlockInfo->_iOffsetY;
+    m_bPaintEventSource = true;
+    Refresh();
+}
+
+void PixelViewCtrl::Clear()
+{
+    m_pTimer->Stop();
+    m_pBuffer = NULL;
+    m_pBlockInfo = NULL;
+    m_iCUHeight = 32;
+    m_iCUWidth = 32;
+    m_FocusPos.x = 0;
+    m_FocusPos.y = 0;
+    m_iHeightPerPixel = 90;
+    m_iWidthPerPixel = 70;
+    m_bHexFormat = true;
+    Refresh();
 }

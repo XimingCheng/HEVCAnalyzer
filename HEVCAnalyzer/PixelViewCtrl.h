@@ -31,12 +31,13 @@ public:
         wxFULL_REPAINT_ON_RESIZE), m_FocusPos(10, 10),
         m_iCUHeight(32), m_iCUWidth(32), m_iHeightPerPixel(90),
         m_iWidthPerPixel(70), m_bHexFormat(true), m_bScrollMode(false),
-        m_iXOffset(20), m_iYOffset(20)
+        m_iXOffset(20), m_iYOffset(20), m_pBuffer(NULL), m_pBlockInfo(NULL),
+        m_bPaintEventSource(false)
     {
         SetBackgroundStyle(wxBG_STYLE_CUSTOM);
         SetScrollRate(5, 7);
-        SetVirtualSize(2*m_iXOffset+m_iCUWidth*m_iWidthPerPixel,
-                       2*m_iYOffset+m_iCUHeight*m_iHeightPerPixel);
+//        SetVirtualSize(2*m_iXOffset+m_iCUWidth*m_iWidthPerPixel,
+//                       2*m_iYOffset+m_iCUHeight*m_iHeightPerPixel);
         m_pTimer = new wxTimer(this, TIMER_ID);
     }
 
@@ -55,8 +56,7 @@ private:
     void OnLeftButtonDown(wxMouseEvent& event);
     void OnLeftButtonUp(wxMouseEvent& event);
     void LogicPosToIndex(int xLogic, int yLogic, int *xIndex, int *yIndex);
-    void ShowOneCell(wxDC& dc, const int xIndex, const int yIndex,
-                     const int y, const int u, const int v);
+    void ShowOneCell(wxDC& dc, const int xIndex, const int yIndex);
     void AdaptiveSize(wxDC& dc);
     void OnBufferChanged(wxCommandEvent& event);
     void OnPosChanged(wxCommandEvent& event);
@@ -69,6 +69,7 @@ public:
     void SetWidth(const int width){m_iWidthPerPixel = width;}
     int  GetHeight()const{return m_iHeightPerPixel;}
     int  GetWidth()const{return m_iWidthPerPixel;}
+    void Clear();
 
 private:
     wxPoint         m_FocusPos;
@@ -86,8 +87,10 @@ private:
     int             m_iXOffset;
     int             m_iYOffset;
     wxPoint         m_LeftDownPos;
-    wxImage*        m_pCursorImg;
-    wxCursor*       m_pMidCursor;
+    TComPicYuv*     m_pBuffer;
+    MSG_block_pos*  m_pBlockInfo;
+    /* true: outside, false: inside*/
+    bool            m_bPaintEventSource;
 
     DECLARE_EVENT_TABLE();
 };
