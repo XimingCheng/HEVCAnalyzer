@@ -13,7 +13,8 @@ END_DECLARE_EVENT_TYPES()
 
 struct MSG_block_pos
 {
-    int _iLCUID;
+    int _iBlockX;
+    int _iBlockY;
     int _iBlockWidth;
     int _iBlockHeight;
     int _iOffsetX;

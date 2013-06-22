@@ -116,9 +116,10 @@ void PicViewCtrl::OnMouseMove(wxMouseEvent& event)
         int posx = event.m_x/m_dScaleRate;
         int posy = event.m_y/m_dScaleRate;
         int id = GetCurLCURasterID(posx, posy);
-        m_PosData._iLCUID = id;
-        m_PosData._iBlockWidth  = m_LCUSize.x;
-        m_PosData._iBlockHeight = m_LCUSize.y;
+        m_PosData._iBlockX      = m_curLCUStart.x;
+        m_PosData._iBlockY      = m_curLCUStart.y;
+        m_PosData._iBlockWidth  = m_curLCUEnd.x - m_curLCUStart.x;
+        m_PosData._iBlockHeight = m_curLCUEnd.y - m_curLCUStart.y;
         m_PosData._iOffsetX     = posx % m_LCUSize.x;
         m_PosData._iOffsetY     = posy % m_LCUSize.y;
         wxCommandEvent event(wxEVT_POSITION_CHANGED, wxID_ANY);

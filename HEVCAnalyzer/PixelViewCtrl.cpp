@@ -286,13 +286,9 @@ void PixelViewCtrl::AdaptiveSize(wxDC& dc)
 
 void PixelViewCtrl::OnBufferChanged(wxCommandEvent& event)
 {
-    //wxMessageBox(_T("OnBufferChanged"));
 }
 
 void PixelViewCtrl::OnPosChanged(wxCommandEvent& event)
 {
     MSG_block_pos* pData = (MSG_block_pos*)event.GetClientData();
-//    wxMessageBox(wxString::Format(_T("OnPosChanged %d %d %d %d %d"), pData->_iLCUID,
-//                                  pData->_iBlockWidth, pData->_iBlockHeight, pData->_iOffsetX,
-//                                  pData->_iOffsetY));
 }
