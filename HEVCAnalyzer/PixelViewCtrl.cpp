@@ -56,7 +56,11 @@ void PixelViewCtrl::Render(wxDC& dc)
         GetClientSize(&virtualwidth, &virtualheight);
         int xbase, ybase;
         xbase = max(0, m_FocusPos.x*m_iWidthPerPixel+m_iXOffset-(virtualwidth-m_iWidthPerPixel)/2);
+        xbase = xbase > 2*m_iXOffset+m_iWidthPerPixel*m_iCUWidth-virtualwidth ?
+                2*m_iXOffset+m_iWidthPerPixel*m_iCUWidth-virtualwidth : xbase;
         ybase = max(0, m_FocusPos.y*m_iHeightPerPixel+m_iYOffset-(virtualheight-m_iHeightPerPixel)/2);
+        ybase = ybase > 2*m_iYOffset+m_iHeightPerPixel*m_iCUHeight-virtualheight ?
+                2*m_iYOffset+m_iHeightPerPixel*m_iCUHeight-virtualheight : ybase;
         if(m_bPaintEventSource)
         {
             Scroll(xbase/(m_iWidthPerPixel/5), ybase/(m_iHeightPerPixel/5));
@@ -268,7 +272,7 @@ void PixelViewCtrl::ShowOneCell(wxDC& dc, const int xIndex, const int yIndex)
     dc.SetFont(*wxSMALL_FONT);
     dc.SetTextForeground(wxColour(55, 86, 132));
     dc.GetTextExtent(Ystr, &textwidth, &textheight);
-    int ystart = (m_iHeightPerPixel-3*textheight-2*gap)/2;
+    int ystart = (m_iHeightPerPixel-4*textheight-3*gap)/2;
     int xstart = (m_iWidthPerPixel-textwidth)/2;
     dc.DrawText(Ystr, xbase+xstart, ybase+ystart);
 
@@ -279,6 +283,12 @@ void PixelViewCtrl::ShowOneCell(wxDC& dc, const int xIndex, const int yIndex)
     dc.GetTextExtent(Vstr, &textwidth, &textheight);
     xstart = (m_iWidthPerPixel-textwidth)/2;
     dc.DrawText(Vstr, xbase+xstart, ybase+ystart+2*(gap+textheight));
+    
+    wxString posstr = wxString::Format(_T("(%d,%d)"), xIndex, yIndex);
+    dc.GetTextExtent(posstr, &textwidth, &textheight);
+    xstart = (m_iWidthPerPixel-textwidth)/2;
+    dc.DrawText(posstr, xbase+xstart, ybase+ystart+3*(gap+textheight));
+
 
     dc.SetFont(oldfont);
     dc.SetTextForeground(oldcolor);
@@ -326,8 +336,8 @@ void PixelViewCtrl::AdaptiveSize(wxDC& dc)
     int textwidth, textheight;
     dc.GetTextExtent(_T("ffff"),&textwidth, &textheight);
     int gap = 1;
-    m_iHeightPerPixel = 3*textheight+2*gap+10;
-    m_iWidthPerPixel = textwidth+30;
+    m_iHeightPerPixel = 4*textheight+3*gap+10;
+    m_iWidthPerPixel = textwidth+40;
 
     dc.SetFont(oldfont);
 }
