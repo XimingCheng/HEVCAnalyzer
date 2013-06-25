@@ -21,12 +21,15 @@ END_EVENT_TABLE()
 
 void PixelViewCtrl::OnPaint(wxPaintEvent& event)
 {
-    wxAutoBufferedPaintDC dc(this);
+    //wxAutoBufferedPaintDC dc(this);
+    wxPaintDC dc(this);
     DoPrepareDC(dc);
     Render(dc);
+
+
 }
 
-void PixelViewCtrl::Render(wxDC& dc)
+void PixelViewCtrl::Render(wxDC &dc)
 {
     if(!m_pBuffer)
     {
@@ -49,7 +52,7 @@ void PixelViewCtrl::Render(wxDC& dc)
         dc.SetTextForeground(oldcolor);
 
     }
-    else 
+    else
     {
         AdaptiveSize(dc);
         SetVirtualSize(2*m_iXOffset+m_iCUWidth*m_iWidthPerPixel,
@@ -60,11 +63,6 @@ void PixelViewCtrl::Render(wxDC& dc)
         int xbase, ybase;
         if(m_bPaintEventSource)
         {
-//            xbase = max(0, m_FocusPos.x*m_iWidthPerPixel+m_iXOffset-(virtualwidth-m_iWidthPerPixel)/2);
-//            xbase = xbase > 2*m_iXOffset+m_iWidthPerPixel*m_iCUWidth-virtualwidth ? 2*m_iXOffset+m_iWidthPerPixel*m_iCUWidth-virtualwidth : xbase;
-//            ybase = max(0, m_FocusPos.y*m_iHeightPerPixel+m_iYOffset-(virtualheight-m_iHeightPerPixel)/2);
-//            ybase = ybase > 2*m_iYOffset+m_iHeightPerPixel*m_iCUHeight-virtualheight ? 2*m_iYOffset+m_iHeightPerPixel*m_iCUHeight-virtualheight : ybase;
-            //Scroll(xbase/(m_iWidthPerPixel/5), ybase/(m_iHeightPerPixel/5));
             CalcUnscrolledPosition(0, 0, &xbase, &ybase);
             m_bPaintEventSource = false;
         }
@@ -73,18 +71,36 @@ void PixelViewCtrl::Render(wxDC& dc)
             CalcUnscrolledPosition(0, 0, &xbase, &ybase);
         }
 
-        DrawBackground(dc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
-        DrawGrid(dc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
-        DrawFocusLine(dc);
         int xindexstart = max(0, (xbase-m_iXOffset)/m_iWidthPerPixel-1);
         int xindexend = min(m_iCUWidth-1, (xbase+virtualwidth-m_iXOffset)/m_iWidthPerPixel+1);
         int yindexstart = max(0, (ybase-m_iYOffset)/m_iHeightPerPixel-1);
         int yindexend = min(m_iCUHeight-1, (ybase+virtualheight-m_iYOffset)/m_iHeightPerPixel+1);
 //        g_LogMessage(wxString::Format(_T("x %d-%d"), xindexstart, xindexend));
 //        g_LogMessage(wxString::Format(_T("y %d-%d"), yindexstart, yindexend));
-        for(int i = xindexstart; i <= xindexend; i++)
-            for(int j = yindexstart; j <= yindexend; j++)
-                ShowOneCell(dc, i, j);
+
+        if(IsDoubleBuffered())
+        {
+            DrawBackground(dc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
+            DrawGrid(dc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
+            DrawFocusLine(dc);
+            for(int i = xindexstart; i <= xindexend; i++)
+                for(int j = yindexstart; j <= yindexend; j++)
+                    ShowOneCell(dc, i, j);
+        }
+        else
+        {
+            wxMemoryDC mdc;
+            wxBitmap bm = wxBitmap(2*m_iXOffset+m_iCUWidth*m_iWidthPerPixel+30, 2*m_iYOffset+m_iCUHeight*m_iHeightPerPixel+30);
+            mdc.SelectObject(bm);
+            DrawBackground(mdc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
+            DrawGrid(mdc, xbase, ybase, xbase+virtualwidth, ybase+virtualheight);
+            DrawFocusLine(mdc);
+            for(int i = xindexstart; i <= xindexend; i++)
+                for(int j = yindexstart; j <= yindexend; j++)
+                    ShowOneCell(mdc, i, j);
+            dc.Blit(xbase, ybase, virtualwidth, virtualheight, &mdc, xbase, ybase);
+        }
+
     }
 }
 
@@ -281,7 +297,7 @@ void PixelViewCtrl::ShowOneCell(wxDC& dc, const int xIndex, const int yIndex)
     dc.GetTextExtent(Vstr, &textwidth, &textheight);
     xstart = (m_iWidthPerPixel-textwidth)/2;
     dc.DrawText(Vstr, xbase+xstart, ybase+ystart+2*(gap+textheight));
-    
+
     wxString posstr = wxString::Format(_T("(%d,%d)"), xIndex, yIndex);
     dc.GetTextExtent(posstr, &textwidth, &textheight);
     xstart = (m_iWidthPerPixel-textwidth)/2;
@@ -357,7 +373,7 @@ void PixelViewCtrl::OnPosChanged(wxCommandEvent& event)
     m_FocusPos.x = m_pBlockInfo->_iOffsetX;
     m_FocusPos.y = m_pBlockInfo->_iOffsetY;
     m_bPaintEventSource = true;
-    wxPaintDC dc(this);
+    wxClientDC dc(this);
     AdaptiveSize(dc);
     SetVirtualSize(2*m_iXOffset+m_iCUWidth*m_iWidthPerPixel,
                    2*m_iYOffset+m_iCUHeight*m_iHeightPerPixel);
