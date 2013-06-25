@@ -39,6 +39,9 @@ void PixelViewCtrl::Render(wxDC& dc)
         dc.GetTextExtent(str, &textwidth, &textheight);
         int clientwidth, clientheight;
         GetClientSize(&clientwidth, &clientheight);
+
+        DrawBackground(dc, 0, 0, clientwidth, clientheight);
+
         SetVirtualSize(clientwidth, clientheight);
         dc.DrawText(str, (clientwidth-textwidth)/2, (clientheight-textheight)/2);
 
@@ -55,15 +58,14 @@ void PixelViewCtrl::Render(wxDC& dc)
         int virtualwidth, virtualheight;
         GetClientSize(&virtualwidth, &virtualheight);
         int xbase, ybase;
-        xbase = max(0, m_FocusPos.x*m_iWidthPerPixel+m_iXOffset-(virtualwidth-m_iWidthPerPixel)/2);
-        xbase = xbase > 2*m_iXOffset+m_iWidthPerPixel*m_iCUWidth-virtualwidth ?
-                2*m_iXOffset+m_iWidthPerPixel*m_iCUWidth-virtualwidth : xbase;
-        ybase = max(0, m_FocusPos.y*m_iHeightPerPixel+m_iYOffset-(virtualheight-m_iHeightPerPixel)/2);
-        ybase = ybase > 2*m_iYOffset+m_iHeightPerPixel*m_iCUHeight-virtualheight ?
-                2*m_iYOffset+m_iHeightPerPixel*m_iCUHeight-virtualheight : ybase;
         if(m_bPaintEventSource)
         {
-            Scroll(xbase/(m_iWidthPerPixel/5), ybase/(m_iHeightPerPixel/5));
+//            xbase = max(0, m_FocusPos.x*m_iWidthPerPixel+m_iXOffset-(virtualwidth-m_iWidthPerPixel)/2);
+//            xbase = xbase > 2*m_iXOffset+m_iWidthPerPixel*m_iCUWidth-virtualwidth ? 2*m_iXOffset+m_iWidthPerPixel*m_iCUWidth-virtualwidth : xbase;
+//            ybase = max(0, m_FocusPos.y*m_iHeightPerPixel+m_iYOffset-(virtualheight-m_iHeightPerPixel)/2);
+//            ybase = ybase > 2*m_iYOffset+m_iHeightPerPixel*m_iCUHeight-virtualheight ? 2*m_iYOffset+m_iHeightPerPixel*m_iCUHeight-virtualheight : ybase;
+            //Scroll(xbase/(m_iWidthPerPixel/5), ybase/(m_iHeightPerPixel/5));
+            CalcUnscrolledPosition(0, 0, &xbase, &ybase);
             m_bPaintEventSource = false;
         }
         else
@@ -136,14 +138,10 @@ void PixelViewCtrl::DrawFocusLine(wxDC& dc)
 
     int xpos = m_FocusPos.x;
     int ypos = m_FocusPos.y;
-    dc.DrawLine(xpos*m_iWidthPerPixel+m_iXOffset, (ypos+1)*m_iHeightPerPixel+m_iYOffset,
-                xpos*m_iWidthPerPixel+m_iXOffset, m_iYOffset);
-    dc.DrawLine((xpos+1)*m_iWidthPerPixel+m_iXOffset, ypos*m_iHeightPerPixel+m_iYOffset,
-                m_iXOffset, ypos*m_iHeightPerPixel+m_iYOffset);
-    dc.DrawLine((xpos+1)*m_iWidthPerPixel+m_iXOffset, (ypos+1)*m_iHeightPerPixel+m_iYOffset,
-                (xpos+1)*m_iWidthPerPixel+m_iXOffset, ypos*m_iHeightPerPixel+m_iYOffset);
-    dc.DrawLine((xpos+1)*m_iWidthPerPixel+m_iXOffset, (ypos+1)*m_iHeightPerPixel+m_iYOffset,
-                 xpos*m_iWidthPerPixel+m_iXOffset, (ypos+1)*m_iHeightPerPixel+m_iYOffset);
+    dc.DrawLine(xpos*m_iWidthPerPixel+m_iXOffset, (ypos+1)*m_iHeightPerPixel+m_iYOffset, xpos*m_iWidthPerPixel+m_iXOffset, m_iYOffset);
+    dc.DrawLine((xpos+1)*m_iWidthPerPixel+m_iXOffset, ypos*m_iHeightPerPixel+m_iYOffset, m_iXOffset, ypos*m_iHeightPerPixel+m_iYOffset);
+    dc.DrawLine((xpos+1)*m_iWidthPerPixel+m_iXOffset, (ypos+1)*m_iHeightPerPixel+m_iYOffset, (xpos+1)*m_iWidthPerPixel+m_iXOffset, ypos*m_iHeightPerPixel+m_iYOffset);
+    dc.DrawLine((xpos+1)*m_iWidthPerPixel+m_iXOffset, (ypos+1)*m_iHeightPerPixel+m_iYOffset, xpos*m_iWidthPerPixel+m_iXOffset, (ypos+1)*m_iHeightPerPixel+m_iYOffset);
 
     dc.SetPen(oldpen);
 }
@@ -359,6 +357,21 @@ void PixelViewCtrl::OnPosChanged(wxCommandEvent& event)
     m_FocusPos.x = m_pBlockInfo->_iOffsetX;
     m_FocusPos.y = m_pBlockInfo->_iOffsetY;
     m_bPaintEventSource = true;
+    wxPaintDC dc(this);
+    AdaptiveSize(dc);
+    SetVirtualSize(2*m_iXOffset+m_iCUWidth*m_iWidthPerPixel,
+                   2*m_iYOffset+m_iCUHeight*m_iHeightPerPixel);
+    SetScrollRate(m_iWidthPerPixel/5, m_iHeightPerPixel/5);
+    int virtualwidth, virtualheight;
+    GetClientSize(&virtualwidth, &virtualheight);
+    int xbase, ybase;
+    xbase = max(0, m_FocusPos.x*m_iWidthPerPixel+m_iXOffset-(virtualwidth-m_iWidthPerPixel)/2);
+    xbase = xbase > 2*m_iXOffset+m_iWidthPerPixel*m_iCUWidth-virtualwidth ?
+            2*m_iXOffset+m_iWidthPerPixel*m_iCUWidth-virtualwidth : xbase;
+    ybase = max(0, m_FocusPos.y*m_iHeightPerPixel+m_iYOffset-(virtualheight-m_iHeightPerPixel)/2);
+    ybase = ybase > 2*m_iYOffset+m_iHeightPerPixel*m_iCUHeight-virtualheight ?
+            2*m_iYOffset+m_iHeightPerPixel*m_iCUHeight-virtualheight : ybase;
+    Scroll(xbase/(m_iWidthPerPixel/5), ybase/(m_iHeightPerPixel/5));
     Refresh();
 }
 
