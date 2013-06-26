@@ -104,9 +104,6 @@ void MainFrame::CreateNoteBookPane()
     m_mgr.AddPane(CreateLeftNotebook(), wxAuiPaneInfo().Name(_T("Left NoteBook")).Caption(_T("YUV info")).
                   BestSize(wxSize(300,100)).MaxSize(wxSize(500,100)).Left().Layer(1));
     m_mgr.AddPane(CreateCenterNotebook(), wxAuiPaneInfo().Name(_T("Center NoteBook")).Center().Layer(0));
-//    m_mgr.AddPane(new wxTextCtrl(this,wxID_ANY, _T("test"),
-//                          wxPoint(0,0), wxSize(150,90),
-//                          wxNO_BORDER | wxTE_MULTILINE), wxAuiPaneInfo().Name(_T("Bottom NoteBook")).Bottom().Layer(1));
     m_mgr.AddPane(CreateBottomNotebook(), wxAuiPaneInfo().Name(_T("Bottom NoteBook")).Bottom().Layer(1));
 }
 
@@ -145,18 +142,37 @@ wxNotebook* MainFrame::CreateLeftNotebook()
 {
     wxNotebook* ctrl = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0 );
     wxGridSizer* gSizer = new wxGridSizer( 1, 0, 0 );
-    wxPanel* pThumbnalListPanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    wxPanel* pThumbnalListPanel = new wxPanel(ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
     m_pThumbnalList = new wxSimpleHtmlListBox(pThumbnalListPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0);
-    gSizer->Add( m_pThumbnalList, 0, wxEXPAND, 5 );
-    pThumbnalListPanel->SetSizer( gSizer );
+    gSizer->Add(m_pThumbnalList, 0, wxEXPAND, 5);
+    pThumbnalListPanel->SetSizer(gSizer);
     pThumbnalListPanel->Layout();
-    ctrl->AddPage( pThumbnalListPanel, _T("Thumbnails"), true );
-    wxPanel* pCUPixelPanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-    m_pPixelViewCtrl = new PixelViewCtrl(pCUPixelPanel, wxID_ANY);
+    ctrl->AddPage(pThumbnalListPanel, _T("Thumbnails"), true);
+    // aad ruler for cu pixel
+    wxFlexGridSizer* fgSizerUp = new wxFlexGridSizer(2, 1, 0, 0);
+    wxFlexGridSizer* fgSizerLeft = new wxFlexGridSizer(1, 2, 0, 0);
+    fgSizerUp->AddGrowableCol(0);
+    fgSizerUp->AddGrowableRow(1);
+    fgSizerUp->SetFlexibleDirection(wxBOTH);
+    fgSizerUp->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
+    fgSizerLeft->AddGrowableCol(1);
+    fgSizerLeft->AddGrowableRow(0);
+    fgSizerLeft->SetFlexibleDirection(wxBOTH);
+    fgSizerLeft->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
+
+    wxPanel* pCUPixelPanel = new wxPanel(ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+    m_pPixelHRuler = new RulerCtrl(pCUPixelPanel, wxID_ANY);
+    m_pPixelVRuler = new RulerCtrl(pCUPixelPanel, wxID_ANY, true);
+    fgSizerUp->Add(m_pPixelHRuler, 0, wxEXPAND, 5);
+    fgSizerLeft->Add(m_pPixelVRuler, 0, wxEXPAND, 5);
+
+    m_pPixelViewCtrl = new PixelViewCtrl(pCUPixelPanel, wxID_ANY, m_pPixelHRuler, m_pPixelVRuler);
     wxGridSizer* pixelSizer = new wxGridSizer(1, 0, 0);
     pixelSizer->Add(m_pPixelViewCtrl, 0, wxEXPAND, 5 );
-    pCUPixelPanel->SetSizer(pixelSizer);
+    pCUPixelPanel->SetSizer(fgSizerUp);
     pCUPixelPanel->Layout();
+    fgSizerLeft->Add(m_pPixelViewCtrl, 1, wxEXPAND, 5);
+    fgSizerUp->Add(fgSizerLeft, 1, wxEXPAND, 5);
     ctrl->AddPage( pCUPixelPanel, _T("CU Pixels"), false);
     return ctrl;
 }
@@ -181,7 +197,7 @@ wxNotebook* MainFrame::CreateCenterNotebook()
     fgSizerUp->Add(m_pPicHRuler, 0, wxEXPAND, 5);
     fgSizerLeft->Add(m_pPicVRuler, 0, wxEXPAND, 5);
     //wxScrolledWindow
-    m_pDecodeScrolledWin = new wxScrolledWindow( pDecodePanel, -1, wxDefaultPosition, wxDefaultSize, wxScrolledWindowStyle);
+    m_pDecodeScrolledWin = new wxScrolledWindow(pDecodePanel, -1, wxDefaultPosition, wxDefaultSize, wxScrolledWindowStyle);
     m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY, m_pThumbnalList, m_pPicHRuler,
                                      m_pPicVRuler, m_pPixelViewCtrl, this);
     m_pPicViewCtrl->SetSizeHints(300, 300);
@@ -395,3 +411,12 @@ void MainFrame::OnIdle(wxIdleEvent& event)
     }
 }
 
+CenterPageManger::~CenterPageManger()
+{
+    Destory();
+}
+
+void CenterPageManger::Destory()
+{
+    std::size_t size = m_PageList.size();
+}

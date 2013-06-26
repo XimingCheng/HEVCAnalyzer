@@ -68,7 +68,7 @@ void PixelViewCtrl::Render(wxDC &dc)
         {
             CalcUnscrolledPosition(0, 0, &xbase, &ybase);
         }
-
+        SetRulerCtrlFited();
         int xindexstart = max(0, (xbase-m_iXOffset)/m_iWidthPerPixel-1);
         int xindexend = min(m_iCUWidth-1, (xbase+virtualwidth-m_iXOffset)/m_iWidthPerPixel+1);
         int yindexstart = max(0, (ybase-m_iYOffset)/m_iHeightPerPixel-1);
@@ -403,4 +403,24 @@ void PixelViewCtrl::Clear()
     m_iWidthPerPixel = 70;
     m_bHexFormat = true;
     Refresh();
+}
+
+void PixelViewCtrl::SetRulerCtrlFited()
+{
+    int xbase, ybase;
+    CalcUnscrolledPosition(0, 0, &xbase, &ybase);
+    m_pHRuler->SetStartValue(0);
+    m_pVRuler->SetStartValue(0);
+    m_pHRuler->SetStartPos(-xbase + m_pHRuler->GetRulerWidth() + m_iXOffset);
+    m_pVRuler->SetStartPos(-ybase + m_iYOffset);
+    m_pHRuler->SetEndValue(m_iCUWidth);
+    m_pVRuler->SetEndValue(m_iCUHeight);
+    m_pHRuler->SetValuePerUnit(1);
+    m_pVRuler->SetValuePerUnit(1);
+    m_pHRuler->SetLongMarkLen(8);
+    m_pVRuler->SetLongMarkLen(8);
+    m_pHRuler->SetTextMarkLen(1);
+    m_pVRuler->SetTextMarkLen(1);
+    m_pHRuler->SetScaleRate(m_iWidthPerPixel);
+    m_pVRuler->SetScaleRate(m_iHeightPerPixel);
 }

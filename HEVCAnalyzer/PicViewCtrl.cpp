@@ -61,15 +61,18 @@ void PicViewCtrl::Render(wxGraphicsContext* gc, wxGraphicsContext* gct)
         gct->SetPen(wxPen(wxColor(255, 255, 255, 100)));
         gct->DrawRectangle(m_curLCUStart.x*m_dScaleRate, m_curLCUStart.y*m_dScaleRate, (m_curLCUEnd.x - m_curLCUStart.x)*m_dScaleRate,
                            (m_curLCUEnd.y - m_curLCUStart.y)*m_dScaleRate);
-        if(m_iSelectedLCUId >= 0)
+        if(m_iSelectedLCUId < 0)
         {
-            gct->SetPen(wxPen(wxColor(255, 0, 0, 128)));
-            gct->DrawRectangle(m_curSelLCUStart.x*m_dScaleRate, m_curSelLCUStart.y*m_dScaleRate, (m_curSelLCUEnd.x - m_curSelLCUStart.x)*m_dScaleRate,
-                           (m_curSelLCUEnd.y - m_curSelLCUStart.y)*m_dScaleRate);
+            m_iSelectedLCUId = 0;
+            CalStartEndPointByLCUId(m_iSelectedLCUId, m_curSelLCUStart, m_curSelLCUEnd);
         }
+        gct->SetPen(wxPen(wxColor(255, 0, 0, 128)));
+        gct->DrawRectangle(m_curSelLCUStart.x*m_dScaleRate, m_curSelLCUStart.y*m_dScaleRate, (m_curSelLCUEnd.x - m_curSelLCUStart.x)*m_dScaleRate,
+                       (m_curSelLCUEnd.y - m_curSelLCUStart.y)*m_dScaleRate);
     }
     else
         DrawNoPictureTips(gc);
+    m_bFullRefresh = true;
 }
 
 void PicViewCtrl::SetBitmap(wxBitmap bitmap, wxBitmap bitmapY, wxBitmap bitmapU, wxBitmap bitmapV)
@@ -182,6 +185,11 @@ void PicViewCtrl::OnMouseLButtonUp(wxMouseEvent& event)
 {
     if(HasCapture())
     {
+        if(m_bClearFlag)
+        {
+            ReleaseMouse();
+            return;
+        }
         // deal with the m_iSelectedLCUId
         int posx = event.m_x/m_dScaleRate;
         int posy = event.m_y/m_dScaleRate;

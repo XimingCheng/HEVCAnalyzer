@@ -4,6 +4,7 @@
 #define TIMER_ID  wxID_HIGHEST+100
 
 #include "HEVCAnalyzer.h"
+#include "RulerCtrl.h"
 #include "wx/timer.h"
 
 BEGIN_DECLARE_EVENT_TYPES()
@@ -26,19 +27,19 @@ class PixelViewCtrl : public wxScrolledWindow
 public:
     DECLARE_DYNAMIC_CLASS(PixelViewCtrl);
     PixelViewCtrl(){}
-    PixelViewCtrl(wxWindow *parent, wxWindowID id)
+    PixelViewCtrl(wxWindow *parent, wxWindowID id, RulerCtrl* pHRuler, RulerCtrl* pVRuler)
         : wxScrolledWindow(parent, id, wxDefaultPosition, wxDefaultSize,
         wxFULL_REPAINT_ON_RESIZE), m_FocusPos(10, 10),
         m_iCUHeight(32), m_iCUWidth(32), m_iHeightPerPixel(90),
         m_iWidthPerPixel(70), m_bHexFormat(true), m_bScrollMode(false),
         m_iXOffset(20), m_iYOffset(20), m_pBuffer(NULL), m_pBlockInfo(NULL),
-        m_bPaintEventSource(false)
+        m_bPaintEventSource(false), m_pHRuler(pHRuler), m_pVRuler(pVRuler)
     {
         SetBackgroundStyle(wxBG_STYLE_CUSTOM);
         SetScrollRate(5, 7);
-//        SetVirtualSize(2*m_iXOffset+m_iCUWidth*m_iWidthPerPixel,
-//                       2*m_iYOffset+m_iCUHeight*m_iHeightPerPixel);
         m_pTimer = new wxTimer(this, TIMER_ID);
+        m_pHRuler->SetAdaptiveMarkLen(false);
+        m_pVRuler->SetAdaptiveMarkLen(false);
     }
 
 private:
@@ -60,6 +61,7 @@ private:
     void AdaptiveSize(wxDC& dc);
     void OnBufferChanged(wxCommandEvent& event);
     void OnPosChanged(wxCommandEvent& event);
+    void SetRulerCtrlFited();
 
 public:
     void SetFocusPos(const wxPoint& pos);
@@ -91,6 +93,8 @@ private:
     MSG_block_pos*  m_pBlockInfo;
     /* true: outside, false: inside*/
     bool            m_bPaintEventSource;
+    RulerCtrl*      m_pHRuler;
+    RulerCtrl*      m_pVRuler;
 
     DECLARE_EVENT_TABLE();
 };

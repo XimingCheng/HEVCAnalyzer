@@ -10,7 +10,8 @@ END_EVENT_TABLE()
 RulerCtrl::RulerCtrl(wxWindow* parent, wxWindowID id, bool bV)
     : wxControl (parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxFULL_REPAINT_ON_RESIZE),
     m_bVertical(bV), m_dStartPos(24), m_dEndPos(0), m_iStartValue(0.0), m_iEndValue(0), m_iValuePerUnit(4),
-    m_dScaleRate(1.0), m_iLongMarkLen(16), m_iTextMarkLen(64), m_iRulerWidth(24), m_iTagValue(-1)
+    m_dScaleRate(1.0), m_iLongMarkLen(16), m_iTextMarkLen(64), m_iRulerWidth(24), m_iTagValue(-1),
+    m_bAdaptiveMarkLen(true)
 {
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
     if(m_bVertical)
@@ -27,7 +28,8 @@ void RulerCtrl::OnPaint(wxPaintEvent& event)
     wxAutoBufferedPaintDC dc(this);
     PrepareDC(dc);
     wxGraphicsContext *gc = wxGraphicsContext::Create(dc);
-    SetAdaptiveMarkLen();
+    if(m_bAdaptiveMarkLen)
+        SetAdaptiveMarkLen();
     Render(gc);
 }
 

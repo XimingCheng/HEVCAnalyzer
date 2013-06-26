@@ -19,6 +19,7 @@ public:
     int  GetLongMarkLen() const { return m_iLongMarkLen; }
     int  GetTextMarkLen() const { return m_iTextMarkLen; }
     int  GetRulerWidth() const { return m_iRulerWidth; }
+    bool IsAdaptiveMarkLen() const { return m_bAdaptiveMarkLen; }
     void SetStartPos(const double start);
     void SetEndPos(const double end);
     void SetStartValue(const int start);
@@ -28,6 +29,7 @@ public:
     void SetTextMarkLen(const int len);
     void SetScaleRate(const double rate);
     void SetTagValue(const int value);
+    void SetAdaptiveMarkLen(const bool b) { m_bAdaptiveMarkLen = b; }
 
 private:
     void OnPaint(wxPaintEvent& event);
@@ -48,6 +50,7 @@ private:
     int        m_iTextMarkLen;
     int        m_iRulerWidth;
     int        m_iTagValue;
+    bool       m_bAdaptiveMarkLen;
 
     DECLARE_EVENT_TABLE();
 };
