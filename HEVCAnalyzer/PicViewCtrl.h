@@ -60,10 +60,10 @@ private:
 
     void Render(wxGraphicsContext* gc, wxGraphicsContext* gct);
     void ChangeScaleRate(const double rate);
-    int  GetCurLCURasterID(const double x, const double y);
+    int  GetCurLCURasterID(const double x, const double y, wxPoint& start, wxPoint& end);
     void MoveLCURect(const Direction& d);
     bool ShowPageByDiffNumber(const int diff);
-    void CalStartEndPointByLCUId(const int id);
+    void CalStartEndPointByLCUId(const int id, wxPoint& start, wxPoint& end);
     void DrawBackGround(wxGraphicsContext* gc);
     void DrawNoPictureTips(wxGraphicsContext* gc);
     void DrawGrid(wxGraphicsContext* gc);
@@ -104,6 +104,9 @@ private:
     bool                 m_bFullRefresh;
     wxWindow*            m_pPixelCtrl;
     MSG_block_pos        m_PosData;
+    int                  m_iSelectedLCUId;
+    wxPoint              m_curSelLCUStart;
+    wxPoint              m_curSelLCUEnd;
 
     DECLARE_EVENT_TABLE();
 };

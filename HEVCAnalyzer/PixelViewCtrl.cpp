@@ -25,8 +25,6 @@ void PixelViewCtrl::OnPaint(wxPaintEvent& event)
     wxPaintDC dc(this);
     DoPrepareDC(dc);
     Render(dc);
-
-
 }
 
 void PixelViewCtrl::Render(wxDC &dc)
@@ -316,6 +314,7 @@ void PixelViewCtrl::LogicPosToIndex(int xLogic, int yLogic, int *xIndex, int *yI
 
 void PixelViewCtrl:: OnLeftButtonDown(wxMouseEvent& event)
 {
+    if(!m_pBuffer) return;
     wxPoint pos = event.GetPosition();
     int xlogic, ylogic;
     CalcUnscrolledPosition(pos.x, pos.y, &xlogic, &ylogic);
@@ -361,8 +360,8 @@ void PixelViewCtrl::OnBufferChanged(wxCommandEvent& event)
     m_pBuffer = (TComPicYuv*)event.GetClientData();
     m_FocusPos.x = 0;
     m_FocusPos.y = 0;
+    Scroll(0, 0);
     Refresh();
-
 }
 
 void PixelViewCtrl::OnPosChanged(wxCommandEvent& event)

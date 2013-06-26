@@ -22,7 +22,7 @@ PicViewCtrl::PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* p
     m_dScaleRateStep(0.02), m_delta(-1, -1), m_curLCUStart(-1, -1), m_curLCUEnd(-1, -1), m_iLCURasterID(-1), m_pList(pList),
     m_pFrame(pFrame), m_bShowGrid(true), m_bMouseWheelPageUpDown(false), m_bShowPUType(true), m_pBuffer(NULL),
     m_iYUVBit(8), m_iShowWhich_O_Y_U_V(MODE_ORG), m_pHRuler(pHRuler), m_pVRuler(pVRuler), m_bFullRefresh(true),
-    m_pPixelCtrl(pPixelCtrl)
+    m_pPixelCtrl(pPixelCtrl), m_iSelectedLCUId(-1), m_curSelLCUStart(-1, -1), m_curSelLCUEnd(-1, -1)
 {
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 }
@@ -61,6 +61,12 @@ void PicViewCtrl::Render(wxGraphicsContext* gc, wxGraphicsContext* gct)
         gct->SetPen(wxPen(wxColor(255, 255, 255, 100)));
         gct->DrawRectangle(m_curLCUStart.x*m_dScaleRate, m_curLCUStart.y*m_dScaleRate, (m_curLCUEnd.x - m_curLCUStart.x)*m_dScaleRate,
                            (m_curLCUEnd.y - m_curLCUStart.y)*m_dScaleRate);
+        if(m_iSelectedLCUId >= 0)
+        {
+            gct->SetPen(wxPen(wxColor(255, 0, 0, 128)));
+            gct->DrawRectangle(m_curSelLCUStart.x*m_dScaleRate, m_curSelLCUStart.y*m_dScaleRate, (m_curSelLCUEnd.x - m_curSelLCUStart.x)*m_dScaleRate,
+                           (m_curSelLCUEnd.y - m_curSelLCUStart.y)*m_dScaleRate);
+        }
     }
     else
         DrawNoPictureTips(gc);
@@ -110,21 +116,21 @@ void PicViewCtrl::OnMouseMove(wxMouseEvent& event)
             SetRulerCtrlFited();
         }
         m_bFullRefresh = false;
-        wxPoint begin_org = m_curLCUStart;
-        wxPoint end_org   = m_curLCUEnd;
-        wxRect refreshRect;
         int posx = event.m_x/m_dScaleRate;
         int posy = event.m_y/m_dScaleRate;
-        int id = GetCurLCURasterID(posx, posy);
-        m_PosData._iBlockX      = m_curLCUStart.x;
-        m_PosData._iBlockY      = m_curLCUStart.y;
-        m_PosData._iBlockWidth  = m_curLCUEnd.x - m_curLCUStart.x;
-        m_PosData._iBlockHeight = m_curLCUEnd.y - m_curLCUStart.y;
-        m_PosData._iOffsetX     = posx % m_LCUSize.x;
-        m_PosData._iOffsetY     = posy % m_LCUSize.y;
-        wxCommandEvent event(wxEVT_POSITION_CHANGED, wxID_ANY);
-        event.SetClientData(&m_PosData);
-        wxPostEvent(m_pPixelCtrl, event);
+        int id = GetCurLCURasterID(posx, posy, m_curLCUStart, m_curLCUEnd);
+        if(id == m_iSelectedLCUId)
+        {
+            m_PosData._iBlockX      = m_curLCUStart.x;
+            m_PosData._iBlockY      = m_curLCUStart.y;
+            m_PosData._iBlockWidth  = m_curLCUEnd.x - m_curLCUStart.x;
+            m_PosData._iBlockHeight = m_curLCUEnd.y - m_curLCUStart.y;
+            m_PosData._iOffsetX     = posx % m_LCUSize.x;
+            m_PosData._iOffsetY     = posy % m_LCUSize.y;
+            wxCommandEvent event(wxEVT_POSITION_CHANGED, wxID_ANY);
+            event.SetClientData(&m_PosData);
+            wxPostEvent(m_pPixelCtrl, event);
+        }
         if(id != m_iLCURasterID)
         {
             CalCurScrolledRectOnPicView(m_rectRefresh);
@@ -141,7 +147,7 @@ void PicViewCtrl::OnEraseBkg(wxEraseEvent& event)
 {
 }
 
-int PicViewCtrl::GetCurLCURasterID(const double x, const double y)
+int PicViewCtrl::GetCurLCURasterID(const double x, const double y, wxPoint& start, wxPoint& end)
 {
     int cuw = m_LCUSize.GetWidth();
     int cuh = m_LCUSize.GetHeight();
@@ -153,10 +159,10 @@ int PicViewCtrl::GetCurLCURasterID(const double x, const double y)
     {
         int x = (col+1)*cuw;
         int y = (row+1)*cuh;
-        m_curLCUStart.x = col*cuw;
-        m_curLCUStart.y = row*cuh;
-        m_curLCUEnd.x   = (x > m_cViewBitmap.GetWidth() ? m_cViewBitmap.GetWidth() : x);
-        m_curLCUEnd.y   = (y > m_cViewBitmap.GetHeight() ? m_cViewBitmap.GetHeight(): y);
+        start.x = col*cuw;
+        start.y = row*cuh;
+        end.x   = (x > m_cViewBitmap.GetWidth() ? m_cViewBitmap.GetWidth() : x);
+        end.y   = (y > m_cViewBitmap.GetHeight() ? m_cViewBitmap.GetHeight(): y);
         return (row*col_num + col);
     }
     return -1;
@@ -175,7 +181,18 @@ void PicViewCtrl::OnMouseLButtonDown(wxMouseEvent& event)
 void PicViewCtrl::OnMouseLButtonUp(wxMouseEvent& event)
 {
     if(HasCapture())
+    {
+        // deal with the m_iSelectedLCUId
+        int posx = event.m_x/m_dScaleRate;
+        int posy = event.m_y/m_dScaleRate;
+        int id = GetCurLCURasterID(posx, posy, m_curSelLCUStart, m_curSelLCUEnd);
+        if(id != m_iSelectedLCUId && id != -1)
+        {
+            m_iSelectedLCUId = id;
+            Refresh();
+        }
         ReleaseMouse();
+    }
 }
 
 void PicViewCtrl::OnMouseWheel(wxMouseEvent& event)
@@ -289,7 +306,7 @@ bool PicViewCtrl::ShowPageByDiffNumber(const int diff)
 
 void PicViewCtrl::MoveLCURect(const Direction& d)
 {
-    if(m_iLCURasterID == -1)
+    if(m_iSelectedLCUId == -1)
         return;
     int cuw = m_LCUSize.GetWidth();
     int cuh = m_LCUSize.GetHeight();
@@ -300,16 +317,16 @@ void PicViewCtrl::MoveLCURect(const Direction& d)
     switch(d)
     {
     case MOVE_UP:
-        id = m_iLCURasterID - col_num;
+        id = m_iSelectedLCUId - col_num;
         break;
     case MOVE_DOWN:
-        id = m_iLCURasterID + col_num;
+        id = m_iSelectedLCUId + col_num;
         break;
     case MOVE_LEFT:
-        id = m_iLCURasterID - 1;
+        id = m_iSelectedLCUId - 1;
         break;
     case MOVE_RIGHT:
-        id = m_iLCURasterID + 1;
+        id = m_iSelectedLCUId + 1;
         break;
     default:
         assert(0);
@@ -322,10 +339,19 @@ void PicViewCtrl::MoveLCURect(const Direction& d)
         id = id > maxid ? id - col_num : id;
         id = id < 0 ? id + col_num : id;
     }
-    if(id != m_iLCURasterID)
+    if(id != m_iSelectedLCUId)
     {
-        CalStartEndPointByLCUId(id);
-        m_iLCURasterID = id;
+        CalStartEndPointByLCUId(id, m_curSelLCUStart, m_curSelLCUEnd);
+        m_iSelectedLCUId = id;
+        m_PosData._iBlockX      = m_curSelLCUStart.x;
+        m_PosData._iBlockY      = m_curSelLCUStart.y;
+        m_PosData._iBlockWidth  = m_curSelLCUEnd.x - m_curSelLCUStart.x;
+        m_PosData._iBlockHeight = m_curSelLCUEnd.y - m_curSelLCUStart.y;
+        m_PosData._iOffsetX     = 0;
+        m_PosData._iOffsetY     = 0;
+        wxCommandEvent event(wxEVT_POSITION_CHANGED, wxID_ANY);
+        event.SetClientData(&m_PosData);
+        wxPostEvent(m_pPixelCtrl, event);
         Refresh();
     }
 }
@@ -364,7 +390,7 @@ void PicViewCtrl::OnKeyDown(wxKeyEvent& event)
     }
 }
 
-void PicViewCtrl::CalStartEndPointByLCUId(const int id)
+void PicViewCtrl::CalStartEndPointByLCUId(const int id, wxPoint& start, wxPoint& end)
 {
     int cuw = m_LCUSize.GetWidth();
     int cuh = m_LCUSize.GetHeight();
@@ -376,10 +402,10 @@ void PicViewCtrl::CalStartEndPointByLCUId(const int id)
     {
         int x = (col+1)*cuw;
         int y = (row+1)*cuh;
-        m_curLCUStart.x = col*cuw;
-        m_curLCUStart.y = row*cuh;
-        m_curLCUEnd.x   = (x > m_cViewBitmap.GetWidth() ? m_cViewBitmap.GetWidth() : x);
-        m_curLCUEnd.y   = (y > m_cViewBitmap.GetHeight() ? m_cViewBitmap.GetHeight() : y);
+        start.x = col*cuw;
+        start.y = row*cuh;
+        end.x   = (x > m_cViewBitmap.GetWidth() ? m_cViewBitmap.GetWidth() : x);
+        end.y   = (y > m_cViewBitmap.GetHeight() ? m_cViewBitmap.GetHeight() : y);
     }
 }
 
