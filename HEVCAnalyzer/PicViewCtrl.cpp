@@ -20,7 +20,7 @@ PicViewCtrl::PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* p
     : wxControl(parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxWANTS_CHARS),
     m_bClearFlag(true), m_bFitMode(true), m_dScaleRate(1.0), m_dMinScaleRate(0.1), m_dMaxScaleRate(2.0), m_dFitScaleRate(1.0),
     m_dScaleRateStep(0.02), m_delta(-1, -1), m_curLCUStart(-1, -1), m_curLCUEnd(-1, -1), m_iLCURasterID(-1), m_pList(pList),
-    m_pFrame(pFrame), m_bShowGrid(true), m_bMouseWheelPageUpDown(false), m_bShowPUType(true), m_pBuffer(NULL),
+    m_pFrame(pFrame), m_bShowGrid(false), m_bMouseWheelPageUpDown(false), m_bShowPUType(true), m_pBuffer(NULL),
     m_iYUVBit(8), m_iShowWhich_O_Y_U_V(MODE_ORG), m_pHRuler(pHRuler), m_pVRuler(pVRuler), m_bFullRefresh(true),
     m_pPixelCtrl(pPixelCtrl), m_iSelectedLCUId(-1), m_curSelLCUStart(-1, -1), m_curSelLCUEnd(-1, -1)
 {
@@ -65,8 +65,21 @@ void PicViewCtrl::Render(wxGraphicsContext* gc, wxGraphicsContext* gct)
         {
             m_iSelectedLCUId = 0;
             CalStartEndPointByLCUId(m_iSelectedLCUId, m_curSelLCUStart, m_curSelLCUEnd);
+            m_PosData._iBlockX      = m_curSelLCUStart.x;
+            m_PosData._iBlockY      = m_curSelLCUStart.y;
+            m_PosData._iBlockWidth  = m_curSelLCUEnd.x - m_curSelLCUStart.x;
+            m_PosData._iBlockHeight = m_curSelLCUEnd.y - m_curSelLCUStart.y;
+            m_PosData._iOffsetX     = 0;
+            m_PosData._iOffsetY     = 0;
+            wxCommandEvent event(wxEVT_POSITION_CHANGED, wxID_ANY);
+            event.SetClientData(&m_PosData);
+            wxPostEvent(m_pPixelCtrl, event);
         }
-        gct->SetPen(wxPen(wxColor(255, 0, 0, 128)));
+        m_pHRuler->SetTagValue2(m_curSelLCUStart.x);
+        m_pVRuler->SetTagValue2(m_curSelLCUStart.y);
+        gct->SetPen(wxPen(wxColor(250, 5, 243, 128)));
+        gct->StrokeLine(0, m_curSelLCUStart.y*m_dScaleRate, m_curSelLCUStart.x*m_dScaleRate, m_curSelLCUStart.y*m_dScaleRate);
+        gct->StrokeLine(m_curSelLCUStart.x*m_dScaleRate, 0, m_curSelLCUStart.x*m_dScaleRate, m_curSelLCUStart.y*m_dScaleRate);
         gct->DrawRectangle(m_curSelLCUStart.x*m_dScaleRate, m_curSelLCUStart.y*m_dScaleRate, (m_curSelLCUEnd.x - m_curSelLCUStart.x)*m_dScaleRate,
                        (m_curSelLCUEnd.y - m_curSelLCUStart.y)*m_dScaleRate);
     }

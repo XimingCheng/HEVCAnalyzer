@@ -29,6 +29,7 @@ public:
     void SetTextMarkLen(const int len);
     void SetScaleRate(const double rate);
     void SetTagValue(const int value);
+    void SetTagValue2(const int value);
     void SetAdaptiveMarkLen(const bool b) { m_bAdaptiveMarkLen = b; }
 
 private:
@@ -50,6 +51,7 @@ private:
     int        m_iTextMarkLen;
     int        m_iRulerWidth;
     int        m_iTagValue;
+    int        m_iTagValue2;
     bool       m_bAdaptiveMarkLen;
 
     DECLARE_EVENT_TABLE();
