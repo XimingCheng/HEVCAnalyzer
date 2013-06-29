@@ -11,8 +11,9 @@ RulerCtrl::RulerCtrl(wxWindow* parent, wxWindowID id, bool bV)
     : wxControl (parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxFULL_REPAINT_ON_RESIZE),
     m_bVertical(bV), m_dStartPos(24), m_dEndPos(0), m_iStartValue(0.0), m_iEndValue(0), m_iValuePerUnit(4),
     m_dScaleRate(1.0), m_iLongMarkLen(16), m_iTextMarkLen(64), m_iRulerWidth(24), m_iTagValue(-1),
-    m_bAdaptiveMarkLen(true)
+    m_iTagValue2(-1), m_bAdaptiveMarkLen(true)
 {
+    // m_iTagValue and m_iTagValue2 should be init with an unused value, here -1 may have bug
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
     if(m_bVertical)
     {
@@ -86,6 +87,17 @@ void RulerCtrl::Render(wxGraphicsContext *gc)
         if(value == m_iTagValue)
         {
             wxPen red(wxColor(255, 0, 0, 128));
+            red.SetWidth(2);
+            gc->SetPen(red);
+            if(m_bVertical)
+                gc->StrokeLine(size.x-1, step, 0, step);
+            else
+                gc->StrokeLine(step, size.y-1, step, 0);
+            gc->SetPen(*wxGREY_PEN);
+        }
+        if(value == m_iTagValue2)
+        {
+            wxPen red(wxColor(250, 5, 243, 128));
             red.SetWidth(2);
             gc->SetPen(red);
             if(m_bVertical)
@@ -174,6 +186,15 @@ void RulerCtrl::SetTagValue(const int value)
     if(value != m_iTagValue)
     {
         m_iTagValue = value;
+        Refresh();
+    }
+}
+
+void RulerCtrl::SetTagValue2(const int value)
+{
+    if(value != m_iTagValue2)
+    {
+        m_iTagValue2 = value;
         Refresh();
     }
 }
