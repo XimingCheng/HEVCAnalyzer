@@ -423,4 +423,6 @@ void PixelViewCtrl::SetRulerCtrlFited()
     m_pVRuler->SetTextMarkLen(1);
     m_pHRuler->SetScaleRate(m_iWidthPerPixel);
     m_pVRuler->SetScaleRate(m_iHeightPerPixel);
+    m_pHRuler->SetTagValue(m_FocusPos.x);
+    m_pVRuler->SetTagValue(m_FocusPos.y);
 }
