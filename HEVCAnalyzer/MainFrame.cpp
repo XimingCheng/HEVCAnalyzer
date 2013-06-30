@@ -46,7 +46,8 @@ END_EVENT_TABLE()
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos,
             const wxSize& size, long style)
             : wxFrame(parent, id, title, pos, size, style),
-            m_pPicViewCtrl(NULL), m_bYUVFile(false), m_bOPened(false), m_pcPicYuvOrg(NULL), m_pThumbThread(NULL)
+            m_bYUVFile(false), m_bOPened(false), m_pcPicYuvOrg(NULL), m_pThumbThread(NULL),
+            m_pCenterPageManager(NULL)
 {
     m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
     m_mgr.SetManagedWindow(this);
@@ -82,7 +83,10 @@ void MainFrame::CreateMenuToolBar()
     SetMenuBar(mb);
 
     CreateStatusBar();
-    GetStatusBar()->SetStatusText(_T("Ready"));
+    wxStatusBar* pStatusBar = GetStatusBar();
+    pStatusBar->SetStatusText(_T("Ready"));
+    // first is tips, second is msg, the last is the scale ctrl
+    pStatusBar->SetFieldsCount(3);
     SetMinSize(wxSize(400, 300));
 
     wxAuiToolBar* tb = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE);
@@ -110,6 +114,7 @@ void MainFrame::CreateNoteBookPane()
 MainFrame::~MainFrame()
 {
     ClearThumbnalMemory();
+    delete m_pCenterPageManager;
     m_mgr.UnInit();
 }
 
@@ -121,8 +126,8 @@ void MainFrame::OnExit(wxCommandEvent& evt)
 wxNotebook* MainFrame::CreateBottomNotebook()
 {
     wxNotebook* ctrl = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0 );
-    wxGridSizer* gSizer = new wxGridSizer( 1, 0, 0 );
-    wxPanel* pLogPanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    wxGridSizer* gSizer = new wxGridSizer(1, 0, 0);
+    wxPanel* pLogPanel = new wxPanel(ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
     m_pTCLogWin= new wxTextCtrl(pLogPanel, wxID_ANY, _T(""), wxPoint(0, 0), wxSize(150, 90), wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH|wxHSCROLL);
     g_SetActiveTarget(m_pTCLogWin);
 
@@ -173,46 +178,50 @@ wxNotebook* MainFrame::CreateLeftNotebook()
     pCUPixelPanel->Layout();
     fgSizerLeft->Add(m_pPixelViewCtrl, 1, wxEXPAND, 5);
     fgSizerUp->Add(fgSizerLeft, 1, wxEXPAND, 5);
-    ctrl->AddPage( pCUPixelPanel, _T("CU Pixels"), false);
+    ctrl->AddPage(pCUPixelPanel, _T("CU Pixels"), false);
     return ctrl;
 }
 
 wxNotebook* MainFrame::CreateCenterNotebook()
 {
-    wxNotebook* ctrl = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0 );
-    wxFlexGridSizer* fgSizerUp = new wxFlexGridSizer(2, 1, 0, 0);
-    wxFlexGridSizer* fgSizerLeft = new wxFlexGridSizer(1, 2, 0, 0);
-    fgSizerUp->AddGrowableCol(0);
-    fgSizerUp->AddGrowableRow(1);
-    fgSizerUp->SetFlexibleDirection(wxBOTH);
-    fgSizerUp->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
-    fgSizerLeft->AddGrowableCol(1);
-    fgSizerLeft->AddGrowableRow(0);
-    fgSizerLeft->SetFlexibleDirection(wxBOTH);
-    fgSizerLeft->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
-
-    wxPanel* pDecodePanel = new wxPanel(ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-    m_pPicHRuler = new RulerCtrl(pDecodePanel, wxID_ANY);
-    m_pPicVRuler = new RulerCtrl(pDecodePanel, wxID_ANY, true);
-    fgSizerUp->Add(m_pPicHRuler, 0, wxEXPAND, 5);
-    fgSizerLeft->Add(m_pPicVRuler, 0, wxEXPAND, 5);
-    //wxScrolledWindow
-    m_pDecodeScrolledWin = new wxScrolledWindow(pDecodePanel, -1, wxDefaultPosition, wxDefaultSize, wxScrolledWindowStyle);
-    m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY, m_pThumbnalList, m_pPicHRuler,
-                                     m_pPicVRuler, m_pPixelViewCtrl, this);
-    m_pPicViewCtrl->SetSizeHints(300, 300);
-    wxGridSizer* innerSizer = new wxGridSizer(1, 0, 0);
-    innerSizer->Add(m_pPicViewCtrl, 1, wxALIGN_CENTER);
-
-    m_pDecodeScrolledWin->SetScrollRate(4, 4);
-    m_pDecodeScrolledWin->SetSizer(innerSizer);
-    fgSizerLeft->Add(m_pDecodeScrolledWin, 1, wxEXPAND, 5);
-    fgSizerUp->Add(fgSizerLeft, 1, wxEXPAND, 5);
-    pDecodePanel->SetSizer(fgSizerUp);
-    pDecodePanel->Layout();
-    ctrl->AddPage(pDecodePanel, _T("Decode Pic"), true);
-    wxPanel* m_panel7 = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-    ctrl->AddPage(m_panel7, _T("Residual Pic"), false);
+    wxNotebook* ctrl = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0);
+    m_pCenterPageManager = new CenterPageManager(ctrl, m_pThumbnalList, this, m_pPixelViewCtrl);
+    m_pCenterPageManager->InsertNewPage(0, _T("Decode Pic"));
+    m_pCenterPageManager->InsertNewPage(1, _T("Decode Pic 2"));
+    m_pCenterPageManager->Show();
+//    wxFlexGridSizer* fgSizerUp = new wxFlexGridSizer(2, 1, 0, 0);
+//    wxFlexGridSizer* fgSizerLeft = new wxFlexGridSizer(1, 2, 0, 0);
+//    fgSizerUp->AddGrowableCol(0);
+//    fgSizerUp->AddGrowableRow(1);
+//    fgSizerUp->SetFlexibleDirection(wxBOTH);
+//    fgSizerUp->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
+//    fgSizerLeft->AddGrowableCol(1);
+//    fgSizerLeft->AddGrowableRow(0);
+//    fgSizerLeft->SetFlexibleDirection(wxBOTH);
+//    fgSizerLeft->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
+//
+//    wxPanel* pDecodePanel = new wxPanel(ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+//    m_pPicHRuler = new RulerCtrl(pDecodePanel, wxID_ANY);
+//    m_pPicVRuler = new RulerCtrl(pDecodePanel, wxID_ANY, true);
+//    fgSizerUp->Add(m_pPicHRuler, 0, wxEXPAND, 5);
+//    fgSizerLeft->Add(m_pPicVRuler, 0, wxEXPAND, 5);
+//    //wxScrolledWindow
+//    m_pDecodeScrolledWin = new wxScrolledWindow(pDecodePanel, -1, wxDefaultPosition, wxDefaultSize, wxScrolledWindowStyle);
+//    m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY, m_pThumbnalList, m_pPicHRuler,
+//                                     m_pPicVRuler, m_pPixelViewCtrl, this);
+//    m_pPicViewCtrl->SetSizeHints(300, 300);
+//    wxGridSizer* innerSizer = new wxGridSizer(1, 0, 0);
+//    innerSizer->Add(m_pPicViewCtrl, 1, wxALIGN_CENTER);
+//
+//    m_pDecodeScrolledWin->SetScrollRate(4, 4);
+//    m_pDecodeScrolledWin->SetSizer(innerSizer);
+//    fgSizerLeft->Add(m_pDecodeScrolledWin, 1, wxEXPAND, 5);
+//    fgSizerUp->Add(fgSizerLeft, 1, wxEXPAND, 5);
+//    pDecodePanel->SetSizer(fgSizerUp);
+//    pDecodePanel->Layout();
+//    ctrl->AddPage(pDecodePanel, _T("Decode Pic"), true);
+//    wxPanel* m_panel7 = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+//    ctrl->AddPage(m_panel7, _T("Residual Pic"), false);
     return ctrl;
 }
 
@@ -241,10 +250,10 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_bOPened = true;
         m_iSourceWidth = cdlg.GetWidth();
         m_iSourceHeight = cdlg.GetHeight();
-        m_pPicViewCtrl->SetScale(1.0);
+        m_pCenterPageManager->GetPicViewCtrl(0)->SetScale(1.0);
         m_iYUVBit = (cdlg.Is10bitYUV() ? 10 : 8);
         m_FileLength = wxFile((const wxChar*)sfile).Length();
-        m_pPicViewCtrl->SetFitMode(true);
+        m_pCenterPageManager->GetPicViewCtrl(0)->SetFitMode(true);
         m_cYUVIO.open((char *)sfile.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
         m_pcPicYuvOrg = new TComPicYuv;
         m_pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
@@ -281,6 +290,7 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
 {
     if(m_bOPened)
     {
+        m_pCenterPageManager->Close();
         if(m_bYUVFile)
         {
             m_cYUVIO.close();
@@ -296,19 +306,19 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
                 delete m_pcPicYuvOrg;
                 m_pcPicYuvOrg = NULL;
             }
-            m_pPicViewCtrl->SetSizeHints(300, 300);
-            m_pPicViewCtrl->SetFitMode(true);
-            m_pPicViewCtrl->GetParent()->FitInside();
-            m_pPicViewCtrl->SetClear();
-            m_pPicViewCtrl->Refresh();
+            m_pCenterPageManager->GetPicViewCtrl(0)->SetSizeHints(300, 300);
+            m_pCenterPageManager->GetPicViewCtrl(0)->SetFitMode(true);
+            m_pCenterPageManager->GetPicViewCtrl(0)->GetParent()->FitInside();
+            m_pCenterPageManager->GetPicViewCtrl(0)->SetClear();
+            m_pCenterPageManager->GetPicViewCtrl(0)->Refresh();
             m_pImageList->RemoveAll();
             if(m_StrMemFileName.GetCount())
                 ClearThumbnalMemory();
             m_FileLength = 0;
-            m_pPicHRuler->SetTagValue(-1);
-            m_pPicVRuler->SetTagValue(-1);
-            m_pPicViewCtrl->CalFitScaleRate();
-            m_pPicViewCtrl->SetRulerCtrlFited();
+            m_pCenterPageManager->GetHorRulerCtrl(0)->SetTagValue(-1);
+            m_pCenterPageManager->GetVerRulerCtrl(0)->SetTagValue(-1);
+            m_pCenterPageManager->GetPicViewCtrl(0)->CalFitScaleRate();
+            m_pCenterPageManager->GetPicViewCtrl(0)->SetRulerCtrlFited();
             m_pPixelViewCtrl->Clear();
             g_ClearLog();
         }
@@ -376,7 +386,7 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
     m_cYUVIO.skipFrames(frame, m_iSourceWidth, m_iSourceHeight);
     int pad[] = {0, 0};
     m_cYUVIO.read(m_pcPicYuvOrg, pad);
-    m_pPicViewCtrl->SetPicYuvBuffer(m_pcPicYuvOrg, m_iSourceWidth, m_iSourceHeight, m_iYUVBit);
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetPicYuvBuffer(m_pcPicYuvOrg, m_iSourceWidth, m_iSourceHeight, m_iYUVBit);
 }
 
 void MainFrame::InitThumbnailListView()
@@ -394,29 +404,154 @@ void MainFrame::InitThumbnailListView()
 
 void MainFrame::OnMainFrameSizeChange(wxSizeEvent& event)
 {
-    if(m_pPicViewCtrl)
+    if(!m_pCenterPageManager) return;
+    if(m_pCenterPageManager->GetPicViewCtrl(0))
     {
-        m_pPicViewCtrl->CalFitScaleRate();
-        m_pPicViewCtrl->SetRulerCtrlFited();
+        m_pCenterPageManager->GetPicViewCtrl(0)->CalFitScaleRate();
+        m_pCenterPageManager->GetPicViewCtrl(0)->SetRulerCtrlFited();
     }
 }
 
 void MainFrame::OnIdle(wxIdleEvent& event)
 {
-    if(m_pPicViewCtrl)
+    if(!m_pCenterPageManager) return;
+    if(m_pCenterPageManager->GetPicViewCtrl(0))
     {
-        m_pPicViewCtrl->CalFitScaleRate();
-        m_pPicViewCtrl->SetRulerCtrlFited();
+        m_pCenterPageManager->GetPicViewCtrl(0)->CalFitScaleRate();
+        m_pCenterPageManager->GetPicViewCtrl(0)->SetRulerCtrlFited();
         event.RequestMore(false);
     }
 }
 
-CenterPageManger::~CenterPageManger()
+CenterPageManager::~CenterPageManager()
 {
     Destory();
 }
 
-void CenterPageManger::Destory()
+void CenterPageManager::Destory()
+{
+    m_pCenterNoteBook->DeleteAllPages();
+    m_PageList.clear();
+}
+
+void CenterPageManager::Close()
 {
     std::size_t size = m_PageList.size();
+    assert(size >= 1);
+    for(std::size_t i = 1; i < size; i++)
+        m_pCenterNoteBook->DeletePage(i);
+    m_pCenterNoteBook->SetPageText(0, _T("Decode Pic"));
+    m_PageList.begin()->_name = _T("Decode Pic");
+    std::list<PanelElments>::iterator it = m_PageList.begin();
+    it++;
+    m_PageList.erase(it, m_PageList.end());
+}
+
+void CenterPageManager::InsertNewPage(const int insertAt, const wxString& name)
+{
+    wxPanel* pDecodePanel = new wxPanel(m_pCenterNoteBook, wxID_ANY, wxDefaultPosition,
+                                wxDefaultSize, wxTAB_TRAVERSAL);
+    wxScrolledWindow* pDecodeScrolledWin = new wxScrolledWindow(pDecodePanel, -1,
+                                wxDefaultPosition, wxDefaultSize, wxScrolledWindowStyle);
+    RulerCtrl* pPicHRuler = new RulerCtrl(pDecodePanel, wxID_ANY);
+    RulerCtrl* pPicVRuler = new RulerCtrl(pDecodePanel, wxID_ANY, true);
+    PicViewCtrl* pPicViewCtrl = new PicViewCtrl(pDecodeScrolledWin, wxID_ANY, m_pList, pPicHRuler,
+                                pPicVRuler, m_pPixelViewCtrl, m_pMainFrame);
+    PanelElments elments;
+    elments._pPicPanel          = pDecodePanel;
+    elments._pDecodeScrolledWin = pDecodeScrolledWin;
+    elments._pPicViewCtrl       = pPicViewCtrl;
+    elments._pPicHRuler         = pPicHRuler;
+    elments._pPicVRuler         = pPicVRuler;
+    elments._name               = name;
+    std::list<PanelElments>::iterator it = m_PageList.begin();
+    for(int i = 0; i < insertAt; i++)
+        it++;
+    m_PageList.insert(it, elments);
+}
+
+void CenterPageManager::Show()
+{
+    std::list<PanelElments>::iterator it = m_PageList.begin();
+    if(m_bFirstCreate)
+        m_bFirstCreate = false;
+    else
+        it++;
+    for(; it != m_PageList.end(); it++)
+    {
+        PanelElments elments = *it;
+        wxFlexGridSizer* fgSizerUp = new wxFlexGridSizer(2, 1, 0, 0);
+        wxFlexGridSizer* fgSizerLeft = new wxFlexGridSizer(1, 2, 0, 0);
+        fgSizerUp->AddGrowableCol(0);
+        fgSizerUp->AddGrowableRow(1);
+        fgSizerUp->SetFlexibleDirection(wxBOTH);
+        fgSizerUp->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
+        fgSizerLeft->AddGrowableCol(1);
+        fgSizerLeft->AddGrowableRow(0);
+        fgSizerLeft->SetFlexibleDirection(wxBOTH);
+        fgSizerLeft->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
+        fgSizerUp->Add(elments._pPicHRuler, 0, wxEXPAND, 5);
+        fgSizerLeft->Add(elments._pPicVRuler, 0, wxEXPAND, 5);
+        elments._pPicViewCtrl->SetSizeHints(300, 300);
+        wxGridSizer* innerSizer = new wxGridSizer(1, 0, 0);
+        innerSizer->Add(elments._pPicViewCtrl, 1, wxALIGN_CENTER);
+        elments._pDecodeScrolledWin->SetScrollRate(4, 4);
+        elments._pDecodeScrolledWin->SetSizer(innerSizer);
+        fgSizerLeft->Add(elments._pDecodeScrolledWin, 1, wxEXPAND, 5);
+        fgSizerUp->Add(fgSizerLeft, 1, wxEXPAND, 5);
+        elments._pPicPanel->SetSizer(fgSizerUp);
+        elments._pPicPanel->Layout();
+        bool bFirst = (it == m_PageList.begin());
+        m_pCenterNoteBook->AddPage(elments._pPicPanel, elments._name, bFirst);
+    }
+}
+
+PicViewCtrl* CenterPageManager::GetPicViewCtrl(const std::size_t index)
+{
+    if(index >= m_PageList.size())
+        return NULL;
+    std::list<PanelElments>::iterator it = m_PageList.begin();
+    for(std::size_t i = 0; i < index; i++)
+        it++;
+    return (*it)._pPicViewCtrl;
+}
+
+wxScrolledWindow* CenterPageManager::GetDecodeScrolledWin(const std::size_t index)
+{
+    if(index >= m_PageList.size())
+        return NULL;
+    std::list<PanelElments>::iterator it = m_PageList.begin();
+    for(std::size_t i = 0; i < index; i++)
+        it++;
+    return (*it)._pDecodeScrolledWin;
+}
+
+RulerCtrl* CenterPageManager::GetHorRulerCtrl(const std::size_t index)
+{
+    if(index >= m_PageList.size())
+        return NULL;
+    std::list<PanelElments>::iterator it = m_PageList.begin();
+    for(std::size_t i = 0; i < index; i++)
+        it++;
+    return (*it)._pPicHRuler;
+}
+
+RulerCtrl* CenterPageManager::GetVerRulerCtrl(const std::size_t index)
+{
+    if(index >= m_PageList.size())
+        return NULL;
+    std::list<PanelElments>::iterator it = m_PageList.begin();
+    for(std::size_t i = 0; i < index; i++)
+        it++;
+    return (*it)._pPicVRuler;
+}
+
+wxString CenterPageManager::GetName(const std::size_t index)
+{
+    if(index >= m_PageList.size())
+        return _T("");
+    std::list<PanelElments>::iterator it = m_PageList.begin();
+    for(std::size_t i = 0; i < index; i++)
+        it++;
+    return (*it)._name;
 }

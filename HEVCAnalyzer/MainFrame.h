@@ -12,7 +12,7 @@ DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_END_THREAD, wxID_ANY)
 
 class ThumbnailThread;
-class CenterPageManger;
+class CenterPageManager;
 
 class MainFrame : public wxFrame
 {
@@ -53,10 +53,10 @@ private:
     wxSimpleHtmlListBox* m_pThumbnalList;
     wxImageList*         m_pImageList;
     wxArrayString        m_StrMemFileName;
-    wxScrolledWindow*    m_pDecodeScrolledWin;
-    PicViewCtrl*         m_pPicViewCtrl;
-    RulerCtrl*           m_pPicHRuler;
-    RulerCtrl*           m_pPicVRuler;
+//    wxScrolledWindow*    m_pDecodeScrolledWin;
+//    PicViewCtrl*         m_pPicViewCtrl;
+//    RulerCtrl*           m_pPicHRuler;
+//    RulerCtrl*           m_pPicVRuler;
     wxTextCtrl*          m_pTCLogWin;
     PixelViewCtrl*       m_pPixelViewCtrl;
     RulerCtrl*           m_pPixelHRuler;
@@ -75,35 +75,49 @@ private:
     TVideoIOYuv          m_cYUVIO;
     TComPicYuv*          m_pcPicYuvOrg;
     ThumbnailThread*     m_pThumbThread;
+    CenterPageManager*    m_pCenterPageManager;
 
     DECLARE_EVENT_TABLE()
 };
 
 struct PanelElments
 {
-    PixelViewCtrl*  _pPixelViewCtrl;
-    RulerCtrl*      _pPicHRuler;
-    RulerCtrl*      _pPicVRuler;
-    wxString        _name;
+    wxPanel*          _pPicPanel;
+    wxScrolledWindow* _pDecodeScrolledWin;
+    PicViewCtrl*      _pPicViewCtrl;
+    RulerCtrl*        _pPicHRuler;
+    RulerCtrl*        _pPicVRuler;
+    wxString          _name;
 };
 
-class CenterPageManger
+class CenterPageManager
 {
 public:
-    CenterPageManger(wxNotebook* pNoteBook) {}
-    ~CenterPageManger();
+    CenterPageManager(wxNotebook* pNoteBook, wxSimpleHtmlListBox* pList, wxFrame* pMainFrame,
+                     wxWindow* pPixelViewCtrl)
+    : m_pCenterNoteBook(pNoteBook), m_pMainFrame(pMainFrame),
+    m_pPixelViewCtrl(pPixelViewCtrl), m_pList(pList), m_bFirstCreate(true)
+    {}
+    ~CenterPageManager();
 
-    void           Destory();
-    void           Show();
-    void           InsertNewPage(const int insertAt, const wxString& name);
-    unsigned int   GetSize() const { return m_PageList.size(); }
-    PixelViewCtrl* GetPixelViewCtrl(const int index);
-    RulerCtrl*     GetHorRulerCtrl(const int index);
-    RulerCtrl*     GetVerRulerCtrl(const int index);
-    wxString       GetName(const int index);
+    void                     Destory();
+    void                     Close();
+    void                     Show();
+    void                     InsertNewPage(const int insertAt, const wxString& name);
+    inline unsigned int      GetSize() const { return m_PageList.size(); }
+    inline PicViewCtrl*      GetPicViewCtrl(const std::size_t index);
+    inline wxScrolledWindow* GetDecodeScrolledWin(const std::size_t index);
+    inline RulerCtrl*        GetHorRulerCtrl(const std::size_t index);
+    inline RulerCtrl*        GetVerRulerCtrl(const std::size_t index);
+    inline wxString          GetName(const std::size_t index);
 
 private:
     std::list<PanelElments> m_PageList;
+    wxNotebook*             m_pCenterNoteBook;
+    wxFrame*                m_pMainFrame;
+    wxWindow*               m_pPixelViewCtrl;
+    wxSimpleHtmlListBox*    m_pList;
+    bool                    m_bFirstCreate;
 };
 
 #endif // MAINFRAME_H_INCLUDED
