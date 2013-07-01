@@ -6,7 +6,8 @@ BEGIN_EVENT_TABLE(YUVConfigDlg, wxDialog)
 END_EVENT_TABLE()
 
 YUVConfigDlg::YUVConfigDlg(wxWindow *parent)
-    : wxDialog(parent, wxID_ANY, wxString(wxT("YUV Param Settings")))
+    : wxDialog(parent, wxID_ANY, wxString(wxT("YUV Param Settings"))),
+    m_iWith(-1), m_iHeight(-1)
 {
     SetSize(250, 180);
     wxFlexGridSizer* fgSizer;

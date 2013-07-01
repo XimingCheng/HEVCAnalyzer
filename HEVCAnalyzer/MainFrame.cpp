@@ -243,6 +243,13 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
     if(m_bYUVFile)
     {
         YUVConfigDlg cdlg(this);
+
+        wxString width,height;
+        if(g_parseResolutionFromFilename(dlg.GetFilename(), width, height))
+        {
+            cdlg.SetWidth(width);
+            cdlg.SetHeight(height);
+        }
         if(cdlg.ShowModal() == wxID_CANCEL)
             return;
         // multi-thread

@@ -130,3 +130,29 @@ void g_ClearLog()
     if (g_pLogWin != NULL)
         g_pLogWin->Clear();
 }
+
+bool g_parseResolutionFromFilename(const wxString &filename, wxString  &width, wxString &height)
+{
+    //wxRegEx reResolution = wxT("_\d+x\d+_");
+
+    wxString  Regex = _T("_[0-9]+x[0-9]+_");
+    wxString  ResolutionString;
+    wxRegEx reResolution(Regex);
+    wxRegEx reNum(_T("[0-9]+"));
+
+    if ( reResolution.Matches(filename) )
+    {
+        ResolutionString = reResolution.GetMatch(filename);
+        if ( reNum.Matches(ResolutionString) )
+        {
+            width = reNum.GetMatch(ResolutionString);
+        }
+        ResolutionString = ResolutionString.AfterFirst(_T('x'));
+        if ( reNum.Matches(ResolutionString) )
+        {
+            height = reNum.GetMatch(ResolutionString);
+        }
+        return true;
+    }
+    return false;
+}

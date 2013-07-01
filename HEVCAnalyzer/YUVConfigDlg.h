@@ -21,6 +21,8 @@ public:
     void SetHeight(const int h)   { m_iHeight = h; }
     void SetBitFlag(const bool b) { m_b10bit = b; }
 
+    void SetWidth(const wxString& w) { m_textCtrlW->SetValue(w); }
+    void SetHeight(const wxString& h) { m_textCtrlH->SetValue(h); }
 private:
     void OnOK(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);

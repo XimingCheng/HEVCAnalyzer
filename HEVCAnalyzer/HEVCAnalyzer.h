@@ -19,6 +19,7 @@
 #include <wx/arrstr.h>
 #include <wx/graphics.h>
 #include <wx/dcbuffer.h>
+#include <wx/regex.h>
 
 #include "../TLibVideoIO/TVideoIOYuv.h"
 
@@ -34,6 +35,7 @@ void g_LogError(wxString);
 void g_LogWarning(wxString);
 void g_SetActiveTarget(wxTextCtrl *pTC);
 void g_ClearLog();
+bool g_parseResolutionFromFilename(const wxString &filename, wxString  &width, wxString &height);
 
 
 #endif // HEVCANALYZER_H_INCLUDED
