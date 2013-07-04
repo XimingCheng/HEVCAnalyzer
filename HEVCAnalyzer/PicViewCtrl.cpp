@@ -134,6 +134,8 @@ void PicViewCtrl::OnMouseMove(wxMouseEvent& event)
         m_bFullRefresh = false;
         int posx = event.m_x/m_dScaleRate;
         int posy = event.m_y/m_dScaleRate;
+        posx     = max(0, posx);
+        posy     = max(0, posy);
         int id = GetCurLCURasterID(posx, posy, m_curLCUStart, m_curLCUEnd);
         if(id == m_iSelectedLCUId)
         {
