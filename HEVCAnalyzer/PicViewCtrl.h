@@ -5,6 +5,14 @@
 #include "RulerCtrl.h"
 #include "PixelViewCtrl.h"
 
+enum ShowMode
+{
+    MODE_ORG = 0,
+    MODE_Y,
+    MODE_U,
+    MODE_V,
+};
+
 class PicViewCtrl : public wxControl
 {
 public:
@@ -15,14 +23,6 @@ public:
         MOVE_DOWN,
         MOVE_LEFT,
         MOVE_RIGHT,
-    };
-
-    enum ShowMode
-    {
-        MODE_ORG = 0,
-        MODE_Y,
-        MODE_U,
-        MODE_V,
     };
 
     PicViewCtrl() {}

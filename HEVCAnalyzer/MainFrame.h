@@ -22,6 +22,12 @@ public:
         ID_NoteBookLeftPane = wxID_HIGHEST+1,
         ID_NoteBookBottomPane,
         ID_NoteBookCenterPane,
+        ID_SwitchGrid,
+        ID_SwitchColorYUV,
+        ID_Switch_YUV,
+        ID_Switch_Y,
+        ID_Switch_U,
+        ID_Switch_V,
     };
 
     MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos = wxDefaultPosition,
@@ -35,18 +41,24 @@ private:
     void           OnIdle(wxIdleEvent& event);
     // UI creator functions
     void           CreateMenuToolBar();
+    void           CreateFileIOToolBar();
+    void           CreateYUVToolBar();
     void           CreateNoteBookPane();
     wxNotebook*    CreateLeftNotebook();
     wxNotebook*    CreateCenterNotebook();
     wxNotebook*    CreateBottomNotebook();
+    void           SetColorComponent();
+    void           ClearThumbnalMemory();
+    void           InitThumbnailListView();
     // File IO operators
     void           OnOpenFile(wxCommandEvent& event);
     void           OnCloseFile(wxCommandEvent& event);
-
     void           OnThumbnailLboxSelect(wxCommandEvent& event);
     void           OnThreadEnd(wxCommandEvent& event);
-    void           ClearThumbnalMemory();
-    void           InitThumbnailListView();
+    void           OnUpdateUI(wxUpdateUIEvent& event);
+    void           OnDropDownToolbarYUV(wxAuiToolBarEvent& event);
+    void           OnSwitchShowGrid(wxCommandEvent& event);
+    void           OnSwitchYUV(wxCommandEvent& event);
 
 private:
     wxAuiManager         m_mgr;
@@ -66,6 +78,7 @@ private:
     long                 m_notebook_theme;
     bool                 m_bYUVFile;
     bool                 m_bOPened;
+    ShowMode             m_eYUVComponentChoose;
 
     int                  m_iSourceWidth;
     int                  m_iSourceHeight;
@@ -75,7 +88,10 @@ private:
     TVideoIOYuv          m_cYUVIO;
     TComPicYuv*          m_pcPicYuvOrg;
     ThumbnailThread*     m_pThumbThread;
-    CenterPageManager*    m_pCenterPageManager;
+    CenterPageManager*   m_pCenterPageManager;
+
+    wxAuiToolBar*        m_ioToolBar;
+    wxAuiToolBar*        m_yuvToolBar;
 
     DECLARE_EVENT_TABLE()
 };

@@ -36,17 +36,21 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_EXIT, MainFrame::OnExit)
     EVT_MENU(wxID_OPEN, MainFrame::OnOpenFile)
     EVT_MENU(wxID_CLOSE, MainFrame::OnCloseFile)
+    EVT_MENU(ID_SwitchGrid, MainFrame::OnSwitchShowGrid)
+    EVT_MENU_RANGE(ID_Switch_YUV, ID_Switch_V, MainFrame::OnSwitchYUV)
     EVT_COMMAND(wxID_ANY, wxEVT_ADDANIMAGE_THREAD, MainFrame::OnThreadAddImage)
     EVT_COMMAND(wxID_ANY, wxEVT_END_THREAD, MainFrame::OnThreadEnd)
+    EVT_AUITOOLBAR_TOOL_DROPDOWN(ID_SwitchColorYUV, MainFrame::OnDropDownToolbarYUV)
     EVT_SIZE(MainFrame::OnMainFrameSizeChange)
     EVT_IDLE(MainFrame::OnIdle)
     EVT_LISTBOX(wxID_ANY, MainFrame::OnThumbnailLboxSelect)
+    EVT_UPDATE_UI_RANGE(ID_Switch_YUV, ID_Switch_V, MainFrame::OnUpdateUI)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos,
             const wxSize& size, long style)
             : wxFrame(parent, id, title, pos, size, style),
-            m_bYUVFile(false), m_bOPened(false), m_pcPicYuvOrg(NULL), m_pThumbThread(NULL),
+            m_bYUVFile(false), m_bOPened(false), m_eYUVComponentChoose(MODE_ORG), m_pcPicYuvOrg(NULL), m_pThumbThread(NULL),
             m_pCenterPageManager(NULL)
 {
     m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
@@ -65,6 +69,35 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
     g_LogMessage(_T("HEVC Analyzer load sucessfully"));
 
     m_mgr.Update();
+}
+
+void MainFrame::CreateFileIOToolBar()
+{
+    m_ioToolBar = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE);
+    m_ioToolBar->SetToolBitmapSize(wxSize(16, 16));
+    wxBitmap tb_open = wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_OTHER, wxSize(16, 16));
+    m_ioToolBar->AddTool(wxID_OPEN, wxT("Open File"), tb_open, wxT("Open File"), wxITEM_NORMAL);
+    m_ioToolBar->Realize();
+
+    m_mgr.AddPane(m_ioToolBar, wxAuiPaneInfo().Name(_T("File_IO")).Caption(_T("File IO ToolBar")).
+                  ToolbarPane().Top().LeftDockable(false).RightDockable(false));
+}
+
+void MainFrame::CreateYUVToolBar()
+{
+    m_yuvToolBar = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                    wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_TEXT | wxAUI_TB_HORZ_TEXT);
+    m_yuvToolBar->SetToolBitmapSize(wxSize(16, 16));
+    wxBitmap tb_switchgrid = wxArtProvider::GetBitmap(wxART_REPORT_VIEW, wxART_OTHER, wxSize(16, 16));
+    wxBitmap tb_switchcolor = wxArtProvider::GetBitmap(wxART_NORMAL_FILE, wxART_OTHER, wxSize(16, 16));
+    wxString label[4] = { _T("YUV"), _T("Y"), _T("U"), _T("V") };
+    m_yuvToolBar->AddTool(ID_SwitchColorYUV, label[m_eYUVComponentChoose], tb_switchcolor);
+    m_yuvToolBar->SetToolDropDown(ID_SwitchColorYUV, true);
+    m_yuvToolBar->AddTool(ID_SwitchGrid, _T(""), tb_switchgrid, _T("Switch Grid"), wxITEM_CHECK);
+    m_yuvToolBar->Realize();
+
+    m_mgr.AddPane(m_yuvToolBar, wxAuiPaneInfo().Name(_T("YUV_Tools")).Caption(_T("YUV ToolBar")).
+                  ToolbarPane().Top().LeftDockable(false).RightDockable(false));
 }
 
 void MainFrame::CreateMenuToolBar()
@@ -89,16 +122,8 @@ void MainFrame::CreateMenuToolBar()
     pStatusBar->SetFieldsCount(3);
     SetMinSize(wxSize(400, 300));
 
-    wxAuiToolBar* tb = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE);
-    tb->SetToolBitmapSize(wxSize(16, 16));
-    wxBitmap tb_open = wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_OTHER, wxSize(16, 16));
-    tb->AddTool(wxID_OPEN, wxT("Open File"), tb_open, wxT("Open File"), wxITEM_NORMAL);
-    tb->Realize();
-
-    m_mgr.AddPane(tb, wxAuiPaneInfo().
-                  Name(_T("tb")).Caption(_T("Toolbar")).
-                  ToolbarPane().Top().
-                  LeftDockable(false).RightDockable(false));
+    CreateFileIOToolBar();
+    CreateYUVToolBar();
     g_uiMaxCUWidth  = 64;
     g_uiMaxCUHeight = 64;
 }
@@ -187,41 +212,7 @@ wxNotebook* MainFrame::CreateCenterNotebook()
     wxNotebook* ctrl = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0);
     m_pCenterPageManager = new CenterPageManager(ctrl, m_pThumbnalList, this, m_pPixelViewCtrl);
     m_pCenterPageManager->InsertNewPage(0, _T("Decode Pic"));
-    m_pCenterPageManager->InsertNewPage(1, _T("Decode Pic 2"));
     m_pCenterPageManager->Show();
-//    wxFlexGridSizer* fgSizerUp = new wxFlexGridSizer(2, 1, 0, 0);
-//    wxFlexGridSizer* fgSizerLeft = new wxFlexGridSizer(1, 2, 0, 0);
-//    fgSizerUp->AddGrowableCol(0);
-//    fgSizerUp->AddGrowableRow(1);
-//    fgSizerUp->SetFlexibleDirection(wxBOTH);
-//    fgSizerUp->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
-//    fgSizerLeft->AddGrowableCol(1);
-//    fgSizerLeft->AddGrowableRow(0);
-//    fgSizerLeft->SetFlexibleDirection(wxBOTH);
-//    fgSizerLeft->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
-//
-//    wxPanel* pDecodePanel = new wxPanel(ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-//    m_pPicHRuler = new RulerCtrl(pDecodePanel, wxID_ANY);
-//    m_pPicVRuler = new RulerCtrl(pDecodePanel, wxID_ANY, true);
-//    fgSizerUp->Add(m_pPicHRuler, 0, wxEXPAND, 5);
-//    fgSizerLeft->Add(m_pPicVRuler, 0, wxEXPAND, 5);
-//    //wxScrolledWindow
-//    m_pDecodeScrolledWin = new wxScrolledWindow(pDecodePanel, -1, wxDefaultPosition, wxDefaultSize, wxScrolledWindowStyle);
-//    m_pPicViewCtrl = new PicViewCtrl(m_pDecodeScrolledWin, wxID_ANY, m_pThumbnalList, m_pPicHRuler,
-//                                     m_pPicVRuler, m_pPixelViewCtrl, this);
-//    m_pPicViewCtrl->SetSizeHints(300, 300);
-//    wxGridSizer* innerSizer = new wxGridSizer(1, 0, 0);
-//    innerSizer->Add(m_pPicViewCtrl, 1, wxALIGN_CENTER);
-//
-//    m_pDecodeScrolledWin->SetScrollRate(4, 4);
-//    m_pDecodeScrolledWin->SetSizer(innerSizer);
-//    fgSizerLeft->Add(m_pDecodeScrolledWin, 1, wxEXPAND, 5);
-//    fgSizerUp->Add(fgSizerLeft, 1, wxEXPAND, 5);
-//    pDecodePanel->SetSizer(fgSizerUp);
-//    pDecodePanel->Layout();
-//    ctrl->AddPage(pDecodePanel, _T("Decode Pic"), true);
-//    wxPanel* m_panel7 = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-//    ctrl->AddPage(m_panel7, _T("Residual Pic"), false);
     return ctrl;
 }
 
@@ -346,10 +337,10 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
     for(int i = 0;  i < (int)framenumber; i++)
     {
         int tmp = frame-framenumber+i+1;
-        wxString filename = wxString::Format(_T("poc %d.bmp"), tmp);
+        wxString filename = wxString::Format(_T("Frame Number %d.bmp"), tmp);
         m_StrMemFileName.Add(filename);
-        wxMemoryFSHandler::AddFile(wxString::Format(_T("poc %d.bmp"), tmp), m_pImageList->GetBitmap(tmp),wxBITMAP_TYPE_BMP);
-        wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:poc %d.bmp\"><br></p><span text-align=center>POC %d </span><br>"), tmp, tmp);
+        wxMemoryFSHandler::AddFile(wxString::Format(_T("Frame Number %d.bmp"), tmp), m_pImageList->GetBitmap(tmp),wxBITMAP_TYPE_BMP);
+        wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:Frame Number %d.bmp\"><br></p><span text-align=center>Frame Number: %d </span><br>"), tmp, tmp);
 //        m_pThumbnalList->Insert(label, tmp);
 //        m_pThumbnalList->Delete(tmp+1);
 //       arr.Add(label);
@@ -399,11 +390,11 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
 void MainFrame::InitThumbnailListView()
 {
     int framenumber = m_FileLength/(m_iSourceWidth*m_iSourceHeight*1.5*(m_iYUVBit==10?2:1));
-    g_LogMessage(wxString::Format(_T("frame numbes: %d\n"), framenumber));
+    g_LogMessage(wxString::Format(_T("Frame Number: %d\n"), framenumber));
     wxArrayString arr;
     for(int i = 0;  i < framenumber; i++)
     {
-        wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"/home/luqingbo/Downloads/horse.bmp\"><br></p><span text-align=center>POC %d </span><br>"), i);
+        wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"/home/luqingbo/Downloads/horse.bmp\"><br></p><span text-align=center>Frame Number: %d </span><br>"), i);
         arr.Add(label);
     }
     m_pThumbnalList->Append(arr);
@@ -428,6 +419,90 @@ void MainFrame::OnIdle(wxIdleEvent& event)
         m_pCenterPageManager->GetPicViewCtrl(0)->SetRulerCtrlFited();
         event.RequestMore(false);
     }
+}
+
+void MainFrame::OnDropDownToolbarYUV(wxAuiToolBarEvent& event)
+{
+    if (event.IsDropDownClicked())
+    {
+        wxAuiToolBar* tb = static_cast<wxAuiToolBar*>(event.GetEventObject());
+        tb->SetToolSticky(event.GetId(), true);
+        wxMenu menuPopup;
+        menuPopup.AppendRadioItem(ID_Switch_YUV, _T("YUV"), _T("Show YUV"));
+        menuPopup.AppendRadioItem(ID_Switch_Y, _T("Y"), _T("Show Y component"));
+        menuPopup.AppendRadioItem(ID_Switch_U, _T("U"), _T("Show U component"));
+        menuPopup.AppendRadioItem(ID_Switch_V, _T("V"), _T("Show V component"));
+        menuPopup.Check(ID_Switch_YUV + (int)m_eYUVComponentChoose, true);
+        wxRect rect = tb->GetToolRect(event.GetId());
+        wxPoint pt = tb->ClientToScreen(rect.GetBottomLeft());
+        pt = ScreenToClient(pt);
+        PopupMenu(&menuPopup, pt);
+        tb->SetToolSticky(event.GetId(), false);
+    }
+}
+
+void MainFrame::OnSwitchShowGrid(wxCommandEvent& event)
+{
+    bool b = event.IsChecked();
+    unsigned int size = m_pCenterPageManager->GetSize();
+    for(unsigned int i = 0; i < size; i++)
+    {
+        PicViewCtrl* pCtrl = m_pCenterPageManager->GetPicViewCtrl(i);
+        pCtrl->SetShowGrid(b);
+        pCtrl->Refresh();
+    }
+}
+
+void MainFrame::SetColorComponent()
+{
+    unsigned int size = m_pCenterPageManager->GetSize();
+    for(unsigned int i = 0; i < size; i++)
+    {
+        PicViewCtrl* pCtrl = m_pCenterPageManager->GetPicViewCtrl(i);
+        pCtrl->SetWhichTobeShown(m_eYUVComponentChoose);
+        pCtrl->Refresh();
+    }
+}
+
+void MainFrame::OnUpdateUI(wxUpdateUIEvent& event)
+{
+    switch(event.GetId())
+    {
+    case ID_Switch_YUV:
+        event.Check(m_eYUVComponentChoose == MODE_ORG);
+        break;
+    case ID_Switch_Y:
+        event.Check(m_eYUVComponentChoose == MODE_Y);
+        break;
+    case ID_Switch_U:
+        event.Check(m_eYUVComponentChoose == MODE_U);
+        break;
+    case ID_Switch_V:
+        event.Check(m_eYUVComponentChoose == MODE_V);
+        break;
+    }
+}
+
+void MainFrame::OnSwitchYUV(wxCommandEvent& event)
+{
+    wxString label[4] = { _T("YUV"), _T("Y"), _T("U"), _T("V") };
+    switch(event.GetId())
+    {
+    case ID_Switch_YUV:
+        m_eYUVComponentChoose = MODE_ORG;
+        break;
+    case ID_Switch_Y:
+        m_eYUVComponentChoose = MODE_Y;
+        break;
+    case ID_Switch_U:
+        m_eYUVComponentChoose = MODE_U;
+        break;
+    case ID_Switch_V:
+        m_eYUVComponentChoose = MODE_V;
+        break;
+    }
+    m_yuvToolBar->SetToolLabel(ID_SwitchColorYUV, label[m_eYUVComponentChoose]);
+    SetColorComponent();
 }
 
 CenterPageManager::~CenterPageManager()
