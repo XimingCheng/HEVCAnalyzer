@@ -97,7 +97,7 @@ void MainFrame::CreateYUVToolBar()
     m_yuvToolBar->Realize();
 
     m_mgr.AddPane(m_yuvToolBar, wxAuiPaneInfo().Name(_T("YUV_Tools")).Caption(_T("YUV ToolBar")).
-                  ToolbarPane().Top().LeftDockable(false).RightDockable(false));
+                  ToolbarPane().Top().Position(1).LeftDockable(false).RightDockable(false));
 }
 
 void MainFrame::CreateMenuToolBar()
