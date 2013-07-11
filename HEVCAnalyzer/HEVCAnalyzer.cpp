@@ -133,8 +133,6 @@ void g_ClearLog()
 
 bool g_parseResolutionFromFilename(const wxString &filename, wxString  &width, wxString &height)
 {
-    //wxRegEx reResolution = wxT("_\d+x\d+_");
-
     wxString  Regex = _T("_[0-9]+x[0-9]+_");
     wxString  ResolutionString;
     wxRegEx reResolution(Regex);
