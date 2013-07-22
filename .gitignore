@@ -1,0 +1,8 @@
+/bin/
+/Build/Win/obj/
+/Build/Win/*.cscope_file_list
+/Build/Win/*.layout
+/Build/Win/*.depend
+/Build/Linux/HEVCAnalyzerObj/
+/Build/Linux/TLibCommonObj/
+/Build/Linux/TLibVideoIOObj
