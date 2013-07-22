@@ -642,3 +642,19 @@ void PicViewCtrl::CalTwoRectsOutsideBox(wxRect& rect, const wxPoint& start, cons
     rect.width = (x2+4)*m_dScaleRate;
     rect.height = (y2+4)*m_dScaleRate;
 }
+
+void PicViewCtrl::Clear()
+{
+    m_iSelectedLCUId = -1;
+    m_pHRuler->SetTagValue(-1);
+    m_pVRuler->SetTagValue(-1);
+    m_pHRuler->SetTagValue2(-1);
+    m_pVRuler->SetTagValue2(-1);
+    SetSizeHints(300, 300);
+    SetFitMode(true);
+    GetParent()->FitInside();
+    SetClear();
+    CalFitScaleRate();
+    SetRulerCtrlFited();
+    Refresh();
+}

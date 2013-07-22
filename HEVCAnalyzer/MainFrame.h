@@ -117,6 +117,7 @@ public:
     ~CenterPageManager();
 
     void                     Destory();
+    void                     Clear();
     void                     Close();
     void                     Show();
     void                     InsertNewPage(const int insertAt, const wxString& name);
@@ -128,12 +129,12 @@ public:
     inline wxString          GetName(const std::size_t index);
 
 private:
-    std::list<PanelElments> m_PageList;
-    wxNotebook*             m_pCenterNoteBook;
-    wxFrame*                m_pMainFrame;
-    wxWindow*               m_pPixelViewCtrl;
-    wxSimpleHtmlListBox*    m_pList;
-    bool                    m_bFirstCreate;
+    std::list<PanelElments>  m_PageList;
+    wxNotebook*              m_pCenterNoteBook;
+    wxFrame*                 m_pMainFrame;
+    wxWindow*                m_pPixelViewCtrl;
+    wxSimpleHtmlListBox*     m_pList;
+    bool                     m_bFirstCreate;
 };
 
 #endif // MAINFRAME_H_INCLUDED

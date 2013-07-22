@@ -241,7 +241,8 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
             cdlg.SetWidth(width);
             cdlg.SetHeight(height);
         }
-        if(dlg.GetFilename().find(_T("_10bit_")) != wxNOT_FOUND)
+        int ret = dlg.GetFilename().find(_T("_10bit_"));
+        if(ret != wxNOT_FOUND)
             cdlg.SetBitFlag(true);
         if(cdlg.ShowModal() == wxID_CANCEL)
             return;
@@ -306,19 +307,11 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
                 delete m_pcPicYuvOrg;
                 m_pcPicYuvOrg = NULL;
             }
-            m_pCenterPageManager->GetPicViewCtrl(0)->SetSizeHints(300, 300);
-            m_pCenterPageManager->GetPicViewCtrl(0)->SetFitMode(true);
-            m_pCenterPageManager->GetPicViewCtrl(0)->GetParent()->FitInside();
-            m_pCenterPageManager->GetPicViewCtrl(0)->SetClear();
-            m_pCenterPageManager->GetPicViewCtrl(0)->Refresh();
             m_pImageList->RemoveAll();
             if(m_StrMemFileName.GetCount())
                 ClearThumbnalMemory();
             m_FileLength = 0;
-            m_pCenterPageManager->GetHorRulerCtrl(0)->SetTagValue(-1);
-            m_pCenterPageManager->GetVerRulerCtrl(0)->SetTagValue(-1);
-            m_pCenterPageManager->GetPicViewCtrl(0)->CalFitScaleRate();
-            m_pCenterPageManager->GetPicViewCtrl(0)->SetRulerCtrlFited();
+            m_pCenterPageManager->Clear();
             m_pPixelViewCtrl->Clear();
             g_ClearLog();
         }
@@ -638,4 +631,14 @@ wxString CenterPageManager::GetName(const std::size_t index)
     for(std::size_t i = 0; i < index; i++)
         it++;
     return (*it)._name;
+}
+
+void CenterPageManager::Clear()
+{
+    std::size_t size = m_PageList.size();
+    for(std::size_t i = 0; i < size; i++)
+    {
+        PicViewCtrl* pPic = GetPicViewCtrl(i);
+        pPic->Clear();
+    }
 }

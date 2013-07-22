@@ -48,6 +48,7 @@ public:
     void SetWhichTobeShown(const ShowMode& which) { m_iShowWhich_O_Y_U_V = which; }
     void SetPicYuvBuffer(TComPicYuv* pBuffer, const int w, const int h, const int bit);
     void SetRulerCtrlFited();
+    void Clear();
 
 private:
     void OnMouseMove(wxMouseEvent& event);
