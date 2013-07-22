@@ -241,6 +241,8 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
             cdlg.SetWidth(width);
             cdlg.SetHeight(height);
         }
+        if(dlg.GetFilename().find(_T("_10bit_")) != wxNOT_FOUND)
+            cdlg.SetBitFlag(true);
         if(cdlg.ShowModal() == wxID_CANCEL)
             return;
         // multi-thread

@@ -17,9 +17,11 @@ public:
     int GetHeight()   const { return m_iHeight; }
     bool Is10bitYUV() const { return m_b10bit; }
 
-    void SetWidth(const int w)    { m_iWith = w; }
-    void SetHeight(const int h)   { m_iHeight = h; }
-    void SetBitFlag(const bool b) { m_b10bit = b; }
+    void SetWidth(const int w)    { m_iWith = w; wxString str;
+        str.Printf(_T("%d"), w); m_textCtrlW->SetValue(str); }
+    void SetHeight(const int h)   { m_iHeight = h; wxString str;
+        str.Printf(_T("%d"), h); m_textCtrlH->SetValue(str); }
+    void SetBitFlag(const bool b) { m_b10bit = b; int sel = b ? 1 : 0; m_choiceBit->SetSelection(sel); }
 
     void SetWidth(const wxString& w) { m_textCtrlW->SetValue(w); }
     void SetHeight(const wxString& h) { m_textCtrlH->SetValue(h); }
