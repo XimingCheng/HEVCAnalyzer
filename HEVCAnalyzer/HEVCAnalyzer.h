@@ -36,6 +36,6 @@ void g_LogWarning(wxString);
 void g_SetActiveTarget(wxTextCtrl *pTC);
 void g_ClearLog();
 bool g_parseResolutionFromFilename(const wxString &filename, wxString  &width, wxString &height);
-
+unsigned long long g_getCurrentMS();
 
 #endif // HEVCANALYZER_H_INCLUDED

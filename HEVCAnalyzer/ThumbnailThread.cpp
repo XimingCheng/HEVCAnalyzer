@@ -3,6 +3,9 @@
 extern const wxEventType wxEVT_ADDANIMAGE_THREAD;
 extern const wxEventType wxEVT_END_THREAD;
 
+double ThumbnailThread::m_fixWidth       = 165.0;
+double ThumbnailThread::m_dOneAddingTime = 1000;
+
 void* ThumbnailThread::Entry()
 {
     m_pImageList->RemoveAll();
@@ -14,6 +17,13 @@ void* ThumbnailThread::Entry()
     int pad[] = {0, 0};
     int frame = 0;
     long framenumbers = 0;
+    unsigned long long tstart = 0;
+    unsigned long long tend = 0;
+    if(m_bAdaptiveFrameNumners)
+    {
+        tstart = g_getCurrentMS();
+        m_iFrameNumbers = 5;
+    }
     while(!m_cYUVIO.isEof() && !m_cYUVIO.isFail() && !TestDestroy())
     {
         // here read may be failed
@@ -22,7 +32,7 @@ void* ThumbnailThread::Entry()
         g_tranformYUV2RGB(m_iSourceWidth, m_iSourceHeight, m_pcPicYuvOrg, m_iYUVBit, bmp, bmp, bmp, bmp);
         //bmp.SaveFile(wxString::Format(_("test_%d.bmp"), frame), wxBITMAP_TYPE_BMP);
         wxImage bimg = bmp.ConvertToImage();
-        double scaleRate = 165.0/m_iSourceWidth;
+        double scaleRate = m_fixWidth/m_iSourceWidth;
         wxImage simg = bimg.Scale((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
         wxBitmap newbmp(simg);
         m_pImageList->Add(newbmp);
@@ -31,6 +41,14 @@ void* ThumbnailThread::Entry()
         framenumbers++;
         if(framenumbers >= m_iFrameNumbers)
         {
+            if(m_bAdaptiveFrameNumners && tend == 0)
+            {
+                tend = g_getCurrentMS();
+                m_iFrameNumbers = (int)5*m_dOneAddingTime/(tend - tstart);
+                if(m_iFrameNumbers == 0)
+                    m_iFrameNumbers = 1;
+                g_LogMessage(wxString::Format(_T("m_iFrameNumbers %d"), m_iFrameNumbers));
+            }
             wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);
             event.SetExtraLong(framenumbers);
             event.SetInt(frame);

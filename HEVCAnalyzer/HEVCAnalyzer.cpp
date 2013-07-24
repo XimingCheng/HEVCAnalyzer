@@ -154,3 +154,9 @@ bool g_parseResolutionFromFilename(const wxString &filename, wxString  &width, w
     }
     return false;
 }
+
+unsigned long long g_getCurrentMS()
+{
+    wxDateTime t = wxDateTime::UNow();
+    return t.GetTicks()*1000 + t.GetMillisecond();
+}
