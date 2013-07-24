@@ -19,7 +19,7 @@ void* ThumbnailThread::Entry()
     long framenumbers = 0;
     unsigned long long tstart = 0;
     unsigned long long tend = 0;
-    if(m_bAdaptiveFrameNumners)
+    if(m_bAdaptiveFrameNumbers)
     {
         tstart = g_getCurrentMS();
         m_iFrameNumbers = 5;
@@ -41,7 +41,7 @@ void* ThumbnailThread::Entry()
         framenumbers++;
         if(framenumbers >= m_iFrameNumbers)
         {
-            if(m_bAdaptiveFrameNumners && tend == 0)
+            if(m_bAdaptiveFrameNumbers && tend == 0)
             {
                 tend = g_getCurrentMS();
                 m_iFrameNumbers = (int)5*m_dOneAddingTime/(tend - tstart);
