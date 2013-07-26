@@ -264,8 +264,6 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         // multi-thread
         OnCloseFile(event);
         m_bOPened = true;
-        if(m_StrMemFileName.GetCount())
-            ClearThumbnalMemory();
         m_FileLength = wxFile((const wxChar*)sfile).Length();
         m_pCenterPageManager->GetPicViewCtrl(0)->SetScale(1.0);
         m_pCenterPageManager->GetPicViewCtrl(0)->SetFitMode(true);
@@ -321,13 +319,12 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
                 delete m_pcPicYuvOrg;
                 m_pcPicYuvOrg = NULL;
             }
-            m_pImageList->RemoveAll();
             if(m_StrMemFileName.GetCount())
                 ClearThumbnalMemory();
             m_FileLength = 0;
             m_pCenterPageManager->Clear();
             m_pPixelViewCtrl->Clear();
-            g_ClearLog();
+            g_LogMessage(wxString::Format(_T("OnCloseFile() %d"), m_StrMemFileName.GetCount()));
         }
         else
         {
@@ -341,23 +338,22 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
 {
     int frame = event.GetInt();
     long framenumber = event.GetExtraLong();
-//    wxArrayString arr;
-    //g_LogMessage(wxString::Format(_T("Add some images from %d to %d"), frame-framenumber+1, frame));
+    g_LogMessage(wxString::Format(_T("Add some images from %d to %d"), frame-framenumber+1, frame));
     for(int i = 0;  i < (int)framenumber; i++)
     {
         int tmp = frame-framenumber+i+1;
-        wxString filename = wxString::Format(_T("Frame Number %d.bmp"), tmp);
-        m_StrMemFileName.Add(filename);
-        wxMemoryFSHandler::AddFile(wxString::Format(_T("Frame Number %d.bmp"), tmp), m_pImageList->GetBitmap(tmp),wxBITMAP_TYPE_BMP);
-        wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:Frame Number %d.bmp\"><br></p><span text-align=center>Frame Number: %d </span><br>"), tmp, tmp);
-//        m_pThumbnalList->Insert(label, tmp);
-//        m_pThumbnalList->Delete(tmp+1);
-//       arr.Add(label);
-        m_pThumbnalList->SetString(tmp, label);
+        if(m_pImageList->GetImageCount() > tmp)
+        {
+            wxMemoryFSHandler::AddFile(wxString::Format(_T("Frame Number %d.bmp"), tmp), m_pImageList->GetBitmap(tmp),wxBITMAP_TYPE_BMP);
+            wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:Frame Number %d.bmp\"><br></p><span text-align=center>Frame Number: %d </span><br>"), tmp, tmp);
+            m_pThumbnalList->SetString(tmp, label);
+            wxString filename = wxString::Format(_T("Frame Number %d.bmp"), tmp);
+            m_StrMemFileName.Add(filename);
+        }
+
     }
     m_pThumbnalList->Freeze();
     unsigned int cnt = m_pThumbnalList->GetFirstVisibleLine();
-//   m_pThumbnalList->Append(arr);
     m_pThumbnalList->ScrollToLine(cnt);
     m_pThumbnalList->Thaw();
     m_pThumbnalList->RefreshAll();
@@ -368,6 +364,7 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
         m_pThumbnalList->SetSelection(0);
         m_pThumbnalList->SetFocus();
     }
+    g_LogMessage(wxString::Format(_T("LEAVE Adding some images from %d to %d"), frame-framenumber+1, frame));
 }
 
 void MainFrame::OnThreadEnd(wxCommandEvent& event)
@@ -383,6 +380,12 @@ void MainFrame::ClearThumbnalMemory()
     m_StrMemFileName.Clear();
     m_pThumbnalList->Clear();
     m_pThumbnalList->RefreshAll();
+    if(m_pImageList)
+    {
+        m_pImageList->RemoveAll();
+        delete m_pImageList;
+        m_pImageList = NULL;
+    }
 }
 
 void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)

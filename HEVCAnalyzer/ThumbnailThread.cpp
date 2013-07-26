@@ -4,7 +4,7 @@ extern const wxEventType wxEVT_ADDANIMAGE_THREAD;
 extern const wxEventType wxEVT_END_THREAD;
 
 double ThumbnailThread::m_fixWidth       = 165.0;
-double ThumbnailThread::m_dOneAddingTime = 1000;
+double ThumbnailThread::m_dOneAddingTime = 1500;
 
 void* ThumbnailThread::Entry()
 {
@@ -59,7 +59,7 @@ void* ThumbnailThread::Entry()
         }
         frame++;
     }
-    if(framenumbers > 0)
+    if(m_cYUVIO.isEof() && framenumbers > 0)
     {
         wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);
         event.SetExtraLong(framenumbers);

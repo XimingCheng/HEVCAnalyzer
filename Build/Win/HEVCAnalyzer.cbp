@@ -16,6 +16,7 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-Wno-attributes" />
+					<Add option="-O0" />
 					<Add option="-D__WXDEBUG__" />
 					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll/mswud" />
 					<Add directory="E:/Projects/GitHub/wxsqlite3-3.0.3/include" />
