@@ -1,6 +1,9 @@
 language: cpp
 compiler: clang
-install: libx11-dev libwxbase2.8-dev libwxgtk2.8-dev
+before_install: sudo apt-get install -qq libx11-dev libwxbase2.8-dev libwxgtk2.8-dev
+script:
+    - cd ./Build/Linux
+    - make
 branches:
   only:
     - master
