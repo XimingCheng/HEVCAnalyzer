@@ -1,5 +1,6 @@
 HEVCAnalyzer
 ============
+[![Build Status](https://api.travis-ci.org/XimingCheng/HEVCAnalyzer.png)](https://travis-ci.org/XimingCheng/HEVCAnalyzer)
 
 HEVC stream and YUV file GUI Analyzer based on wxWidgets
 
