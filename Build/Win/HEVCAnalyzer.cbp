@@ -18,6 +18,7 @@
 					<Add option="-Wno-attributes" />
 					<Add option="-D__WXDEBUG__" />
 					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll/mswud" />
+					<Add directory="E:/Projects/GitHub/wxsqlite3-3.0.3/include" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll/mswud" />
@@ -29,7 +30,9 @@
 					<Add library="libwxzlibd.a" />
 					<Add library="libwxmsw28ud_aui.a" />
 					<Add library="libwxmsw28ud_html.a" />
+					<Add library="libwxcode_msw28ud_wxsqlite3.a" />
 					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll" />
+					<Add directory="E:/Projects/GitHub/wxsqlite3-3.0.3/lib/gcc_dll" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -42,6 +45,7 @@
 					<Add option="-O2" />
 					<Add option="-Wno-attributes" />
 					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll/mswu" />
+					<Add directory="E:/Projects/GitHub/wxsqlite3-3.0.3/include" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll/mswu" />
@@ -54,7 +58,9 @@
 					<Add library="libwxzlib.a" />
 					<Add library="libwxmsw28u_aui.a" />
 					<Add library="libwxmsw28u_html.a" />
+					<Add library="libwxcode_msw28u_wxsqlite3.a" />
 					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll" />
+					<Add directory="E:/Projects/GitHub/wxsqlite3-3.0.3/lib/gcc_dll" />
 				</Linker>
 			</Target>
 		</Build>
