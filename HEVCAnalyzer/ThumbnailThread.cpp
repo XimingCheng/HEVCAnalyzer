@@ -4,7 +4,7 @@ extern const wxEventType wxEVT_ADDANIMAGE_THREAD;
 extern const wxEventType wxEVT_END_THREAD;
 
 double ThumbnailThread::m_fixWidth       = 165.0;
-double ThumbnailThread::m_dOneAddingTime = 1000;
+double ThumbnailThread::m_dOneAddingTime = 1500;
 
 void* ThumbnailThread::Entry()
 {
@@ -19,7 +19,7 @@ void* ThumbnailThread::Entry()
     long framenumbers = 0;
     unsigned long long tstart = 0;
     unsigned long long tend = 0;
-    if(m_bAdaptiveFrameNumners)
+    if(m_bAdaptiveFrameNumbers)
     {
         tstart = g_getCurrentMS();
         m_iFrameNumbers = 5;
@@ -35,13 +35,14 @@ void* ThumbnailThread::Entry()
         double scaleRate = m_fixWidth/m_iSourceWidth;
         wxImage simg = bimg.Scale((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
         wxBitmap newbmp(simg);
-        m_pImageList->Add(newbmp);
+        if(!TestDestroy())
+            m_pImageList->Add(newbmp);
         //m_pFrame->ProcessEvent(event);
         // this method can be used in Linux
         framenumbers++;
         if(framenumbers >= m_iFrameNumbers)
         {
-            if(m_bAdaptiveFrameNumners && tend == 0)
+            if(m_bAdaptiveFrameNumbers && tend == 0)
             {
                 tend = g_getCurrentMS();
                 m_iFrameNumbers = (int)5*m_dOneAddingTime/(tend - tstart);
@@ -52,27 +53,41 @@ void* ThumbnailThread::Entry()
             wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);
             event.SetExtraLong(framenumbers);
             event.SetInt(frame);
-            wxPostEvent(m_pFrame, event);
+            if(!TestDestroy())
+                wxPostEvent(m_pFrame, event);
             framenumbers = 0;
             frame++;
             continue;
         }
         frame++;
     }
-    if(framenumbers > 0)
+    if(m_cYUVIO.isEof() && framenumbers > 0)
     {
         wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);
         event.SetExtraLong(framenumbers);
         event.SetInt(frame-1);
+        if(!TestDestroy())
+            wxPostEvent(m_pFrame, event);
+    }
+    return (wxThread::ExitCode)0;
+}
+
+void ThumbnailThread::OnExit()
+{
+    g_LogWarning(_T("ThumbnailThread::OnExit() called"));
+    if(m_cYUVIO.isOpen())
+        m_cYUVIO.close();
+    if(m_pcPicYuvOrg)
+    {
+        m_pcPicYuvOrg->destroy();
+        delete m_pcPicYuvOrg;
+        m_pcPicYuvOrg = NULL;
+    }
+    if(!TestDestroy())
+    {
+        wxCommandEvent event(wxEVT_END_THREAD, wxID_ANY);
         wxPostEvent(m_pFrame, event);
     }
-    m_cYUVIO.close();
-    m_pcPicYuvOrg->destroy();
-    delete m_pcPicYuvOrg;
-    m_pcPicYuvOrg = NULL;
-    wxCommandEvent event(wxEVT_END_THREAD, wxID_ANY);
-    wxPostEvent(m_pFrame, event);
-    return (wxThread::ExitCode)0;
 }
 
 ThumbnailThread::~ThumbnailThread()

@@ -233,27 +233,39 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
 
     if(m_bYUVFile)
     {
-        YUVConfigDlg cdlg(this);
-
-        wxString width,height;
-        if(g_parseResolutionFromFilename(dlg.GetFilename(), width, height))
+        int w, h;
+        bool bit;
+        if(!GetYUVConfigData(dlg.GetPath(), w, h, bit))
         {
-            cdlg.SetWidth(width);
-            cdlg.SetHeight(height);
+            YUVConfigDlg cdlg(this);
+            wxString width,height;
+            if(g_parseResolutionFromFilename(dlg.GetFilename(), width, height))
+            {
+                cdlg.SetWidth(width);
+                cdlg.SetHeight(height);
+            }
+            int ret = dlg.GetFilename().find(_T("_10bit_"));
+            if(ret != wxNOT_FOUND)
+                cdlg.SetBitFlag(true);
+            if(cdlg.ShowModal() == wxID_CANCEL)
+                return;
+
+            m_iSourceWidth = cdlg.GetWidth();
+            m_iSourceHeight = cdlg.GetHeight();
+            m_iYUVBit = (cdlg.Is10bitYUV() ? 10 : 8);
+            StoreYUVConfigData(dlg.GetPath(), m_iSourceWidth, m_iSourceHeight, (m_iYUVBit > 8));
         }
-        int ret = dlg.GetFilename().find(_T("_10bit_"));
-        if(ret != wxNOT_FOUND)
-            cdlg.SetBitFlag(true);
-        if(cdlg.ShowModal() == wxID_CANCEL)
-            return;
+        else
+        {
+            m_iSourceWidth = w;
+            m_iSourceHeight = h;
+            m_iYUVBit = (bit ? 10 : 8);
+        }
         // multi-thread
         OnCloseFile(event);
         m_bOPened = true;
-        m_iSourceWidth = cdlg.GetWidth();
-        m_iSourceHeight = cdlg.GetHeight();
-        m_pCenterPageManager->GetPicViewCtrl(0)->SetScale(1.0);
-        m_iYUVBit = (cdlg.Is10bitYUV() ? 10 : 8);
         m_FileLength = wxFile((const wxChar*)sfile).Length();
+        m_pCenterPageManager->GetPicViewCtrl(0)->SetScale(1.0);
         m_pCenterPageManager->GetPicViewCtrl(0)->SetFitMode(true);
         m_cYUVIO.open((char *)sfile.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
         m_pcPicYuvOrg = new TComPicYuv;
@@ -265,7 +277,7 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_pThumbThread = new ThumbnailThread(this, m_pImageList, m_iSourceWidth, m_iSourceHeight, m_iYUVBit, sfile);
         if(m_pThumbThread->Create() != wxTHREAD_NO_ERROR)
         {
-            g_LogError(wxT("Can't create the thread!"));
+            g_LogError(_T("Can't create the thread!"));
             delete m_pThumbThread;
             m_pThumbThread = NULL;
         }
@@ -273,7 +285,7 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         {
             if(m_pThumbThread->Run() != wxTHREAD_NO_ERROR)
             {
-                g_LogError(wxT("Can't create the thread!"));
+                g_LogError(_T("Can't create the thread!"));
                 delete m_pThumbThread;
                 m_pThumbThread = NULL;
             }
@@ -297,7 +309,7 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
             m_cYUVIO.close();
             if(m_pThumbThread)
             {
-                if(m_pThumbThread->IsRunning())
+                if(m_pThumbThread->IsAlive())
                     m_pThumbThread->Delete();
                 m_pThumbThread = NULL;
             }
@@ -307,13 +319,12 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
                 delete m_pcPicYuvOrg;
                 m_pcPicYuvOrg = NULL;
             }
-            m_pImageList->RemoveAll();
             if(m_StrMemFileName.GetCount())
                 ClearThumbnalMemory();
             m_FileLength = 0;
             m_pCenterPageManager->Clear();
             m_pPixelViewCtrl->Clear();
-            g_ClearLog();
+            g_LogMessage(wxString::Format(_T("OnCloseFile() %d"), m_StrMemFileName.GetCount()));
         }
         else
         {
@@ -327,23 +338,22 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
 {
     int frame = event.GetInt();
     long framenumber = event.GetExtraLong();
-//    wxArrayString arr;
-    //g_LogMessage(wxString::Format(_T("Add some images from %d to %d"), frame-framenumber+1, frame));
+    g_LogMessage(wxString::Format(_T("Add some images from %d to %d"), frame-framenumber+1, frame));
     for(int i = 0;  i < (int)framenumber; i++)
     {
         int tmp = frame-framenumber+i+1;
-        wxString filename = wxString::Format(_T("Frame Number %d.bmp"), tmp);
-        m_StrMemFileName.Add(filename);
-        wxMemoryFSHandler::AddFile(wxString::Format(_T("Frame Number %d.bmp"), tmp), m_pImageList->GetBitmap(tmp),wxBITMAP_TYPE_BMP);
-        wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:Frame Number %d.bmp\"><br></p><span text-align=center>Frame Number: %d </span><br>"), tmp, tmp);
-//        m_pThumbnalList->Insert(label, tmp);
-//        m_pThumbnalList->Delete(tmp+1);
-//       arr.Add(label);
-        m_pThumbnalList->SetString(tmp, label);
+        if(m_pImageList->GetImageCount() > tmp)
+        {
+            wxMemoryFSHandler::AddFile(wxString::Format(_T("Frame Number %d.bmp"), tmp), m_pImageList->GetBitmap(tmp),wxBITMAP_TYPE_BMP);
+            wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:Frame Number %d.bmp\"><br></p><span text-align=center>Frame Number: %d </span><br>"), tmp, tmp);
+            m_pThumbnalList->SetString(tmp, label);
+            wxString filename = wxString::Format(_T("Frame Number %d.bmp"), tmp);
+            m_StrMemFileName.Add(filename);
+        }
+
     }
     m_pThumbnalList->Freeze();
     unsigned int cnt = m_pThumbnalList->GetFirstVisibleLine();
-//   m_pThumbnalList->Append(arr);
     m_pThumbnalList->ScrollToLine(cnt);
     m_pThumbnalList->Thaw();
     m_pThumbnalList->RefreshAll();
@@ -354,10 +364,12 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
         m_pThumbnalList->SetSelection(0);
         m_pThumbnalList->SetFocus();
     }
+    g_LogMessage(wxString::Format(_T("LEAVE Adding some images from %d to %d"), frame-framenumber+1, frame));
 }
 
 void MainFrame::OnThreadEnd(wxCommandEvent& event)
 {
+    g_LogMessage(_T("OnThreadEnd called"));
     m_pThumbThread = NULL;
     m_pImageList->RemoveAll();
 }
@@ -369,6 +381,12 @@ void MainFrame::ClearThumbnalMemory()
     m_StrMemFileName.Clear();
     m_pThumbnalList->Clear();
     m_pThumbnalList->RefreshAll();
+    if(m_pImageList)
+    {
+        m_pImageList->RemoveAll();
+        delete m_pImageList;
+        m_pImageList = NULL;
+    }
 }
 
 void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
@@ -498,6 +516,80 @@ void MainFrame::OnSwitchYUV(wxCommandEvent& event)
     }
     m_yuvToolBar->SetToolLabel(ID_SwitchColorYUV, label[m_eYUVComponentChoose]);
     SetColorComponent();
+}
+
+wxString MainFrame::GetDataBaseFileName(const DataBaseType type)
+{
+    wxString name = wxStandardPaths::Get().GetUserLocalDataDir();
+    if(!::wxDirExists(name))
+        ::wxMkdir(name);
+    switch(type)
+    {
+    case ID_SettingData:
+        name += _T("/Settings.db");
+        break;
+    case ID_StreamInfoData:
+        name += _T("/Info.db");
+        break;
+    default:
+        assert(0);
+        break;
+    }
+    return name;
+}
+
+void MainFrame::StoreYUVConfigData(const wxString& file, int width, int height, bool b10bit)
+{
+    wxString dbName = GetDataBaseFileName(ID_SettingData);
+    wxSQLite3Database* db = new wxSQLite3Database();
+    db->Open(dbName);
+    assert(db->TableExists(_T("YUVCONFIG")));
+    // check file already in the database
+    wxString sqlQuery = _T("SELECT * FROM YUVCONFIG WHERE FileName=\"");
+    sqlQuery += ( file + _T("\"") );
+    wxSQLite3ResultSet result = db->ExecuteQuery(sqlQuery);
+    if(result.NextRow())
+    {
+        // fix with the new data
+    }
+    else
+    {
+        wxString sqlInsert = _T("INSERT INTO YUVCONFIG VALUES (");
+        sqlInsert += ( _T("\"") + file + _T("\", ") );
+        sqlInsert += wxString::Format(_T("\"%d\", "), width);
+        sqlInsert += wxString::Format(_T("\"%d\", "), height);
+        wxString bit = b10bit ? _T("\"1\"") : _T("\"0\"");
+        sqlInsert += ( bit + _T(")") );
+        db->ExecuteUpdate(sqlInsert);
+    }
+    db->Close();
+    delete db;
+}
+
+bool MainFrame::GetYUVConfigData(const wxString& file, int& width, int& height, bool& b10bit)
+{
+    wxString dbName = GetDataBaseFileName(ID_SettingData);
+    wxSQLite3Database* db = new wxSQLite3Database();
+    db->Open(dbName);
+    if(!db->TableExists(_T("YUVCONFIG")))
+    {
+        db->ExecuteUpdate(_T("CREATE TABLE YUVCONFIG (FileName varchar(600), Width int, Height int, Is10Bit bit, PRIMARY KEY (FileName))"));
+        return false;
+    }
+    wxString sqlQuery = _T("SELECT * FROM YUVCONFIG WHERE FileName=\"");
+    sqlQuery += ( file + _T("\"") );
+    wxSQLite3ResultSet result = db->ExecuteQuery(sqlQuery);
+    bool ret = false;
+    if(result.NextRow())
+    {
+        width = result.GetInt(1);
+        height = result.GetInt(2);
+        b10bit = result.GetBool(3);
+        ret = true;
+    }
+    db->Close();
+    delete db;
+    return ret;
 }
 
 CenterPageManager::~CenterPageManager()

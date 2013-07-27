@@ -12,8 +12,9 @@ CXXFLAGS ?=
 # Standard preprocessor flags (common for CC and CXX) 
 CPPFLAGS ?= 
 
-# Standard linker flags 
-LDFLAGS ?= -lX11
+# Standard linker flags, the wxsqlite3 lib version is specified as follow
+# You may want to change the wxsqlite3 lib version
+LDFLAGS ?= -lX11 -lwxsqlite3-2.8
 
 # Location and arguments of wx-config script 
 WX_CONFIG ?= wx-config
@@ -32,7 +33,7 @@ BIN_DIR             = ../../bin
 
 DEBUGFLAG = -ggdb
 CPPDEPS = -MT$@ -MF`echo $@ | sed -e 's,\.o$$,.d,'` -MMD -MP
-HEVCANALYZER_CXXFLAGS =  -Wall -I.  $(WX_CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS)
+HEVCANALYZER_CXXFLAGS =  -Wall -Wno-unknown-pragmas -I.  $(WX_CXXFLAGS) $(CPPFLAGS) $(CXXFLAGS)
 HEVCANALYZER_OBJECTS =  \
 	$(HEVCANALYZER_OBJDIR)/HEVCodecApp.o \
 	$(HEVCANALYZER_OBJDIR)/HEVCAnalyzer.o \

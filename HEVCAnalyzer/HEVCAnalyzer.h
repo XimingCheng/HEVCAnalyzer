@@ -20,6 +20,8 @@
 #include <wx/graphics.h>
 #include <wx/dcbuffer.h>
 #include <wx/regex.h>
+#include <wx/stdpaths.h>
+#include <wx/wxsqlite3.h>
 
 #include "../TLibVideoIO/TVideoIOYuv.h"
 

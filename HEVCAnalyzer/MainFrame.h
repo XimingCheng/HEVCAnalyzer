@@ -30,6 +30,12 @@ public:
         ID_Switch_V,
     };
 
+    enum DataBaseType
+    {
+        ID_SettingData = 0,
+        ID_StreamInfoData,
+    };
+
     MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos = wxDefaultPosition,
               const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE | wxSUNKEN_BORDER);
     ~MainFrame();
@@ -50,6 +56,9 @@ private:
     void           SetColorComponent();
     void           ClearThumbnalMemory();
     void           InitThumbnailListView();
+    wxString       GetDataBaseFileName(const DataBaseType type);
+    void           StoreYUVConfigData(const wxString& file, int width, int height, bool b10bit);
+    bool           GetYUVConfigData(const wxString& file, int& width, int& height, bool& b10bit);
     // File IO operators
     void           OnOpenFile(wxCommandEvent& event);
     void           OnCloseFile(wxCommandEvent& event);

@@ -401,6 +401,8 @@ void PixelViewCtrl::Clear()
     m_FocusPos.y = 0;
     m_iHeightPerPixel = 90;
     m_iWidthPerPixel = 70;
+    m_pHRuler->SetTagValue(-1);
+    m_pVRuler->SetTagValue(-1);
     m_bHexFormat = true;
     Refresh();
 }
