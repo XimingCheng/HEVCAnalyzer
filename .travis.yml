@@ -1,6 +1,6 @@
 language: cpp
 compiler: clang
-before_install: sudo apt-get install -qq libx11-dev libwxbase2.8-dev libwxgtk2.8-dev libwxsqlite2.8-dev
+before_install: sudo apt-get install -qq libx11-dev libwxbase2.8-dev libwxgtk2.8-dev libwxsqlite3-2.8-dev
 script:
     - cd ./Build/Linux
     - make
