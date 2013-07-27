@@ -35,7 +35,8 @@ void* ThumbnailThread::Entry()
         double scaleRate = m_fixWidth/m_iSourceWidth;
         wxImage simg = bimg.Scale((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
         wxBitmap newbmp(simg);
-        m_pImageList->Add(newbmp);
+        if(!TestDestroy())
+            m_pImageList->Add(newbmp);
         //m_pFrame->ProcessEvent(event);
         // this method can be used in Linux
         framenumbers++;
@@ -52,7 +53,8 @@ void* ThumbnailThread::Entry()
             wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);
             event.SetExtraLong(framenumbers);
             event.SetInt(frame);
-            wxPostEvent(m_pFrame, event);
+            if(!TestDestroy())
+                wxPostEvent(m_pFrame, event);
             framenumbers = 0;
             frame++;
             continue;
@@ -64,15 +66,28 @@ void* ThumbnailThread::Entry()
         wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);
         event.SetExtraLong(framenumbers);
         event.SetInt(frame-1);
+        if(!TestDestroy())
+            wxPostEvent(m_pFrame, event);
+    }
+    return (wxThread::ExitCode)0;
+}
+
+void ThumbnailThread::OnExit()
+{
+    g_LogWarning(_T("ThumbnailThread::OnExit() called"));
+    if(m_cYUVIO.isOpen())
+        m_cYUVIO.close();
+    if(m_pcPicYuvOrg)
+    {
+        m_pcPicYuvOrg->destroy();
+        delete m_pcPicYuvOrg;
+        m_pcPicYuvOrg = NULL;
+    }
+    if(!TestDestroy())
+    {
+        wxCommandEvent event(wxEVT_END_THREAD, wxID_ANY);
         wxPostEvent(m_pFrame, event);
     }
-    m_cYUVIO.close();
-    m_pcPicYuvOrg->destroy();
-    delete m_pcPicYuvOrg;
-    m_pcPicYuvOrg = NULL;
-    wxCommandEvent event(wxEVT_END_THREAD, wxID_ANY);
-    wxPostEvent(m_pFrame, event);
-    return (wxThread::ExitCode)0;
 }
 
 ThumbnailThread::~ThumbnailThread()

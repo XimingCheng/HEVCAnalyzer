@@ -17,6 +17,7 @@ public:
 
 protected:
     virtual void* Entry();
+    void OnExit();
 
     wxString     m_sYUVPath;
     int          m_iSourceWidth;

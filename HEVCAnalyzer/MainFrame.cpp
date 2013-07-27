@@ -277,7 +277,7 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_pThumbThread = new ThumbnailThread(this, m_pImageList, m_iSourceWidth, m_iSourceHeight, m_iYUVBit, sfile);
         if(m_pThumbThread->Create() != wxTHREAD_NO_ERROR)
         {
-            g_LogError(wxT("Can't create the thread!"));
+            g_LogError(_T("Can't create the thread!"));
             delete m_pThumbThread;
             m_pThumbThread = NULL;
         }
@@ -285,7 +285,7 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         {
             if(m_pThumbThread->Run() != wxTHREAD_NO_ERROR)
             {
-                g_LogError(wxT("Can't create the thread!"));
+                g_LogError(_T("Can't create the thread!"));
                 delete m_pThumbThread;
                 m_pThumbThread = NULL;
             }
@@ -309,7 +309,7 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
             m_cYUVIO.close();
             if(m_pThumbThread)
             {
-                if(m_pThumbThread->IsRunning())
+                if(m_pThumbThread->IsAlive())
                     m_pThumbThread->Delete();
                 m_pThumbThread = NULL;
             }
@@ -369,6 +369,7 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
 
 void MainFrame::OnThreadEnd(wxCommandEvent& event)
 {
+    g_LogMessage(_T("OnThreadEnd called"));
     m_pThumbThread = NULL;
     m_pImageList->RemoveAll();
 }
