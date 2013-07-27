@@ -543,8 +543,7 @@ void MainFrame::StoreYUVConfigData(const wxString& file, int width, int height, 
     wxString dbName = GetDataBaseFileName(ID_SettingData);
     wxSQLite3Database* db = new wxSQLite3Database();
     db->Open(dbName);
-    if(!db->TableExists(_T("YUVCONFIG")))
-        db->ExecuteUpdate(_T("CREATE TABLE YUVCONFIG (FileName varchar(600), Width int, Height int, Is10Bit bit, PRIMARY KEY (FileName))"));
+    assert(db->TableExists(_T("YUVCONFIG")));
     // check file already in the database
     wxString sqlQuery = _T("SELECT * FROM YUVCONFIG WHERE FileName=\"");
     sqlQuery += ( file + _T("\"") );
@@ -572,7 +571,11 @@ bool MainFrame::GetYUVConfigData(const wxString& file, int& width, int& height, 
     wxString dbName = GetDataBaseFileName(ID_SettingData);
     wxSQLite3Database* db = new wxSQLite3Database();
     db->Open(dbName);
-    assert(db->TableExists(_T("YUVCONFIG")));
+    if(!db->TableExists(_T("YUVCONFIG")))
+    {
+        db->ExecuteUpdate(_T("CREATE TABLE YUVCONFIG (FileName varchar(600), Width int, Height int, Is10Bit bit, PRIMARY KEY (FileName))"));
+        return false;
+    }
     wxString sqlQuery = _T("SELECT * FROM YUVCONFIG WHERE FileName=\"");
     sqlQuery += ( file + _T("\"") );
     wxSQLite3ResultSet result = db->ExecuteQuery(sqlQuery);
