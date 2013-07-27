@@ -9,7 +9,7 @@ Build Under Linux(Ubuntu)
 
 Prefer clang++, but you can use g++ to build this project
 
-    sudo apt-get install libx11-dev libwxbase2.8-dev libwxgtk2.8-dev
+    sudo apt-get install libx11-dev libwxbase2.8-dev libwxgtk2.8-dev libwxsqlite2.8-dev
     cd ~
     git clone https://github.com/XimingCheng/HEVCAnalyzer.git
     cd ~/HEVCAnalyzer/Build/Linux
