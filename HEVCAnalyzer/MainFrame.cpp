@@ -38,13 +38,14 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_CLOSE, MainFrame::OnCloseFile)
     EVT_MENU(ID_SwitchGrid, MainFrame::OnSwitchShowGrid)
     EVT_MENU_RANGE(ID_Switch_YUV, ID_Switch_V, MainFrame::OnSwitchYUV)
+    EVT_MENU(ID_SwitchfitMode, MainFrame::OnSwitchFitMode)
     EVT_COMMAND(wxID_ANY, wxEVT_ADDANIMAGE_THREAD, MainFrame::OnThreadAddImage)
     EVT_COMMAND(wxID_ANY, wxEVT_END_THREAD, MainFrame::OnThreadEnd)
     EVT_AUITOOLBAR_TOOL_DROPDOWN(ID_SwitchColorYUV, MainFrame::OnDropDownToolbarYUV)
     EVT_SIZE(MainFrame::OnMainFrameSizeChange)
     EVT_IDLE(MainFrame::OnIdle)
     EVT_LISTBOX(wxID_ANY, MainFrame::OnThumbnailLboxSelect)
-    EVT_UPDATE_UI_RANGE(ID_Switch_YUV, ID_Switch_V, MainFrame::OnUpdateUI)
+    EVT_UPDATE_UI_RANGE(ID_SwitchGrid, ID_SwitchfitMode, MainFrame::OnUpdateUI)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos,
@@ -94,6 +95,7 @@ void MainFrame::CreateYUVToolBar()
     m_yuvToolBar->AddTool(ID_SwitchColorYUV, label[m_eYUVComponentChoose], tb_switchcolor);
     m_yuvToolBar->SetToolDropDown(ID_SwitchColorYUV, true);
     m_yuvToolBar->AddTool(ID_SwitchGrid, _T(""), tb_switchgrid, _T("Switch Grid"), wxITEM_CHECK);
+    m_yuvToolBar->AddTool(ID_SwitchfitMode, _T(""), tb_switchgrid, _T("Switch FitMode"), wxITEM_CHECK);
     m_yuvToolBar->Realize();
 
     m_mgr.AddPane(m_yuvToolBar, wxAuiPaneInfo().Name(_T("YUV_Tools")).Caption(_T("YUV ToolBar")).
@@ -479,8 +481,12 @@ void MainFrame::SetColorComponent()
 
 void MainFrame::OnUpdateUI(wxUpdateUIEvent& event)
 {
+    PicViewCtrl* pCtrl = m_pCenterPageManager->GetPicViewCtrl(0);
     switch(event.GetId())
     {
+    case ID_SwitchGrid:
+        event.Check(pCtrl->IsShowGrid());
+        break;
     case ID_Switch_YUV:
         event.Check(m_eYUVComponentChoose == MODE_ORG);
         break;
@@ -492,6 +498,9 @@ void MainFrame::OnUpdateUI(wxUpdateUIEvent& event)
         break;
     case ID_Switch_V:
         event.Check(m_eYUVComponentChoose == MODE_V);
+        break;
+    case ID_SwitchfitMode:
+        event.Check(pCtrl->GetFitMode());
         break;
     }
 }
@@ -516,6 +525,19 @@ void MainFrame::OnSwitchYUV(wxCommandEvent& event)
     }
     m_yuvToolBar->SetToolLabel(ID_SwitchColorYUV, label[m_eYUVComponentChoose]);
     SetColorComponent();
+}
+
+void MainFrame::OnSwitchFitMode(wxCommandEvent& event)
+{
+    unsigned int size = m_pCenterPageManager->GetSize();
+    for(unsigned int i = 0; i < size; i++)
+    {
+        PicViewCtrl* pCtrl = m_pCenterPageManager->GetPicViewCtrl(i);
+        bool bFit = pCtrl->GetFitMode();
+        pCtrl->SetFitMode(!bFit);
+        if(!bFit)
+            pCtrl->Refresh();
+    }
 }
 
 wxString MainFrame::GetDataBaseFileName(const DataBaseType type)

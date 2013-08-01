@@ -22,12 +22,13 @@ public:
         ID_NoteBookLeftPane = wxID_HIGHEST+1,
         ID_NoteBookBottomPane,
         ID_NoteBookCenterPane,
-        ID_SwitchGrid,
         ID_SwitchColorYUV,
+        ID_SwitchGrid,
         ID_Switch_YUV,
         ID_Switch_Y,
         ID_Switch_U,
         ID_Switch_V,
+        ID_SwitchfitMode,
     };
 
     enum DataBaseType
@@ -68,6 +69,7 @@ private:
     void           OnDropDownToolbarYUV(wxAuiToolBarEvent& event);
     void           OnSwitchShowGrid(wxCommandEvent& event);
     void           OnSwitchYUV(wxCommandEvent& event);
+    void           OnSwitchFitMode(wxCommandEvent& event);
 
 private:
     wxAuiManager         m_mgr;
