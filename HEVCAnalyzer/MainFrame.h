@@ -29,6 +29,7 @@ public:
         ID_Switch_U,
         ID_Switch_V,
         ID_SwitchfitMode,
+        ID_SwitchHEXPixel,
     };
 
     enum DataBaseType
@@ -70,6 +71,7 @@ private:
     void           OnSwitchShowGrid(wxCommandEvent& event);
     void           OnSwitchYUV(wxCommandEvent& event);
     void           OnSwitchFitMode(wxCommandEvent& event);
+    void           OnSwitchHEXPixel(wxCommandEvent& event);
 
 private:
     wxAuiManager         m_mgr;

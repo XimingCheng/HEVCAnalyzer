@@ -39,13 +39,14 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(ID_SwitchGrid, MainFrame::OnSwitchShowGrid)
     EVT_MENU_RANGE(ID_Switch_YUV, ID_Switch_V, MainFrame::OnSwitchYUV)
     EVT_MENU(ID_SwitchfitMode, MainFrame::OnSwitchFitMode)
+    EVT_MENU(ID_SwitchHEXPixel, MainFrame::OnSwitchHEXPixel)
     EVT_COMMAND(wxID_ANY, wxEVT_ADDANIMAGE_THREAD, MainFrame::OnThreadAddImage)
     EVT_COMMAND(wxID_ANY, wxEVT_END_THREAD, MainFrame::OnThreadEnd)
     EVT_AUITOOLBAR_TOOL_DROPDOWN(ID_SwitchColorYUV, MainFrame::OnDropDownToolbarYUV)
     EVT_SIZE(MainFrame::OnMainFrameSizeChange)
     EVT_IDLE(MainFrame::OnIdle)
     EVT_LISTBOX(wxID_ANY, MainFrame::OnThumbnailLboxSelect)
-    EVT_UPDATE_UI_RANGE(ID_SwitchGrid, ID_SwitchfitMode, MainFrame::OnUpdateUI)
+    EVT_UPDATE_UI_RANGE(ID_SwitchGrid, ID_SwitchHEXPixel, MainFrame::OnUpdateUI)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos,
@@ -92,6 +93,7 @@ void MainFrame::CreateYUVToolBar()
     wxBitmap tb_switchgrid = wxArtProvider::GetBitmap(wxART_REPORT_VIEW, wxART_OTHER, wxSize(16, 16));
     wxBitmap tb_switchcolor = wxArtProvider::GetBitmap(wxART_NORMAL_FILE, wxART_OTHER, wxSize(16, 16));
     wxString label[4] = { _T("YUV"), _T("Y"), _T("U"), _T("V") };
+    m_yuvToolBar->AddTool(ID_SwitchHEXPixel, _T(""), tb_switchgrid, _T("Switch HEX View in Pixel"), wxITEM_CHECK);
     m_yuvToolBar->AddTool(ID_SwitchColorYUV, label[m_eYUVComponentChoose], tb_switchcolor);
     m_yuvToolBar->SetToolDropDown(ID_SwitchColorYUV, true);
     m_yuvToolBar->AddTool(ID_SwitchGrid, _T(""), tb_switchgrid, _T("Switch Grid"), wxITEM_CHECK);
@@ -502,6 +504,9 @@ void MainFrame::OnUpdateUI(wxUpdateUIEvent& event)
     case ID_SwitchfitMode:
         event.Check(pCtrl->GetFitMode());
         break;
+    case ID_SwitchHEXPixel:
+        event.Check(m_pPixelViewCtrl->GetHEXFormat());
+        break;
     }
 }
 
@@ -538,6 +543,13 @@ void MainFrame::OnSwitchFitMode(wxCommandEvent& event)
         if(!bFit)
             pCtrl->Refresh();
     }
+}
+
+void MainFrame::OnSwitchHEXPixel(wxCommandEvent& event)
+{
+    bool bHEX = m_pPixelViewCtrl->GetHEXFormat();
+    m_pPixelViewCtrl->SetHEXFormat(!bHEX);
+    m_pPixelViewCtrl->Refresh();
 }
 
 wxString MainFrame::GetDataBaseFileName(const DataBaseType type)

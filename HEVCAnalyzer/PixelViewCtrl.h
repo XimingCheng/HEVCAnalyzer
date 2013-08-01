@@ -71,6 +71,8 @@ public:
     void SetWidth(const int width){m_iWidthPerPixel = width;}
     int  GetHeight()const{return m_iHeightPerPixel;}
     int  GetWidth()const{return m_iWidthPerPixel;}
+    void SetHEXFormat(const bool b) { m_bHexFormat = b;}
+    bool GetHEXFormat() const { return m_bHexFormat; }
     void Clear();
 
 private:
