@@ -1,4 +1,5 @@
 #include "PicViewCtrl.h"
+#include "MainFrame.h"
 
 extern const wxEventType wxEVT_YUVBUFFER_CHANGED;
 extern const wxEventType wxEVT_POSITION_CHANGED;
@@ -306,7 +307,7 @@ void PicViewCtrl::ChangeScaleRate(const double rate)
 }
 
 // if diff > 0 show next, else show previous
-bool PicViewCtrl::ShowPageByDiffNumber(const int diff)
+bool PicViewCtrl::ShowPageByDiffNumber(const int diff, bool bWantRet)
 {
     int cnt     = m_pList->GetItemCount();
     int cursel  = m_pList->GetSelection();
@@ -321,7 +322,10 @@ bool PicViewCtrl::ShowPageByDiffNumber(const int diff)
         m_pList->SetSelection(nextsel);
         wxCommandEvent evt(wxEVT_COMMAND_LISTBOX_SELECTED, wxID_ANY);
         evt.SetInt(nextsel);
-        wxPostEvent(m_pFrame, evt);
+        if(!bWantRet)
+            wxPostEvent(m_pFrame, evt);
+        else
+            ((MainFrame*)m_pFrame)->OnThumbnailLboxSelect(evt);
         return true;
     }
     return false;
@@ -387,13 +391,14 @@ void PicViewCtrl::OnKeyDown(wxKeyEvent& event)
         return;
     }
     int key = event.GetKeyCode();
+    wxCommandEvent e;
     switch(key)
     {
     case WXK_PAGEUP:
-        ShowPageByDiffNumber(-1);
+        ((MainFrame*)m_pFrame)->OnGoToPreFrame(e);
         break;
     case WXK_PAGEDOWN:
-        ShowPageByDiffNumber(1);
+        ((MainFrame*)m_pFrame)->OnGoToNextFrame(e);
         break;
     case WXK_UP:
         MoveLCURect(MOVE_UP);

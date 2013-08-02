@@ -8,6 +8,8 @@
 #include "PixelViewCtrl.h"
 #include "RulerCtrl.h"
 
+#define TIMER_ID_PLAYING  wxID_HIGHEST+101
+
 DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_END_THREAD, wxID_ANY)
 
@@ -30,6 +32,12 @@ public:
         ID_Switch_V,
         ID_SwitchfitMode,
         ID_SwitchHEXPixel,
+        ID_GoToNextFrame,
+        ID_GoToPreFrame,
+        ID_Play_Pause,
+        ID_FastForward,
+        ID_FastBackward,
+        ID_ToolBarHighestID,
     };
 
     enum DataBaseType
@@ -41,6 +49,10 @@ public:
     MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos = wxDefaultPosition,
               const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE | wxSUNKEN_BORDER);
     ~MainFrame();
+
+    void           OnGoToNextFrame(wxCommandEvent& event);
+    void           OnGoToPreFrame(wxCommandEvent& event);
+    void           OnThumbnailLboxSelect(wxCommandEvent& event);
 
 private:
     void           OnExit(wxCommandEvent& evt);
@@ -61,10 +73,11 @@ private:
     wxString       GetDataBaseFileName(const DataBaseType type);
     void           StoreYUVConfigData(const wxString& file, int width, int height, bool b10bit);
     bool           GetYUVConfigData(const wxString& file, int& width, int& height, bool& b10bit);
+    void           SetTotalFrameNumber();
+    void           OnFrameClose(wxCommandEvent& event);
     // File IO operators
     void           OnOpenFile(wxCommandEvent& event);
     void           OnCloseFile(wxCommandEvent& event);
-    void           OnThumbnailLboxSelect(wxCommandEvent& event);
     void           OnThreadEnd(wxCommandEvent& event);
     void           OnUpdateUI(wxUpdateUIEvent& event);
     void           OnDropDownToolbarYUV(wxAuiToolBarEvent& event);
@@ -72,6 +85,10 @@ private:
     void           OnSwitchYUV(wxCommandEvent& event);
     void           OnSwitchFitMode(wxCommandEvent& event);
     void           OnSwitchHEXPixel(wxCommandEvent& event);
+    void           OnPlayorPause(wxCommandEvent& event);
+    void           OnFastForward(wxCommandEvent& event);
+    void           OnFastBackward(wxCommandEvent& event);
+    void           OnTimer(wxTimerEvent& event);
 
 private:
     wxAuiManager         m_mgr;
@@ -83,6 +100,8 @@ private:
 //    RulerCtrl*           m_pPicHRuler;
 //    RulerCtrl*           m_pPicVRuler;
     wxTextCtrl*          m_pTCLogWin;
+    wxTextCtrl*          m_pFrameNumberText;
+    wxStaticText*        m_pTotalFrameNumberText;
     PixelViewCtrl*       m_pPixelViewCtrl;
     RulerCtrl*           m_pPixelHRuler;
     RulerCtrl*           m_pPixelVRuler;
@@ -91,12 +110,15 @@ private:
     long                 m_notebook_theme;
     bool                 m_bYUVFile;
     bool                 m_bOPened;
+    bool                 m_bPlaying;
+    wxTimer*             m_pTimer;
     ShowMode             m_eYUVComponentChoose;
 
     int                  m_iSourceWidth;
     int                  m_iSourceHeight;
     int                  m_iYUVBit;
     wxFileOffset         m_FileLength;
+    int                  m_iTotalFrame;
 
     TVideoIOYuv          m_cYUVIO;
     TComPicYuv*          m_pcPicYuvOrg;

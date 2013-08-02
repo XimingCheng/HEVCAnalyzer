@@ -40,13 +40,20 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU_RANGE(ID_Switch_YUV, ID_Switch_V, MainFrame::OnSwitchYUV)
     EVT_MENU(ID_SwitchfitMode, MainFrame::OnSwitchFitMode)
     EVT_MENU(ID_SwitchHEXPixel, MainFrame::OnSwitchHEXPixel)
+    EVT_MENU(ID_GoToNextFrame, MainFrame::OnGoToNextFrame)
+    EVT_MENU(ID_GoToPreFrame, MainFrame::OnGoToPreFrame)
+    EVT_MENU(ID_Play_Pause, MainFrame::OnPlayorPause)
+    EVT_MENU(ID_FastForward, MainFrame::OnFastForward)
+    EVT_MENU(ID_FastBackward, MainFrame::OnFastBackward)
     EVT_COMMAND(wxID_ANY, wxEVT_ADDANIMAGE_THREAD, MainFrame::OnThreadAddImage)
     EVT_COMMAND(wxID_ANY, wxEVT_END_THREAD, MainFrame::OnThreadEnd)
+    EVT_COMMAND(wxID_ANY, wxEVT_CLOSE_WINDOW, MainFrame::OnFrameClose)
     EVT_AUITOOLBAR_TOOL_DROPDOWN(ID_SwitchColorYUV, MainFrame::OnDropDownToolbarYUV)
     EVT_SIZE(MainFrame::OnMainFrameSizeChange)
     EVT_IDLE(MainFrame::OnIdle)
     EVT_LISTBOX(wxID_ANY, MainFrame::OnThumbnailLboxSelect)
-    EVT_UPDATE_UI_RANGE(ID_SwitchGrid, ID_SwitchHEXPixel, MainFrame::OnUpdateUI)
+    EVT_UPDATE_UI_RANGE(ID_SwitchGrid, ID_ToolBarHighestID, MainFrame::OnUpdateUI)
+    EVT_TIMER(TIMER_ID_PLAYING, MainFrame::OnTimer)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos,
@@ -69,7 +76,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 
     Centre();
     g_LogMessage(_T("HEVC Analyzer load sucessfully"));
-
+    m_pTimer = new wxTimer(this, TIMER_ID_PLAYING);
     m_mgr.Update();
 }
 
@@ -87,17 +94,43 @@ void MainFrame::CreateFileIOToolBar()
 
 void MainFrame::CreateYUVToolBar()
 {
+    wxTextValidator tv(wxFILTER_INCLUDE_CHAR_LIST);
+    wxArrayString s;
+    wxString str;
+    for(int i = 0; i < 10; i++)
+    {
+        str.Printf(wxT("%d"), i);
+        s.Add(str);
+    }
+    tv.SetIncludes(s);
+
     m_yuvToolBar = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                     wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_TEXT | wxAUI_TB_HORZ_TEXT);
+    m_pFrameNumberText = new wxTextCtrl(m_yuvToolBar, wxID_ANY, _T("0"), wxDefaultPosition, wxSize(40, -1), 0, tv);
+    m_pTotalFrameNumberText = new wxStaticText(m_yuvToolBar, wxID_ANY, _T("/0"), wxDefaultPosition, wxSize(30, -1));
+    m_pFrameNumberText->SetToolTip(_T("Current Frame Number"));
+    m_pTotalFrameNumberText->SetToolTip(_T("Total Frame Number"));
     m_yuvToolBar->SetToolBitmapSize(wxSize(16, 16));
-    wxBitmap tb_switchgrid = wxArtProvider::GetBitmap(wxART_REPORT_VIEW, wxART_OTHER, wxSize(16, 16));
-    wxBitmap tb_switchcolor = wxArtProvider::GetBitmap(wxART_NORMAL_FILE, wxART_OTHER, wxSize(16, 16));
+    wxBitmap tb_switchgrid = wxArtProvider::GetBitmap(wxART_REPORT_VIEW, wxART_TOOLBAR, wxSize(16, 16));
+    wxBitmap tb_switchcolor = wxArtProvider::GetBitmap(wxART_NORMAL_FILE, wxART_TOOLBAR, wxSize(16, 16));
+    wxBitmap tb_back = wxArtProvider::GetBitmap(wxART_GO_BACK, wxART_TOOLBAR, wxSize(16, 16));
+    wxBitmap tb_play = wxArtProvider::GetBitmap(wxART_HELP_PAGE, wxART_TOOLBAR, wxSize(16, 16));
+    wxBitmap tb_next = wxArtProvider::GetBitmap(wxART_GO_FORWARD, wxART_TOOLBAR, wxSize(16, 16));
     wxString label[4] = { _T("YUV"), _T("Y"), _T("U"), _T("V") };
     m_yuvToolBar->AddTool(ID_SwitchHEXPixel, _T(""), tb_switchgrid, _T("Switch HEX View in Pixel"), wxITEM_CHECK);
-    m_yuvToolBar->AddTool(ID_SwitchColorYUV, label[m_eYUVComponentChoose], tb_switchcolor);
+    m_yuvToolBar->AddSeparator();
+    m_yuvToolBar->AddTool(ID_SwitchColorYUV, label[m_eYUVComponentChoose], tb_switchcolor, _T("Switch Color YUV"), wxITEM_NORMAL);
     m_yuvToolBar->SetToolDropDown(ID_SwitchColorYUV, true);
     m_yuvToolBar->AddTool(ID_SwitchGrid, _T(""), tb_switchgrid, _T("Switch Grid"), wxITEM_CHECK);
     m_yuvToolBar->AddTool(ID_SwitchfitMode, _T(""), tb_switchgrid, _T("Switch FitMode"), wxITEM_CHECK);
+    m_yuvToolBar->AddSeparator();
+    m_yuvToolBar->AddTool(ID_GoToPreFrame, _T(""), tb_back, _T("Go to previous frame (PAGE_UP)"), wxITEM_NORMAL);
+    m_yuvToolBar->AddTool(ID_FastBackward, _T(""), tb_back, _T("Fast backward"), wxITEM_NORMAL);
+    m_yuvToolBar->AddTool(ID_Play_Pause, _T(""), tb_play, _T("Play/Pause"), wxITEM_NORMAL);
+    m_yuvToolBar->AddTool(ID_FastForward, _T(""), tb_next, _T("Fast forward"), wxITEM_NORMAL);
+    m_yuvToolBar->AddTool(ID_GoToNextFrame, _T(""), tb_next, _T("Go to next frame (PAGE_DOWN)"), wxITEM_NORMAL);
+    m_yuvToolBar->AddControl(m_pFrameNumberText, _T("Frame Number"));
+    m_yuvToolBar->AddControl(m_pTotalFrameNumberText, _T("Total Frame Number"));
     m_yuvToolBar->Realize();
 
     m_mgr.AddPane(m_yuvToolBar, wxAuiPaneInfo().Name(_T("YUV_Tools")).Caption(_T("YUV ToolBar")).
@@ -257,6 +290,13 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
             m_iSourceWidth = cdlg.GetWidth();
             m_iSourceHeight = cdlg.GetHeight();
             m_iYUVBit = (cdlg.Is10bitYUV() ? 10 : 8);
+            m_FileLength = wxFile((const wxChar*)sfile).Length();
+            int t = (cdlg.Is10bitYUV() ? 2 : 1);
+            if(!(m_FileLength/(m_iSourceWidth*m_iSourceHeight*3/2*t) > 0))
+            {
+                wxMessageBox(_T("Not enough data for one frame, open YUV file failed"));
+                return;
+            }
             StoreYUVConfigData(dlg.GetPath(), m_iSourceWidth, m_iSourceHeight, (m_iYUVBit > 8));
         }
         else
@@ -264,11 +304,20 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
             m_iSourceWidth = w;
             m_iSourceHeight = h;
             m_iYUVBit = (bit ? 10 : 8);
+            m_FileLength = wxFile((const wxChar*)sfile).Length();
+            int t = (bit ? 2 : 1);
+            if(!(m_FileLength/(m_iSourceWidth*m_iSourceHeight*3/2*t) > 0))
+            {
+                wxMessageBox(_T("Not enough data for one frame, open YUV file failed"));
+                return;
+            }
         }
         // multi-thread
         OnCloseFile(event);
         m_bOPened = true;
+        m_bPlaying = false;
         m_FileLength = wxFile((const wxChar*)sfile).Length();
+        SetTotalFrameNumber();
         m_pCenterPageManager->GetPicViewCtrl(0)->SetScale(1.0);
         m_pCenterPageManager->GetPicViewCtrl(0)->SetFitMode(true);
         m_cYUVIO.open((char *)sfile.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
@@ -303,10 +352,18 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
     }
 }
 
+void MainFrame::OnFrameClose(wxCommandEvent& event)
+{
+    OnCloseFile(event);
+    event.Skip();
+}
+
 void MainFrame::OnCloseFile(wxCommandEvent& event)
 {
     if(m_bOPened)
     {
+        if(m_pTimer->IsRunning())
+            m_pTimer->Stop();
         m_pCenterPageManager->Close();
         if(m_bYUVFile)
         {
@@ -328,6 +385,7 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
             m_FileLength = 0;
             m_pCenterPageManager->Clear();
             m_pPixelViewCtrl->Clear();
+            m_pTotalFrameNumberText->SetLabel(_T("0"));
             g_LogMessage(wxString::Format(_T("OnCloseFile() %d"), m_StrMemFileName.GetCount()));
         }
         else
@@ -402,11 +460,14 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
     int pad[] = {0, 0};
     m_cYUVIO.read(m_pcPicYuvOrg, pad);
     m_pCenterPageManager->GetPicViewCtrl(0)->SetPicYuvBuffer(m_pcPicYuvOrg, m_iSourceWidth, m_iSourceHeight, m_iYUVBit);
+    wxString str;
+    str.Printf(_T("%d"), frame + 1);
+    m_pFrameNumberText->SetValue(str);
 }
 
 void MainFrame::InitThumbnailListView()
 {
-    int framenumber = m_FileLength/(m_iSourceWidth*m_iSourceHeight*1.5*(m_iYUVBit==10?2:1));
+    int framenumber = m_FileLength/(m_iSourceWidth*m_iSourceHeight*1.5*(m_iYUVBit > 8? 2 : 1));
     g_LogMessage(wxString::Format(_T("Frame Number: %d\n"), framenumber));
     wxArrayString arr;
     for(int i = 0;  i < framenumber; i++)
@@ -440,8 +501,8 @@ void MainFrame::OnIdle(wxIdleEvent& event)
 
 void MainFrame::OnDropDownToolbarYUV(wxAuiToolBarEvent& event)
 {
-    if (event.IsDropDownClicked())
-    {
+//    if (event.IsDropDownClicked())
+//    {
         wxAuiToolBar* tb = static_cast<wxAuiToolBar*>(event.GetEventObject());
         tb->SetToolSticky(event.GetId(), true);
         wxMenu menuPopup;
@@ -455,7 +516,7 @@ void MainFrame::OnDropDownToolbarYUV(wxAuiToolBarEvent& event)
         pt = ScreenToClient(pt);
         PopupMenu(&menuPopup, pt);
         tb->SetToolSticky(event.GetId(), false);
-    }
+//    }
 }
 
 void MainFrame::OnSwitchShowGrid(wxCommandEvent& event)
@@ -624,6 +685,70 @@ bool MainFrame::GetYUVConfigData(const wxString& file, int& width, int& height, 
     db->Close();
     delete db;
     return ret;
+}
+
+void MainFrame::SetTotalFrameNumber()
+{
+    int t = m_iYUVBit > 8 ? 2 : 1;
+    int framenum = m_FileLength/(m_iSourceWidth*m_iSourceHeight*3/2*t);
+    m_iTotalFrame = framenum;
+    wxString str;
+    str.Printf(_T("%d"), framenum);
+    m_pTotalFrameNumberText->SetLabel(str);
+    m_pFrameNumberText->SetValue(_T("1"));
+}
+
+void MainFrame::OnGoToNextFrame(wxCommandEvent& event)
+{
+    if(m_bOPened && !m_bPlaying && m_pCenterPageManager->GetPicViewCtrl(0))
+        m_pCenterPageManager->GetPicViewCtrl(0)->ShowPageByDiffNumber(1);
+}
+
+void MainFrame::OnGoToPreFrame(wxCommandEvent& event)
+{
+    if(m_bOPened && !m_bPlaying && m_pCenterPageManager->GetPicViewCtrl(0))
+        m_pCenterPageManager->GetPicViewCtrl(0)->ShowPageByDiffNumber(-1);
+}
+
+void MainFrame::OnPlayorPause(wxCommandEvent& event)
+{
+    if(m_bOPened && m_pCenterPageManager->GetPicViewCtrl(0))
+    {
+        if(m_pTimer->IsRunning())
+        {
+            m_bPlaying = false;
+            m_pTimer->Stop();
+        }
+        else
+        {
+            m_bPlaying = true;
+            m_pTimer->Start(100/3);
+        }
+    }
+}
+
+void MainFrame::OnFastForward(wxCommandEvent& event)
+{
+    if(m_bOPened && !m_bPlaying && m_pCenterPageManager->GetPicViewCtrl(0))
+        m_pCenterPageManager->GetPicViewCtrl(0)->ShowPageByDiffNumber(10);
+}
+
+void MainFrame::OnFastBackward(wxCommandEvent& event)
+{
+    if(m_bOPened && !m_bPlaying && m_pCenterPageManager->GetPicViewCtrl(0))
+        m_pCenterPageManager->GetPicViewCtrl(0)->ShowPageByDiffNumber(-10);
+}
+
+void MainFrame::OnTimer(wxTimerEvent& event)
+{
+    int frame = m_pThumbnalList->GetSelection();
+    if(frame == m_iTotalFrame - 1)
+    {
+        m_pTimer->Stop();
+        m_bPlaying = false;
+    }
+    else
+        m_pCenterPageManager->GetPicViewCtrl(0)->ShowPageByDiffNumber(1, true);
 }
 
 CenterPageManager::~CenterPageManager()

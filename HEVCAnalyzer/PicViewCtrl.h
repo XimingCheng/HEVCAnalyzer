@@ -49,6 +49,7 @@ public:
     void SetPicYuvBuffer(TComPicYuv* pBuffer, const int w, const int h, const int bit);
     void SetRulerCtrlFited();
     void Clear();
+    bool ShowPageByDiffNumber(const int diff, bool bWantRet = false);
 
 private:
     void OnMouseMove(wxMouseEvent& event);
@@ -63,7 +64,6 @@ private:
     void ChangeScaleRate(const double rate);
     int  GetCurLCURasterID(const double x, const double y, wxPoint& start, wxPoint& end);
     void MoveLCURect(const Direction& d);
-    bool ShowPageByDiffNumber(const int diff);
     void CalStartEndPointByLCUId(const int id, wxPoint& start, wxPoint& end);
     void DrawBackGround(wxGraphicsContext* gc);
     void DrawNoPictureTips(wxGraphicsContext* gc);
