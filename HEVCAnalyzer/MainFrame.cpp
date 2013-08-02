@@ -754,15 +754,20 @@ void MainFrame::OnTimer(wxTimerEvent& event)
 
 void MainFrame::OnInputFrameNumber(wxCommandEvent& event)
 {
-    if(event.GetEventObject() == (wxObject*)m_pFrameNumberText)
+    if(m_bOPened && !m_bPlaying)
     {
-        int frame = m_pThumbnalList->GetSelection();
-        wxString str = m_pFrameNumberText->GetValue();
-        long diff = 0;
-        str.ToLong(&diff);
-        diff = diff - frame - 1;
-        m_pCenterPageManager->GetPicViewCtrl(0)->ShowPageByDiffNumber(diff);
+        if(event.GetEventObject() == (wxObject*)m_pFrameNumberText)
+        {
+            int frame = m_pThumbnalList->GetSelection();
+            wxString str = m_pFrameNumberText->GetValue();
+            long diff = 0;
+            str.ToLong(&diff);
+            diff = diff - frame - 1;
+            m_pCenterPageManager->GetPicViewCtrl(0)->ShowPageByDiffNumber(diff);
+        }
     }
+    else
+        m_pFrameNumberText->SetValue(_T("0"));
 }
 
 CenterPageManager::~CenterPageManager()
