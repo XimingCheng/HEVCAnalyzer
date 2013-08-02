@@ -48,6 +48,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_COMMAND(wxID_ANY, wxEVT_ADDANIMAGE_THREAD, MainFrame::OnThreadAddImage)
     EVT_COMMAND(wxID_ANY, wxEVT_END_THREAD, MainFrame::OnThreadEnd)
     EVT_COMMAND(wxID_ANY, wxEVT_CLOSE_WINDOW, MainFrame::OnFrameClose)
+    EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_TEXT_ENTER, MainFrame::OnInputFrameNumber)
     EVT_AUITOOLBAR_TOOL_DROPDOWN(ID_SwitchColorYUV, MainFrame::OnDropDownToolbarYUV)
     EVT_SIZE(MainFrame::OnMainFrameSizeChange)
     EVT_IDLE(MainFrame::OnIdle)
@@ -106,7 +107,7 @@ void MainFrame::CreateYUVToolBar()
 
     m_yuvToolBar = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                     wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_TEXT | wxAUI_TB_HORZ_TEXT);
-    m_pFrameNumberText = new wxTextCtrl(m_yuvToolBar, wxID_ANY, _T("0"), wxDefaultPosition, wxSize(40, -1), 0, tv);
+    m_pFrameNumberText = new wxTextCtrl(m_yuvToolBar, wxID_ANY, _T("0"), wxDefaultPosition, wxSize(40, -1), wxTE_PROCESS_ENTER, tv);
     m_pTotalFrameNumberText = new wxStaticText(m_yuvToolBar, wxID_ANY, _T("/0"), wxDefaultPosition, wxSize(30, -1));
     m_pFrameNumberText->SetToolTip(_T("Current Frame Number"));
     m_pTotalFrameNumberText->SetToolTip(_T("Total Frame Number"));
@@ -749,6 +750,19 @@ void MainFrame::OnTimer(wxTimerEvent& event)
     }
     else
         m_pCenterPageManager->GetPicViewCtrl(0)->ShowPageByDiffNumber(1, true);
+}
+
+void MainFrame::OnInputFrameNumber(wxCommandEvent& event)
+{
+    if(event.GetEventObject() == (wxObject*)m_pFrameNumberText)
+    {
+        int frame = m_pThumbnalList->GetSelection();
+        wxString str = m_pFrameNumberText->GetValue();
+        long diff = 0;
+        str.ToLong(&diff);
+        diff = diff - frame - 1;
+        m_pCenterPageManager->GetPicViewCtrl(0)->ShowPageByDiffNumber(diff);
+    }
 }
 
 CenterPageManager::~CenterPageManager()

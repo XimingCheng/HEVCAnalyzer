@@ -89,6 +89,7 @@ private:
     void           OnFastForward(wxCommandEvent& event);
     void           OnFastBackward(wxCommandEvent& event);
     void           OnTimer(wxTimerEvent& event);
+    void           OnInputFrameNumber(wxCommandEvent& event);
 
 private:
     wxAuiManager         m_mgr;
