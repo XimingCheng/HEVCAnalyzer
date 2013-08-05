@@ -102,10 +102,6 @@ private:
     wxArrayString        m_StrMemFileName;
     wxString             m_sCurOpenedFilePath;
     wxString             m_sCurOpenedFileName;
-//    wxScrolledWindow*    m_pDecodeScrolledWin;
-//    PicViewCtrl*         m_pPicViewCtrl;
-//    RulerCtrl*           m_pPicHRuler;
-//    RulerCtrl*           m_pPicVRuler;
     wxTextCtrl*          m_pTCLogWin;
     wxTextCtrl*          m_pFrameNumberText;
     wxStaticText*        m_pTotalFrameNumberText;

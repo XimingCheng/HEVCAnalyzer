@@ -404,6 +404,7 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
             m_FileLength = 0;
             m_pCenterPageManager->Clear();
             m_pPixelViewCtrl->Clear();
+            m_pFrameNumberText->SetValue(_T("0"));
             m_pTotalFrameNumberText->SetLabel(_T("/ 0"));
             g_LogMessage(wxString::Format(_T("OnCloseFile() %d"), m_StrMemFileName.GetCount()));
         }
@@ -520,22 +521,19 @@ void MainFrame::OnIdle(wxIdleEvent& event)
 
 void MainFrame::OnDropDownToolbarYUV(wxAuiToolBarEvent& event)
 {
-//    if (event.IsDropDownClicked())
-//    {
-        wxAuiToolBar* tb = static_cast<wxAuiToolBar*>(event.GetEventObject());
-        tb->SetToolSticky(event.GetId(), true);
-        wxMenu menuPopup;
-        menuPopup.AppendRadioItem(ID_Switch_YUV, _T("YUV"), _T("Show YUV"));
-        menuPopup.AppendRadioItem(ID_Switch_Y, _T("Y"), _T("Show Y component"));
-        menuPopup.AppendRadioItem(ID_Switch_U, _T("U"), _T("Show U component"));
-        menuPopup.AppendRadioItem(ID_Switch_V, _T("V"), _T("Show V component"));
-        menuPopup.Check(ID_Switch_YUV + (int)m_eYUVComponentChoose, true);
-        wxRect rect = tb->GetToolRect(event.GetId());
-        wxPoint pt = tb->ClientToScreen(rect.GetBottomLeft());
-        pt = ScreenToClient(pt);
-        PopupMenu(&menuPopup, pt);
-        tb->SetToolSticky(event.GetId(), false);
-//    }
+    wxAuiToolBar* tb = static_cast<wxAuiToolBar*>(event.GetEventObject());
+    tb->SetToolSticky(event.GetId(), true);
+    wxMenu menuPopup;
+    menuPopup.AppendRadioItem(ID_Switch_YUV, _T("YUV"), _T("Show YUV"));
+    menuPopup.AppendRadioItem(ID_Switch_Y, _T("Y"), _T("Show Y component"));
+    menuPopup.AppendRadioItem(ID_Switch_U, _T("U"), _T("Show U component"));
+    menuPopup.AppendRadioItem(ID_Switch_V, _T("V"), _T("Show V component"));
+    menuPopup.Check(ID_Switch_YUV + (int)m_eYUVComponentChoose, true);
+    wxRect rect = tb->GetToolRect(event.GetId());
+    wxPoint pt = tb->ClientToScreen(rect.GetBottomLeft());
+    pt = ScreenToClient(pt);
+    PopupMenu(&menuPopup, pt);
+    tb->SetToolSticky(event.GetId(), false);
 }
 
 void MainFrame::OnSwitchShowGrid(wxCommandEvent& event)
@@ -566,6 +564,14 @@ void MainFrame::OnUpdateUI(wxUpdateUIEvent& event)
     PicViewCtrl* pCtrl = m_pCenterPageManager->GetPicViewCtrl(0);
     switch(event.GetId())
     {
+    case ID_ReOpenWrongConfigYUVFile:
+    case ID_GoToNextFrame:
+    case ID_GoToPreFrame:
+    case ID_Play_Pause:
+    case ID_FastForward:
+    case ID_FastBackward:
+        event.Enable(m_bOPened);
+        break;
     case ID_SwitchGrid:
         event.Check(pCtrl->IsShowGrid());
         break;
