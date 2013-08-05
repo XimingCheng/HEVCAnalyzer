@@ -5,9 +5,9 @@ BEGIN_EVENT_TABLE(YUVConfigDlg, wxDialog)
     EVT_BUTTON(ID_CANCELBUTTON, YUVConfigDlg::OnCancel)
 END_EVENT_TABLE()
 
-YUVConfigDlg::YUVConfigDlg(wxWindow *parent)
-    : wxDialog(parent, wxID_ANY, wxString(wxT("YUV Param Settings"))),
-    m_iWith(-1), m_iHeight(-1)
+YUVConfigDlg::YUVConfigDlg(wxWindow *parent, bool bReload)
+    : wxDialog(parent, wxID_ANY, wxString(_T("YUV Param Settings"))),
+    m_iWith(-1), m_iHeight(-1), m_bReload(bReload)
 {
     SetSize(250, 180);
     wxFlexGridSizer* fgSizer;
@@ -19,26 +19,26 @@ YUVConfigDlg::YUVConfigDlg(wxWindow *parent)
     wxString str;
     for(int i = 0; i < 10; i++)
     {
-        str.Printf(wxT("%d"), i);
+        str.Printf(_T("%d"), i);
         s.Add(str);
     }
     tv.SetIncludes(s);
 
-    wxStaticText* staticTextW = new wxStaticText( this, wxID_ANY, wxT("YUV Width"), wxDefaultPosition, wxDefaultSize, 0 );
+    wxStaticText* staticTextW = new wxStaticText( this, wxID_ANY, _T("YUV Width"), wxDefaultPosition, wxDefaultSize, 0 );
     staticTextW->Wrap( -1 );
     fgSizer->Add( staticTextW, 0, wxALIGN_CENTER|wxALL, 5 );
 
     m_textCtrlW = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, tv );
     fgSizer->Add( m_textCtrlW, 0, wxALIGN_CENTER|wxALL, 5 );
 
-    wxStaticText* staticTextH = new wxStaticText( this, wxID_ANY, wxT("YUV Height"), wxDefaultPosition, wxDefaultSize, 0 );
+    wxStaticText* staticTextH = new wxStaticText( this, wxID_ANY, _T("YUV Height"), wxDefaultPosition, wxDefaultSize, 0 );
     staticTextH->Wrap( -1 );
     fgSizer->Add( staticTextH, 0, wxALIGN_CENTER|wxALL, 5 );
 
     m_textCtrlH = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, tv );
     fgSizer->Add( m_textCtrlH, 0, wxALIGN_CENTER|wxALL, 5 );
 
-    wxStaticText* staticTextBit = new wxStaticText( this, wxID_ANY, wxT("YUV Bits"), wxDefaultPosition, wxDefaultSize, 0 );
+    wxStaticText* staticTextBit = new wxStaticText( this, wxID_ANY, _T("YUV Bits"), wxDefaultPosition, wxDefaultSize, 0 );
     staticTextBit->Wrap( -1 );
     fgSizer->Add( staticTextBit, 0, wxALIGN_CENTER|wxALL, 5 );
 
@@ -49,10 +49,12 @@ YUVConfigDlg::YUVConfigDlg(wxWindow *parent)
     m_choiceBit->SetSelection( 0 );
     fgSizer->Add( m_choiceBit, 0, wxALIGN_CENTER|wxALL, 5 );
 
-    wxButton* buttonCancel = new wxButton( this, ID_CANCELBUTTON, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+    wxButton* buttonCancel = new wxButton( this, ID_CANCELBUTTON, _T("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
     fgSizer->Add( buttonCancel, 0, wxALL, 5 );
 
-    wxButton* buttonOK = new wxButton( this, ID_OKBUTTON, wxT("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+    wxString OKtext = _T("OK");
+    if(m_bReload) OKtext = _T("Reload");
+    wxButton* buttonOK = new wxButton( this, ID_OKBUTTON, OKtext, wxDefaultPosition, wxDefaultSize, 0 );
     fgSizer->Add( buttonOK, 0, wxALIGN_RIGHT|wxALL, 5 );
 
 
@@ -68,14 +70,14 @@ void YUVConfigDlg::OnOK(wxCommandEvent& event)
     str = m_textCtrlW->GetValue();
     if(str.Len() == 0)
     {
-        wxMessageBox(wxT("Width is empty!"));
+        wxMessageBox(_T("Width is empty!"));
         return;
     }
     m_iWith = wxAtoi(str);
     str = m_textCtrlH->GetValue();
     if(str.Len() == 0)
     {
-        wxMessageBox(wxT("Height is empty!"));
+        wxMessageBox(_T("Height is empty!"));
         return;
     }
     m_iHeight = wxAtoi(str);

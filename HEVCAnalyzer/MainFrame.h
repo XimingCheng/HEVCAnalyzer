@@ -24,6 +24,8 @@ public:
         ID_NoteBookLeftPane = wxID_HIGHEST+1,
         ID_NoteBookBottomPane,
         ID_NoteBookCenterPane,
+        ID_ToolBarLowestID,
+        ID_ReOpenWrongConfigYUVFile,
         ID_SwitchColorYUV,
         ID_SwitchGrid,
         ID_Switch_YUV,
@@ -77,6 +79,7 @@ private:
     void           OnFrameClose(wxCommandEvent& event);
     // File IO operators
     void           OnOpenFile(wxCommandEvent& event);
+    void           OnOpenYUVFile(const wxString& sFile, const wxString& sName, bool bWrongOpened = false);
     void           OnCloseFile(wxCommandEvent& event);
     void           OnThreadEnd(wxCommandEvent& event);
     void           OnUpdateUI(wxUpdateUIEvent& event);
@@ -90,12 +93,15 @@ private:
     void           OnFastBackward(wxCommandEvent& event);
     void           OnTimer(wxTimerEvent& event);
     void           OnInputFrameNumber(wxCommandEvent& event);
+    void           OnReOpenWrongConfigYUVFile(wxCommandEvent& event);
 
 private:
     wxAuiManager         m_mgr;
     wxSimpleHtmlListBox* m_pThumbnalList;
     wxImageList*         m_pImageList;
     wxArrayString        m_StrMemFileName;
+    wxString             m_sCurOpenedFilePath;
+    wxString             m_sCurOpenedFileName;
 //    wxScrolledWindow*    m_pDecodeScrolledWin;
 //    PicViewCtrl*         m_pPicViewCtrl;
 //    RulerCtrl*           m_pPicHRuler;

@@ -11,7 +11,7 @@ public:
         ID_OKBUTTON = wxID_HIGHEST+1,
         ID_CANCELBUTTON,
     };
-    YUVConfigDlg(wxWindow *parent);
+    YUVConfigDlg(wxWindow *parent, bool bReload);
 
     int GetWidth()    const { return m_iWith; }
     int GetHeight()   const { return m_iHeight; }
@@ -25,6 +25,7 @@ public:
 
     void SetWidth(const wxString& w) { m_textCtrlW->SetValue(w); }
     void SetHeight(const wxString& h) { m_textCtrlH->SetValue(h); }
+
 private:
     void OnOK(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
@@ -33,6 +34,7 @@ private:
     int         m_iWith;
     int         m_iHeight;
     bool        m_b10bit;
+    bool        m_bReload;
     wxTextCtrl* m_textCtrlW;
     wxTextCtrl* m_textCtrlH;
     wxChoice*   m_choiceBit;

@@ -45,6 +45,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(ID_Play_Pause, MainFrame::OnPlayorPause)
     EVT_MENU(ID_FastForward, MainFrame::OnFastForward)
     EVT_MENU(ID_FastBackward, MainFrame::OnFastBackward)
+    EVT_MENU(ID_ReOpenWrongConfigYUVFile, MainFrame::OnReOpenWrongConfigYUVFile)
     EVT_COMMAND(wxID_ANY, wxEVT_ADDANIMAGE_THREAD, MainFrame::OnThreadAddImage)
     EVT_COMMAND(wxID_ANY, wxEVT_END_THREAD, MainFrame::OnThreadEnd)
     EVT_COMMAND(wxID_ANY, wxEVT_CLOSE_WINDOW, MainFrame::OnFrameClose)
@@ -53,7 +54,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_SIZE(MainFrame::OnMainFrameSizeChange)
     EVT_IDLE(MainFrame::OnIdle)
     EVT_LISTBOX(wxID_ANY, MainFrame::OnThumbnailLboxSelect)
-    EVT_UPDATE_UI_RANGE(ID_SwitchGrid, ID_ToolBarHighestID, MainFrame::OnUpdateUI)
+    EVT_UPDATE_UI_RANGE(ID_ToolBarLowestID, ID_ToolBarHighestID, MainFrame::OnUpdateUI)
     EVT_TIMER(TIMER_ID_PLAYING, MainFrame::OnTimer)
 END_EVENT_TABLE()
 
@@ -86,7 +87,9 @@ void MainFrame::CreateFileIOToolBar()
     m_ioToolBar = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE);
     m_ioToolBar->SetToolBitmapSize(wxSize(16, 16));
     wxBitmap tb_open = wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_OTHER, wxSize(16, 16));
-    m_ioToolBar->AddTool(wxID_OPEN, wxT("Open File"), tb_open, wxT("Open File"), wxITEM_NORMAL);
+    m_ioToolBar->AddTool(wxID_OPEN, _T("Open File"), tb_open, _T("Open File"), wxITEM_NORMAL);
+    m_ioToolBar->AddTool(ID_ReOpenWrongConfigYUVFile, _T("Reopen current YUV File"), tb_open,
+                         _T("Reopen current YUV File if configurations are not right"), wxITEM_NORMAL);
     m_ioToolBar->Realize();
 
     m_mgr.AddPane(m_ioToolBar, wxAuiPaneInfo().Name(_T("File_IO")).Caption(_T("File IO ToolBar")).
@@ -100,7 +103,7 @@ void MainFrame::CreateYUVToolBar()
     wxString str;
     for(int i = 0; i < 10; i++)
     {
-        str.Printf(wxT("%d"), i);
+        str.Printf(_T("%d"), i);
         s.Add(str);
     }
     tv.SetIncludes(s);
@@ -108,7 +111,7 @@ void MainFrame::CreateYUVToolBar()
     m_yuvToolBar = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                     wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_TEXT | wxAUI_TB_HORZ_TEXT);
     m_pFrameNumberText = new wxTextCtrl(m_yuvToolBar, wxID_ANY, _T("0"), wxDefaultPosition, wxSize(40, -1), wxTE_PROCESS_ENTER, tv);
-    m_pTotalFrameNumberText = new wxStaticText(m_yuvToolBar, wxID_ANY, _T("/0"), wxDefaultPosition, wxSize(30, -1));
+    m_pTotalFrameNumberText = new wxStaticText(m_yuvToolBar, wxID_ANY, _T("/ 0"), wxDefaultPosition, wxSize(30, -1));
     m_pFrameNumberText->SetToolTip(_T("Current Frame Number"));
     m_pTotalFrameNumberText->SetToolTip(_T("Total Frame Number"));
     m_yuvToolBar->SetToolBitmapSize(wxSize(16, 16));
@@ -254,6 +257,90 @@ wxNotebook* MainFrame::CreateCenterNotebook()
     return ctrl;
 }
 
+void MainFrame::OnOpenYUVFile(const wxString& sFile, const wxString& sName, bool bWrongOpened)
+{
+    int w, h;
+    bool bit;
+    bool bShowConfigDlg = true;
+    if(GetYUVConfigData(sFile, w, h, bit))
+        bShowConfigDlg = false;
+    if(bWrongOpened)
+        bShowConfigDlg = true;
+    if(bShowConfigDlg)
+    {
+        YUVConfigDlg cdlg(this, bWrongOpened);
+        wxString width,height;
+        if(g_parseResolutionFromFilename(sName, width, height))
+        {
+            cdlg.SetWidth(width);
+            cdlg.SetHeight(height);
+        }
+        int ret = sName.find(_T("_10bit_"));
+        if(ret != wxNOT_FOUND)
+            cdlg.SetBitFlag(true);
+        if(cdlg.ShowModal() == wxID_CANCEL)
+            return;
+
+        m_iSourceWidth = cdlg.GetWidth();
+        m_iSourceHeight = cdlg.GetHeight();
+        m_iYUVBit = (cdlg.Is10bitYUV() ? 10 : 8);
+        m_FileLength = wxFile((const wxChar*)sFile).Length();
+        int t = (cdlg.Is10bitYUV() ? 2 : 1);
+        if(!(m_FileLength/(m_iSourceWidth*m_iSourceHeight*3/2*t) > 0))
+        {
+            wxMessageBox(_T("Not enough data for one frame, open YUV file failed"));
+            return;
+        }
+        StoreYUVConfigData(sFile, m_iSourceWidth, m_iSourceHeight, (m_iYUVBit > 8));
+    }
+    else
+    {
+        m_iSourceWidth = w;
+        m_iSourceHeight = h;
+        m_iYUVBit = (bit ? 10 : 8);
+        m_FileLength = wxFile((const wxChar*)sFile).Length();
+        int t = (bit ? 2 : 1);
+        if(!(m_FileLength/(m_iSourceWidth*m_iSourceHeight*3/2*t) > 0))
+        {
+            wxMessageBox(_T("Not enough data for one frame, open YUV file failed"));
+            return;
+        }
+    }
+    // multi-thread
+    wxString lastFile = sFile;
+    wxCommandEvent event;
+    OnCloseFile(event);
+    m_bOPened = true;
+    m_bPlaying = false;
+    m_FileLength = wxFile((const wxChar*)lastFile).Length();
+    SetTotalFrameNumber();
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetScale(1.0);
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetFitMode(true);
+    m_cYUVIO.open((char *)lastFile.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
+    m_pcPicYuvOrg = new TComPicYuv;
+    m_pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
+    double scaleRate = 165.0/m_iSourceWidth;
+    InitThumbnailListView();
+    g_LogMessage(_T("Initialize thumbnail finished"));
+    m_pImageList = new wxImageList((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
+    m_pThumbThread = new ThumbnailThread(this, m_pImageList, m_iSourceWidth, m_iSourceHeight, m_iYUVBit, lastFile);
+    if(m_pThumbThread->Create() != wxTHREAD_NO_ERROR)
+    {
+        g_LogError(_T("Can't create the thread!"));
+        delete m_pThumbThread;
+        m_pThumbThread = NULL;
+    }
+    else
+    {
+        if(m_pThumbThread->Run() != wxTHREAD_NO_ERROR)
+        {
+            g_LogError(_T("Can't create the thread!"));
+            delete m_pThumbThread;
+            m_pThumbThread = NULL;
+        }
+    }
+}
+
 void MainFrame::OnOpenFile(wxCommandEvent& event)
 {
     wxFileDialog dlg(this, wxT("Open YUV file or HEVC stream file"), _T(""), _T(""),
@@ -271,80 +358,9 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
 
     if(m_bYUVFile)
     {
-        int w, h;
-        bool bit;
-        if(!GetYUVConfigData(dlg.GetPath(), w, h, bit))
-        {
-            YUVConfigDlg cdlg(this);
-            wxString width,height;
-            if(g_parseResolutionFromFilename(dlg.GetFilename(), width, height))
-            {
-                cdlg.SetWidth(width);
-                cdlg.SetHeight(height);
-            }
-            int ret = dlg.GetFilename().find(_T("_10bit_"));
-            if(ret != wxNOT_FOUND)
-                cdlg.SetBitFlag(true);
-            if(cdlg.ShowModal() == wxID_CANCEL)
-                return;
-
-            m_iSourceWidth = cdlg.GetWidth();
-            m_iSourceHeight = cdlg.GetHeight();
-            m_iYUVBit = (cdlg.Is10bitYUV() ? 10 : 8);
-            m_FileLength = wxFile((const wxChar*)sfile).Length();
-            int t = (cdlg.Is10bitYUV() ? 2 : 1);
-            if(!(m_FileLength/(m_iSourceWidth*m_iSourceHeight*3/2*t) > 0))
-            {
-                wxMessageBox(_T("Not enough data for one frame, open YUV file failed"));
-                return;
-            }
-            StoreYUVConfigData(dlg.GetPath(), m_iSourceWidth, m_iSourceHeight, (m_iYUVBit > 8));
-        }
-        else
-        {
-            m_iSourceWidth = w;
-            m_iSourceHeight = h;
-            m_iYUVBit = (bit ? 10 : 8);
-            m_FileLength = wxFile((const wxChar*)sfile).Length();
-            int t = (bit ? 2 : 1);
-            if(!(m_FileLength/(m_iSourceWidth*m_iSourceHeight*3/2*t) > 0))
-            {
-                wxMessageBox(_T("Not enough data for one frame, open YUV file failed"));
-                return;
-            }
-        }
-        // multi-thread
-        OnCloseFile(event);
-        m_bOPened = true;
-        m_bPlaying = false;
-        m_FileLength = wxFile((const wxChar*)sfile).Length();
-        SetTotalFrameNumber();
-        m_pCenterPageManager->GetPicViewCtrl(0)->SetScale(1.0);
-        m_pCenterPageManager->GetPicViewCtrl(0)->SetFitMode(true);
-        m_cYUVIO.open((char *)sfile.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
-        m_pcPicYuvOrg = new TComPicYuv;
-        m_pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
-        double scaleRate = 165.0/m_iSourceWidth;
-        InitThumbnailListView();
-        g_LogMessage(_T("Initialize thumbnail finished"));
-        m_pImageList = new wxImageList((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
-        m_pThumbThread = new ThumbnailThread(this, m_pImageList, m_iSourceWidth, m_iSourceHeight, m_iYUVBit, sfile);
-        if(m_pThumbThread->Create() != wxTHREAD_NO_ERROR)
-        {
-            g_LogError(_T("Can't create the thread!"));
-            delete m_pThumbThread;
-            m_pThumbThread = NULL;
-        }
-        else
-        {
-            if(m_pThumbThread->Run() != wxTHREAD_NO_ERROR)
-            {
-                g_LogError(_T("Can't create the thread!"));
-                delete m_pThumbThread;
-                m_pThumbThread = NULL;
-            }
-        }
-
+        m_sCurOpenedFilePath = dlg.GetPath();
+        m_sCurOpenedFileName = dlg.GetFilename();
+        OnOpenYUVFile(dlg.GetPath(), dlg.GetFilename());
     }
     else
     {
@@ -363,6 +379,8 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
 {
     if(m_bOPened)
     {
+        m_sCurOpenedFilePath = _T("");
+        m_sCurOpenedFileName = _T("");
         if(m_pTimer->IsRunning())
             m_pTimer->Stop();
         m_pCenterPageManager->Close();
@@ -386,7 +404,7 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
             m_FileLength = 0;
             m_pCenterPageManager->Clear();
             m_pPixelViewCtrl->Clear();
-            m_pTotalFrameNumberText->SetLabel(_T("0"));
+            m_pTotalFrameNumberText->SetLabel(_T("/ 0"));
             g_LogMessage(wxString::Format(_T("OnCloseFile() %d"), m_StrMemFileName.GetCount()));
         }
         else
@@ -647,6 +665,14 @@ void MainFrame::StoreYUVConfigData(const wxString& file, int width, int height, 
     if(result.NextRow())
     {
         // fix with the new data
+        wxString sqlUpdate = _T("UPDATE YUVCONFIG SET ");
+        sqlUpdate += wxString::Format(_T("Width=\"%d\", "), width);
+        sqlUpdate += wxString::Format(_T("Height=\"%d\", "), height);
+        sqlUpdate += _T("Is10Bit=");
+        wxString bit = b10bit ? _T("\"1\"") : _T("\"0\"");
+        sqlUpdate += bit;
+        sqlUpdate += ( _T(" WHERE FileName=\"") + file + _T("\"") );
+        db->ExecuteUpdate(sqlUpdate);
     }
     else
     {
@@ -694,7 +720,7 @@ void MainFrame::SetTotalFrameNumber()
     int framenum = m_FileLength/(m_iSourceWidth*m_iSourceHeight*3/2*t);
     m_iTotalFrame = framenum;
     wxString str;
-    str.Printf(_T("%d"), framenum);
+    str.Printf(_T("/ %d"), framenum);
     m_pTotalFrameNumberText->SetLabel(str);
     m_pFrameNumberText->SetValue(_T("1"));
 }
@@ -768,6 +794,12 @@ void MainFrame::OnInputFrameNumber(wxCommandEvent& event)
     }
     else
         m_pFrameNumberText->SetValue(_T("0"));
+}
+
+void MainFrame::OnReOpenWrongConfigYUVFile(wxCommandEvent& event)
+{
+    if(m_bOPened)
+        OnOpenYUVFile(m_sCurOpenedFilePath, m_sCurOpenedFileName, true);
 }
 
 CenterPageManager::~CenterPageManager()
