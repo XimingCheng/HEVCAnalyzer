@@ -12,6 +12,10 @@ void* ThumbnailThread::Entry()
     m_cYUVIO.open((char *)m_sYUVPath.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
     m_pcPicYuvOrg = new TComPicYuv;
     m_pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
+    int sizeYUV = wxFile((const wxChar*)m_sYUVPath).Length();
+    int bytes = m_iYUVBit > 8 ? 2 : 1;
+    int frames_num = sizeYUV/(m_iSourceWidth*m_iSourceHeight*1.5*bytes);
+    if(frames_num < 6) m_bAdaptiveFrameNumbers = false;
 
     wxBitmap bmp(m_iSourceWidth, m_iSourceHeight, 24);
     int pad[] = {0, 0};
@@ -24,7 +28,12 @@ void* ThumbnailThread::Entry()
         tstart = g_getCurrentMS();
         m_iFrameNumbers = 5;
     }
-    while(!m_cYUVIO.isEof() && !m_cYUVIO.isFail() && !TestDestroy())
+    else
+    {
+        if(m_iFrameNumbers > frames_num)
+            m_iFrameNumbers = frames_num;
+    }
+    while(frame < frames_num && !m_cYUVIO.isEof() && !m_cYUVIO.isFail() && !TestDestroy())
     {
         // here read may be failed
         if(!m_cYUVIO.read(m_pcPicYuvOrg, pad))
@@ -48,6 +57,8 @@ void* ThumbnailThread::Entry()
                 m_iFrameNumbers = (int)5*m_dOneAddingTime/(tend - tstart);
                 if(m_iFrameNumbers == 0)
                     m_iFrameNumbers = 1;
+                if(m_iFrameNumbers > frames_num - frame - 1)
+                    m_iFrameNumbers = frames_num - frame - 1;
                 g_LogMessage(wxString::Format(_T("m_iFrameNumbers %d"), m_iFrameNumbers));
             }
             wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);
