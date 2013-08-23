@@ -72,7 +72,7 @@ void* ThumbnailThread::Entry()
         }
         frame++;
     }
-    if(m_cYUVIO.isEof() && framenumbers > 0)
+    if((frame == frames_num || m_cYUVIO.isEof()) && framenumbers > 0)
     {
         wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);
         event.SetExtraLong(framenumbers);
@@ -85,7 +85,7 @@ void* ThumbnailThread::Entry()
 
 void ThumbnailThread::OnExit()
 {
-    g_LogWarning(_T("ThumbnailThread::OnExit() called"));
+    //g_LogWarning(_T("ThumbnailThread::OnExit() called"));
     if(m_cYUVIO.isOpen())
         m_cYUVIO.close();
     if(m_pcPicYuvOrg)
