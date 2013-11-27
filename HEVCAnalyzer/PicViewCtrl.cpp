@@ -3,8 +3,10 @@
 
 extern const wxEventType wxEVT_YUVBUFFER_CHANGED;
 extern const wxEventType wxEVT_POSITION_CHANGED;
+extern const wxEventType wxEVT_DROP_FILES;
 
 IMPLEMENT_DYNAMIC_CLASS(PicViewCtrl, wxControl);
+//IMPLEMENT_DYNAMIC_CLASS(PicViewCtrl, wxFileDropTarget);
 
 BEGIN_EVENT_TABLE(PicViewCtrl, wxControl)
     EVT_PAINT(PicViewCtrl::OnPaint)
@@ -14,6 +16,7 @@ BEGIN_EVENT_TABLE(PicViewCtrl, wxControl)
     EVT_LEFT_UP(PicViewCtrl::OnMouseLButtonUp)
     EVT_MOUSEWHEEL(PicViewCtrl::OnMouseWheel)
     EVT_KEY_DOWN(PicViewCtrl::OnKeyDown)
+    EVT_DROP_FILES(PicViewCtrl::OnDropFiles)
 END_EVENT_TABLE()
 
 PicViewCtrl::PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* pList, RulerCtrl* pHRuler, RulerCtrl* pVRuler,
@@ -26,6 +29,7 @@ PicViewCtrl::PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* p
     m_pPixelCtrl(pPixelCtrl), m_iSelectedLCUId(-1), m_curSelLCUStart(-1, -1), m_curSelLCUEnd(-1, -1)
 {
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
+    DragAcceptFiles(true);
 }
 
 void PicViewCtrl::OnPaint(wxPaintEvent& event)
@@ -663,3 +667,37 @@ void PicViewCtrl::Clear()
     SetRulerCtrlFited();
     Refresh();
 }
+
+//bool PicViewCtrl::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames)
+//{
+//    g_LogMessage(_T("Enter PicViewCtrl::OnDropFiles"));
+//    size_t fileNO = filenames.GetCount();
+//    if(fileNO!=1)
+//    {
+//        wxMessageBox(_T("Only can drop one files once!"));
+//        return false;
+//    }
+//    else
+//    {
+//        wxCommandEvent evt(wxEVT_DROP_FILES, wxID_ANY);
+//        evt.SetString(filenames[0]);
+//        wxPostEvent(m_pFrame, evt);
+//        return true;
+//    }
+//}
+
+void PicViewCtrl::OnDropFiles(wxDropFilesEvent& event)
+{
+    //g_LogMessage(_T("Enter PicViewCtrl::OnDropFiles"));
+    if(event.GetNumberOfFiles() != 1){
+        wxMessageBox(_T("Only can drop one files once!"));
+        return;
+    }
+    wxString* filenames = event.GetFiles();
+    wxCommandEvent evt(wxEVT_DROP_FILES, wxID_ANY);
+    evt.SetString(filenames[0]);
+    wxPostEvent(m_pFrame, evt);
+    return ;
+}
+
+

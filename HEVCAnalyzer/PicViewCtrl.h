@@ -4,6 +4,7 @@
 #include "HEVCAnalyzer.h"
 #include "RulerCtrl.h"
 #include "PixelViewCtrl.h"
+#include <wx/dnd.h>
 
 class HEVCStatusBar;
 
@@ -15,10 +16,11 @@ enum ShowMode
     MODE_V,
 };
 
-class PicViewCtrl : public wxControl
+class PicViewCtrl : public wxControl //, public wxFileDropTarget
 {
 public:
     DECLARE_DYNAMIC_CLASS(PicViewCtrl);
+//    DECLARE_DYNAMIC_CLASS(wxFileDropTarget);
     enum Direction
     {
         MOVE_UP  = 0,
@@ -53,6 +55,8 @@ public:
     void Clear();
     bool ShowPageByDiffNumber(const int diff, bool bWantRet = false);
     void SetHEVCStatusBar(HEVCStatusBar* bar) { m_pStatusBar = bar; }
+    //bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames);
+    void OnDropFiles(wxDropFilesEvent& event);
 
 private:
     void OnMouseMove(wxMouseEvent& event);
@@ -62,6 +66,7 @@ private:
     void OnPaint(wxPaintEvent& event);
     void OnEraseBkg(wxEraseEvent& event);
     void OnKeyDown(wxKeyEvent& event);
+    /* the  drop and drag action function */
 
     void Render(wxGraphicsContext* gc, wxGraphicsContext* gct);
     void ChangeScaleRate(const double rate);

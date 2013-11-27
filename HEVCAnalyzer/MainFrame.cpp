@@ -31,6 +31,7 @@ wxString wxbuildinfo(wxbuildinfoformat format)
 
 DEFINE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD)
 DEFINE_EVENT_TYPE(wxEVT_END_THREAD)
+DEFINE_EVENT_TYPE(wxEVT_DROP_FILES)
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_EXIT, MainFrame::OnExit)
@@ -50,6 +51,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_COMMAND(wxID_ANY, wxEVT_END_THREAD, MainFrame::OnThreadEnd)
     EVT_COMMAND(wxID_ANY, wxEVT_CLOSE_WINDOW, MainFrame::OnFrameClose)
     EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_TEXT_ENTER, MainFrame::OnInputFrameNumber)
+    EVT_COMMAND(wxID_ANY, wxEVT_DROP_FILES, MainFrame::OnDropFiles)
     EVT_AUITOOLBAR_TOOL_DROPDOWN(ID_SwitchColorYUV, MainFrame::OnDropDownToolbarYUV)
     EVT_SIZE(MainFrame::OnMainFrameSizeChange)
     EVT_IDLE(MainFrame::OnIdle)
@@ -813,8 +815,40 @@ void MainFrame::OnInputFrameNumber(wxCommandEvent& event)
 
 void MainFrame::OnReOpenWrongConfigYUVFile(wxCommandEvent& event)
 {
-    if(m_bOPened)
+    if(m_bOPened){
+        wxString tmppath = m_sCurOpenedFilePath;
+        wxString tmpfilename = m_sCurOpenedFileName;
+        OnCloseFile(event);
+        m_sCurOpenedFilePath = tmppath;
+        m_sCurOpenedFileName = tmpfilename;
         OnOpenYUVFile(m_sCurOpenedFilePath, m_sCurOpenedFileName, true);
+    }
+}
+
+void MainFrame::OnDropFiles(wxCommandEvent& event)
+{
+    wxString filename = event.GetString();
+    if(filename.Lower().EndsWith(_T(".yuv")))
+        m_bYUVFile = true;
+    else
+    {
+        m_bYUVFile = false;
+        g_LogError(_T("The file to be open must be YUV file"));
+    }
+
+    if(m_bYUVFile)
+    {
+        OnCloseFile(event);
+        m_sCurOpenedFilePath = filename;
+        m_sCurOpenedFileName = ::wxFileNameFromPath(filename);
+        OnOpenYUVFile(m_sCurOpenedFilePath, m_sCurOpenedFileName);
+    }
+    else
+    {
+        OnCloseFile(event);
+        m_bOPened = true;
+    }
+
 }
 
 BEGIN_EVENT_TABLE(HEVCStatusBar, wxStatusBar)

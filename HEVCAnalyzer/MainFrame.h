@@ -12,6 +12,7 @@
 
 DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_END_THREAD, wxID_ANY)
+DECLARE_EVENT_TYPE(wxEVT_DROP_FILES, wxID_ANY)
 
 class ThumbnailThread;
 class CenterPageManager;
@@ -94,6 +95,7 @@ private:
     void           OnTimer(wxTimerEvent& event);
     void           OnInputFrameNumber(wxCommandEvent& event);
     void           OnReOpenWrongConfigYUVFile(wxCommandEvent& event);
+    void           OnDropFiles(wxCommandEvent& event);
 
 private:
     wxAuiManager         m_mgr;
