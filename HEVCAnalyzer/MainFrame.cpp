@@ -311,14 +311,15 @@ void MainFrame::OnOpenYUVFile(const wxString& sFile, const wxString& sName, bool
     }
     // multi-thread
     wxString lastFile = sFile;
-    wxCommandEvent event;
-    OnCloseFile(event);
+//    wxCommandEvent event;
+ //   OnCloseFile(event);
     m_bOPened = true;
     m_bPlaying = false;
     m_FileLength = wxFile((const wxChar*)lastFile).Length();
     SetTotalFrameNumber();
     m_pCenterPageManager->GetPicViewCtrl(0)->SetScale(1.0);
     m_pCenterPageManager->GetPicViewCtrl(0)->SetFitMode(true);
+    /* the next line maybe a bug */
     m_cYUVIO.open((char *)lastFile.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
     m_pcPicYuvOrg = new TComPicYuv;
     m_pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
@@ -361,6 +362,7 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
 
     if(m_bYUVFile)
     {
+        OnCloseFile(event);
         m_sCurOpenedFilePath = dlg.GetPath();
         m_sCurOpenedFileName = dlg.GetFilename();
         OnOpenYUVFile(dlg.GetPath(), dlg.GetFilename());
