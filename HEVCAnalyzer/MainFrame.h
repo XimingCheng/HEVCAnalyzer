@@ -50,7 +50,7 @@ public:
 
     MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos = wxDefaultPosition,
               const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE | wxSUNKEN_BORDER);
-    ~MainFrame();
+    virtual ~MainFrame();
 
     void           OnGoToNextFrame(wxCommandEvent& event);
     void           OnGoToPreFrame(wxCommandEvent& event);
@@ -134,6 +134,29 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
+class HEVCStatusBar : public wxStatusBar
+{
+public:
+    enum
+    {
+        Field_TextTips = 0,
+        Field_Info,
+        Feild_ZoomSlider,
+        Feild_Max,
+    };
+    HEVCStatusBar(wxWindow *parent);
+    virtual ~HEVCStatusBar();
+    void               OnSize(wxSizeEvent& event);
+    wxSlider*          GetSlider() { return m_pZoomSlider; }
+    void               SetCenterPageManager(CenterPageManager* pManager) { m_pManager = pManager; }
+
+private:
+    wxSlider*          m_pZoomSlider;
+    CenterPageManager* m_pManager;
+
+    DECLARE_EVENT_TABLE()
+};
+
 struct PanelElments
 {
     wxPanel*          _pPicPanel;
@@ -172,6 +195,7 @@ private:
     wxFrame*                 m_pMainFrame;
     wxWindow*                m_pPixelViewCtrl;
     wxSimpleHtmlListBox*     m_pList;
+    wxStatusBar*             m_pStatusBar;
     bool                     m_bFirstCreate;
 };
 

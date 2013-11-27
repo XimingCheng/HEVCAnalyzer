@@ -101,4 +101,4 @@ private:
     DECLARE_EVENT_TABLE();
 };
 
-#endif
+#endif // PIXELVIEWCTRL_H_INCLUDED

@@ -61,8 +61,8 @@ END_EVENT_TABLE()
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos,
             const wxSize& size, long style)
             : wxFrame(parent, id, title, pos, size, style),
-            m_bYUVFile(false), m_bOPened(false), m_eYUVComponentChoose(MODE_ORG), m_pcPicYuvOrg(NULL), m_pThumbThread(NULL),
-            m_pCenterPageManager(NULL)
+            m_pImageList(NULL), m_bYUVFile(false), m_bOPened(false), m_eYUVComponentChoose(MODE_ORG), m_pcPicYuvOrg(NULL),
+            m_pThumbThread(NULL), m_pCenterPageManager(NULL)
 {
     m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
     m_mgr.SetManagedWindow(this);
@@ -156,8 +156,10 @@ void MainFrame::CreateMenuToolBar()
 
     SetMenuBar(mb);
 
-    CreateStatusBar();
-    wxStatusBar* pStatusBar = GetStatusBar();
+    //CreateStatusBar();
+    //wxStatusBar* pStatusBar = GetStatusBar();
+    wxStatusBar* pStatusBar = new HEVCStatusBar(this);
+    SetStatusBar(pStatusBar);
     pStatusBar->SetStatusText(_T("Ready"));
     // first is tips, second is msg, the last is the scale ctrl
     pStatusBar->SetFieldsCount(3);
@@ -254,6 +256,7 @@ wxNotebook* MainFrame::CreateCenterNotebook()
     m_pCenterPageManager = new CenterPageManager(ctrl, m_pThumbnalList, this, m_pPixelViewCtrl);
     m_pCenterPageManager->InsertNewPage(0, _T("Decode Pic"));
     m_pCenterPageManager->Show();
+    ((HEVCStatusBar*)GetStatusBar())->SetCenterPageManager(m_pCenterPageManager);
     return ctrl;
 }
 
@@ -562,6 +565,7 @@ void MainFrame::SetColorComponent()
 void MainFrame::OnUpdateUI(wxUpdateUIEvent& event)
 {
     PicViewCtrl* pCtrl = m_pCenterPageManager->GetPicViewCtrl(0);
+    wxSlider* pSlider = ((HEVCStatusBar*)GetStatusBar())->GetSlider();
     switch(event.GetId())
     {
     case ID_ReOpenWrongConfigYUVFile:
@@ -570,6 +574,9 @@ void MainFrame::OnUpdateUI(wxUpdateUIEvent& event)
     case ID_Play_Pause:
     case ID_FastForward:
     case ID_FastBackward:
+        if(!m_bOPened)
+            pSlider->SetValue(0);
+        pSlider->Enable(m_bOPened);
         event.Enable(m_bOPened);
         break;
     case ID_SwitchGrid:
@@ -806,6 +813,36 @@ void MainFrame::OnReOpenWrongConfigYUVFile(wxCommandEvent& event)
 {
     if(m_bOPened)
         OnOpenYUVFile(m_sCurOpenedFilePath, m_sCurOpenedFileName, true);
+}
+
+BEGIN_EVENT_TABLE(HEVCStatusBar, wxStatusBar)
+    EVT_SIZE(HEVCStatusBar::OnSize)
+END_EVENT_TABLE()
+
+HEVCStatusBar::HEVCStatusBar(wxWindow *parent)
+            : wxStatusBar(parent, wxID_ANY), m_pZoomSlider(NULL), m_pManager(NULL)
+{
+    static const int widths[Feild_Max] = { -1, 100, 150 };
+    SetFieldsCount(Feild_Max);
+    SetStatusWidths(Feild_Max, widths);
+    m_pZoomSlider = new wxSlider(this, wxID_ANY, 0, 0, 100);
+    wxRect rect;
+    GetFieldRect(Feild_ZoomSlider, rect);
+    m_pZoomSlider->SetSize(rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2);
+}
+
+HEVCStatusBar::~HEVCStatusBar()
+{
+}
+
+void HEVCStatusBar::OnSize(wxSizeEvent& event)
+{
+    if(!m_pZoomSlider)
+        return;
+    wxRect rect;
+    GetFieldRect(Feild_ZoomSlider, rect);
+    m_pZoomSlider->SetSize(rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2);
+    event.Skip();
 }
 
 CenterPageManager::~CenterPageManager()

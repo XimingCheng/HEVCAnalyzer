@@ -5,6 +5,8 @@
 #include "RulerCtrl.h"
 #include "PixelViewCtrl.h"
 
+class HEVCStatusBar;
+
 enum ShowMode
 {
     MODE_ORG = 0,
@@ -50,6 +52,7 @@ public:
     void SetRulerCtrlFited();
     void Clear();
     bool ShowPageByDiffNumber(const int diff, bool bWantRet = false);
+    void SetHEVCStatusBar(HEVCStatusBar* bar) { m_pStatusBar = bar; }
 
 private:
     void OnMouseMove(wxMouseEvent& event);
@@ -108,6 +111,7 @@ private:
     int                  m_iSelectedLCUId;
     wxPoint              m_curSelLCUStart;
     wxPoint              m_curSelLCUEnd;
+    HEVCStatusBar*       m_pStatusBar;
 
     DECLARE_EVENT_TABLE();
 };
