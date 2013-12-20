@@ -7,6 +7,7 @@
 #include <wx/dnd.h>
 
 class HEVCStatusBar;
+class DragDropFile;
 
 enum ShowMode
 {
@@ -32,6 +33,7 @@ public:
     PicViewCtrl() {}
     PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* pList, RulerCtrl* pHRuler, RulerCtrl* pVRuler,
                 wxWindow* pPixelWin, wxFrame* pFrame);
+    ~PicViewCtrl();
 
     void SetScale(const double dScale);
     //void SetSize(const wxSize& size) { m_CtrlSize = size; }
@@ -117,8 +119,19 @@ private:
     wxPoint              m_curSelLCUStart;
     wxPoint              m_curSelLCUEnd;
     HEVCStatusBar*       m_pStatusBar;
+    DragDropFile*        m_pDragDropFile;
 
     DECLARE_EVENT_TABLE();
+};
+
+class DragDropFile : public wxFileDropTarget
+{
+public:
+    void setFrameWindow(wxFrame* pFrame) { m_pFrame = pFrame; }
+    virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames);
+
+private:
+    wxFrame*             m_pFrame;
 };
 
 #endif // PICVIEWCTRL_H_INCLUDED

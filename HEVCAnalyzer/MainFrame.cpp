@@ -815,7 +815,8 @@ void MainFrame::OnInputFrameNumber(wxCommandEvent& event)
 
 void MainFrame::OnReOpenWrongConfigYUVFile(wxCommandEvent& event)
 {
-    if(m_bOPened){
+    if(m_bOPened)
+    {
         wxString tmppath = m_sCurOpenedFilePath;
         wxString tmpfilename = m_sCurOpenedFileName;
         OnCloseFile(event);
