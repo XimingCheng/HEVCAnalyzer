@@ -47,4 +47,8 @@ Download wxWidgets-2.8-12 source code, you can build it with Visual Studio or ot
 
 You can use the Code::Blocks project in HEVCAnalyzer/Build/Win/
 
-![grab](https://f.cloud.github.com/assets/2611722/635552/3088214e-d258-11e2-93d7-3407a0a7f2a1.png)
+Linux Mint
+![linux](https://f.cloud.github.com/assets/2611722/1792373/710f7022-699e-11e3-8415-6e2f1dfc60e5.jpg)
+
+Win7
+![win32](https://f.cloud.github.com/assets/2611722/1792380/a197fdc2-699e-11e3-8219-b33c2b1e1599.jpg)
