@@ -313,9 +313,11 @@ void MainFrame::OnOpenYUVFile(const wxString& sFile, const wxString& sName, bool
     }
     // multi-thread
     wxString lastFile = sFile;
+    wxString lastName = sName;
     wxCommandEvent event;
     OnCloseFile(event);
     m_sCurOpenedFilePath = lastFile;
+    m_sCurOpenedFileName = lastName;
     m_bOPened = true;
     m_bPlaying = false;
     m_FileLength = wxFile((const wxChar*)lastFile).Length();
