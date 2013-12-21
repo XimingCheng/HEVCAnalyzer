@@ -65,7 +65,7 @@ public:
   TVideoIOYuv() : m_bOpened(false)           {}
   virtual ~TVideoIOYuv()  {}
 
-  Void  open  ( Char* pchFile, Bool bWriteMode, Int fileBitDepthY, Int fileBitDepthC, Int internalBitDepthY, Int internalBitDepthC ); ///< open or create file
+  Void  open  ( const Char* pchFile, Bool bWriteMode, Int fileBitDepthY, Int fileBitDepthC, Int internalBitDepthY, Int internalBitDepthC ); ///< open or create file
   Void  close ();                                           ///< close file
   Bool  isOpen() const { return m_bOpened; }
   Void  reset ();

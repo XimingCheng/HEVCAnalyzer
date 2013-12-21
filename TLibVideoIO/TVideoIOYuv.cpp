@@ -151,7 +151,7 @@ static void scalePlane(Pel* img, UInt stride, UInt width, UInt height,
  * \param internalBitDepthY bit-depth to scale image data to/from when reading/writing (luma component).
  * \param internalBitDepthC bit-depth to scale image data to/from when reading/writing (chroma components).
  */
-Void TVideoIOYuv::open( Char* pchFile, Bool bWriteMode, Int fileBitDepthY, Int fileBitDepthC, Int internalBitDepthY, Int internalBitDepthC)
+Void TVideoIOYuv::open( const Char* pchFile, Bool bWriteMode, Int fileBitDepthY, Int fileBitDepthC, Int internalBitDepthY, Int internalBitDepthC)
 {
   m_bOpened        = true;
   m_bitDepthShiftY = internalBitDepthY - fileBitDepthY;

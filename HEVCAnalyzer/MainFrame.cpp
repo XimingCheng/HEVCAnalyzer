@@ -289,7 +289,13 @@ void MainFrame::OnOpenYUVFile(const wxString& sFile, const wxString& sName, bool
         m_iSourceWidth = cdlg.GetWidth();
         m_iSourceHeight = cdlg.GetHeight();
         m_iYUVBit = (cdlg.Is10bitYUV() ? 10 : 8);
-        m_FileLength = wxFile((const wxChar*)sFile).Length();
+        if(wxFile::Exists((const wxChar*)sFile))
+            m_FileLength = wxFile((const wxChar*)sFile).Length();
+        else
+        {
+            wxMessageBox(_T("No such file in the disk"));
+            return;
+        }
         int t = (cdlg.Is10bitYUV() ? 2 : 1);
         if(!(m_FileLength/(m_iSourceWidth*m_iSourceHeight*3/2*t) > 0))
         {
@@ -303,7 +309,13 @@ void MainFrame::OnOpenYUVFile(const wxString& sFile, const wxString& sName, bool
         m_iSourceWidth = w;
         m_iSourceHeight = h;
         m_iYUVBit = (bit ? 10 : 8);
-        m_FileLength = wxFile((const wxChar*)sFile).Length();
+        if(wxFile::Exists((const wxChar*)sFile))
+            m_FileLength = wxFile((const wxChar*)sFile).Length();
+        else
+        {
+            wxMessageBox(_T("No such file in the disk"));
+            return;
+        }
         int t = (bit ? 2 : 1);
         if(!(m_FileLength/(m_iSourceWidth*m_iSourceHeight*3/2*t) > 0))
         {
@@ -324,7 +336,7 @@ void MainFrame::OnOpenYUVFile(const wxString& sFile, const wxString& sName, bool
     SetTotalFrameNumber();
     m_pCenterPageManager->GetPicViewCtrl(0)->SetScale(1.0);
     m_pCenterPageManager->GetPicViewCtrl(0)->SetFitMode(true);
-    m_cYUVIO.open((char *)lastFile.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
+    m_cYUVIO.open(lastFile.mb_str(wxCSConv(wxT("gb2312"))).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
     m_pcPicYuvOrg = new TComPicYuv;
     m_pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
     double scaleRate = 165.0/m_iSourceWidth;
