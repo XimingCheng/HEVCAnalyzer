@@ -530,6 +530,13 @@ void MainFrame::OnMainFrameSizeChange(wxSizeEvent& event)
         m_pCenterPageManager->GetPicViewCtrl(0)->CalFitScaleRate();
         m_pCenterPageManager->GetPicViewCtrl(0)->SetRulerCtrlFited();
     }
+    if(!m_bOPened) return;
+    int t = m_iYUVBit > 8 ? 2 : 1;
+    int framenum = m_FileLength/(m_iSourceWidth*m_iSourceHeight*3/2*t);
+    m_iTotalFrame = framenum;
+    wxString str;
+    str.Printf(_T("/ %d"), framenum);
+    m_pTotalFrameNumberText->SetLabel(str);
 }
 
 void MainFrame::OnIdle(wxIdleEvent& event)
@@ -750,6 +757,7 @@ bool MainFrame::GetYUVConfigData(const wxString& file, int& width, int& height, 
 
 void MainFrame::SetTotalFrameNumber()
 {
+    if(!m_bOPened) return;
     int t = m_iYUVBit > 8 ? 2 : 1;
     int framenum = m_FileLength/(m_iSourceWidth*m_iSourceHeight*3/2*t);
     m_iTotalFrame = framenum;
