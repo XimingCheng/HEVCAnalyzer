@@ -9,7 +9,11 @@ double ThumbnailThread::m_dOneAddingTime = 1500;
 void* ThumbnailThread::Entry()
 {
     m_pImageList->RemoveAll();
-    m_cYUVIO.open((char *)m_sYUVPath.mb_str(wxCSConv(wxT("gb2312"))).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
+#if defined(__WXMSW__)
+    m_cYUVIO.open(m_sYUVPath.mb_str(wxCSConv(wxFONTENCODING_SYSTEM)).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
+#else
+    m_cYUVIO.open(m_sYUVPath.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
+#endif
     m_pcPicYuvOrg = new TComPicYuv;
     m_pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
     int sizeYUV = wxFile((const wxChar*)m_sYUVPath).Length();

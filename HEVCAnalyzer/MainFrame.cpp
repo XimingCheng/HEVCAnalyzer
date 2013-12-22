@@ -336,7 +336,11 @@ void MainFrame::OnOpenYUVFile(const wxString& sFile, const wxString& sName, bool
     SetTotalFrameNumber();
     m_pCenterPageManager->GetPicViewCtrl(0)->SetScale(1.0);
     m_pCenterPageManager->GetPicViewCtrl(0)->SetFitMode(true);
-    m_cYUVIO.open(lastFile.mb_str(wxCSConv(wxT("gb2312"))).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
+#if defined(__WXMSW__)
+    m_cYUVIO.open(lastFile.mb_str(wxCSConv(wxFONTENCODING_SYSTEM)).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
+#else
+    m_cYUVIO.open(lastFile.mb_str(wxConvUTF8).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
+#endif
     m_pcPicYuvOrg = new TComPicYuv;
     m_pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
     double scaleRate = 165.0/m_iSourceWidth;
