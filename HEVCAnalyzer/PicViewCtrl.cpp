@@ -319,6 +319,7 @@ void PicViewCtrl::ChangeScaleRate(const double rate)
         this->SetSizeHints(m_CtrlSize);
         GetParent()->FitInside();
         m_bFullRefresh = true;
+        SetCurSliderInStatusBarPos();
         Refresh();
     }
 }
@@ -694,6 +695,17 @@ void PicViewCtrl::OnDropFiles(wxDropFilesEvent& event)
     evt.SetString(filenames[0]);
     wxPostEvent(m_pFrame, evt);
     return;
+}
+
+void PicViewCtrl::SetCurSliderInStatusBarPos()
+{
+    wxSlider* pSlider = m_pStatusBar->GetSlider();
+    // zoom the double value which put on the slider
+    int minVal = (int)(m_dMinScaleRate * 10000);
+    int maxVal = (int)(m_dMaxScaleRate * 10000);
+    int curVal = (int)(m_dScaleRate * 10000);
+    pSlider->SetRange(minVal, maxVal);
+    pSlider->SetValue(curVal);
 }
 
 bool DragDropFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames)

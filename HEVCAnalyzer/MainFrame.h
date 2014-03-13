@@ -9,6 +9,7 @@
 #include "RulerCtrl.h"
 
 #define TIMER_ID_PLAYING  wxID_HIGHEST+101
+#define ZOOMSLIDER_ID     wxID_HIGHEST+102
 
 DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_END_THREAD, wxID_ANY)
@@ -78,6 +79,7 @@ private:
     bool           GetYUVConfigData(const wxString& file, int& width, int& height, bool& b10bit);
     void           SetTotalFrameNumber();
     void           OnFrameClose(wxCommandEvent& event);
+    void           SetStatusBarConnection();
     // File IO operators
     void           OnOpenFile(wxCommandEvent& event);
     void           OnOpenYUVFile(const wxString& sFile, const wxString& sName, bool bWrongOpened = false);
@@ -96,6 +98,7 @@ private:
     void           OnInputFrameNumber(wxCommandEvent& event);
     void           OnReOpenWrongConfigYUVFile(wxCommandEvent& event);
     void           OnDropFiles(wxCommandEvent& event);
+    void           OnScrollChange(wxScrollEvent& event);
 
 private:
     wxAuiManager         m_mgr;
@@ -130,6 +133,7 @@ private:
     ThumbnailThread*     m_pThumbThread;
     CenterPageManager*   m_pCenterPageManager;
 
+    HEVCStatusBar*       m_pStatusBar;
     wxAuiToolBar*        m_ioToolBar;
     wxAuiToolBar*        m_yuvToolBar;
 

@@ -57,8 +57,10 @@ public:
     void Clear();
     bool ShowPageByDiffNumber(const int diff, bool bWantRet = false);
     void SetHEVCStatusBar(HEVCStatusBar* bar) { m_pStatusBar = bar; }
+    void SetCurSliderInStatusBarPos();
     //bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames);
     void OnDropFiles(wxDropFilesEvent& event);
+    void ChangeScaleRate(const double rate);
 
 private:
     void OnMouseMove(wxMouseEvent& event);
@@ -71,7 +73,6 @@ private:
     /* the  drop and drag action function */
 
     void Render(wxGraphicsContext* gc, wxGraphicsContext* gct);
-    void ChangeScaleRate(const double rate);
     int  GetCurLCURasterID(const double x, const double y, wxPoint& start, wxPoint& end);
     void MoveLCURect(const Direction& d);
     void CalStartEndPointByLCUId(const int id, wxPoint& start, wxPoint& end);

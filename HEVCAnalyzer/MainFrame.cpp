@@ -58,6 +58,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_LISTBOX(wxID_ANY, MainFrame::OnThumbnailLboxSelect)
     EVT_UPDATE_UI_RANGE(ID_ToolBarLowestID, ID_ToolBarHighestID, MainFrame::OnUpdateUI)
     EVT_TIMER(TIMER_ID_PLAYING, MainFrame::OnTimer)
+    EVT_SCROLL(MainFrame::OnScrollChange)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos,
@@ -79,6 +80,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
     CreateNoteBookPane();
 
     Centre();
+    SetStatusBarConnection();
     g_LogMessage(_T("HEVC Analyzer load sucessfully"));
     m_pTimer = new wxTimer(this, TIMER_ID_PLAYING);
     m_mgr.Update();
@@ -158,13 +160,12 @@ void MainFrame::CreateMenuToolBar()
 
     SetMenuBar(mb);
 
-    //CreateStatusBar();
-    //wxStatusBar* pStatusBar = GetStatusBar();
-    wxStatusBar* pStatusBar = new HEVCStatusBar(this);
-    SetStatusBar(pStatusBar);
-    pStatusBar->SetStatusText(_T("Ready"));
+    m_pStatusBar = new HEVCStatusBar(this);
+    SetStatusBar(m_pStatusBar);
+    m_pStatusBar->SetStatusText(_T("Ready"));
+
     // first is tips, second is msg, the last is the scale ctrl
-    pStatusBar->SetFieldsCount(3);
+    m_pStatusBar->SetFieldsCount(3);
     SetMinSize(wxSize(400, 300));
 
     CreateFileIOToolBar();
@@ -397,6 +398,13 @@ void MainFrame::OnFrameClose(wxCommandEvent& event)
 {
     OnCloseFile(event);
     event.Skip();
+}
+
+void MainFrame::SetStatusBarConnection()
+{
+    assert(m_pCenterPageManager);
+    for(std::size_t index = 0; index < m_pCenterPageManager->GetSize(); index++)
+        m_pCenterPageManager->GetPicViewCtrl(index)->SetHEVCStatusBar(m_pStatusBar);
 }
 
 void MainFrame::OnCloseFile(wxCommandEvent& event)
@@ -870,6 +878,21 @@ void MainFrame::OnDropFiles(wxCommandEvent& event)
 
 }
 
+void MainFrame::OnScrollChange(wxScrollEvent& event)
+{
+    if(event.GetId() == ZOOMSLIDER_ID)
+    {
+        wxSlider* pSlider = m_pStatusBar->GetSlider();
+        double curVal = static_cast<double>(pSlider->GetValue()) / 10000;
+        for(std::size_t idx = 0; idx < m_pCenterPageManager->GetSize(); idx++)
+        {
+            PicViewCtrl* pPic = m_pCenterPageManager->GetPicViewCtrl(idx);
+            pPic->SetFitMode(false);
+            pPic->ChangeScaleRate(curVal);
+        }
+    }
+}
+
 BEGIN_EVENT_TABLE(HEVCStatusBar, wxStatusBar)
     EVT_SIZE(HEVCStatusBar::OnSize)
 END_EVENT_TABLE()
@@ -880,7 +903,7 @@ HEVCStatusBar::HEVCStatusBar(wxWindow *parent)
     static const int widths[Feild_Max] = { -1, 100, 150 };
     SetFieldsCount(Feild_Max);
     SetStatusWidths(Feild_Max, widths);
-    m_pZoomSlider = new wxSlider(this, wxID_ANY, 0, 0, 100);
+    m_pZoomSlider = new wxSlider(this, ZOOMSLIDER_ID, 0, 0, 100);
     wxRect rect;
     GetFieldRect(Feild_ZoomSlider, rect);
     m_pZoomSlider->SetSize(rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2);
