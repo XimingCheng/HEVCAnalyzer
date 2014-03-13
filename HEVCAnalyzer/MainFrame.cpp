@@ -150,12 +150,31 @@ void MainFrame::CreateMenuToolBar()
     wxMenuBar* mb = new wxMenuBar;
     wxMenu* file_menu = new wxMenu;
     file_menu->Append(wxID_OPEN, _T("Open File"));
+    file_menu->Append(ID_ReOpenWrongConfigYUVFile, _T("Reopen current YUV File"));
     file_menu->Append(wxID_CLOSE, _T("Close Current File"));
+    file_menu->AppendSeparator();
     file_menu->Append(wxID_EXIT, _T("Exit"));
+    wxMenu* tool_memu = new wxMenu;
+    wxMenu* colorSpace_memu = new wxMenu;
+    colorSpace_memu->AppendRadioItem(ID_Switch_YUV, _T("All"));
+    colorSpace_memu->AppendRadioItem(ID_Switch_Y, _T("Y"));
+    colorSpace_memu->AppendRadioItem(ID_Switch_U, _T("U"));
+    colorSpace_memu->AppendRadioItem(ID_Switch_V, _T("V"));
+    tool_memu->AppendCheckItem(ID_SwitchHEXPixel, _T("HEX Mode"));
+    tool_memu->AppendSubMenu(colorSpace_memu, _T("YUV Color Space"));
+    tool_memu->AppendCheckItem(ID_SwitchGrid, _T("Show Grid"));
+    tool_memu->AppendCheckItem(ID_SwitchfitMode, _T("Pic Fit Mode"));
+    tool_memu->AppendSeparator();
+    tool_memu->Append(ID_FastBackward, _T("Fast Backward"));
+    tool_memu->Append(ID_GoToPreFrame, _T("Pre Frame"));
+    tool_memu->Append(ID_Play_Pause, _T("Play/Pause"));
+    tool_memu->Append(ID_GoToNextFrame, _T("Next Frame"));
+    tool_memu->Append(ID_FastForward, _T("Fast Forward"));
     wxMenu* help_menu = new wxMenu;
     help_menu->Append(wxID_ABOUT, _T("About HEVC Analyzer"));
 
     mb->Append(file_menu, _T("File"));
+    mb->Append(tool_memu, _T("Tools"));
     mb->Append(help_menu, _T("Help"));
 
     SetMenuBar(mb);
