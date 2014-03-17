@@ -80,6 +80,7 @@ void g_tranformYUV2RGB(const int w, const int h, TComPicYuv* pcPicYuvOrg, const 
 
 void g_LogMessage(wxString message)
 {
+#ifdef __WXDEBUG__
     if(g_pLogWin==NULL)
         wxLogMessage(message);
     else
@@ -90,10 +91,12 @@ void g_LogMessage(wxString message)
         long endpos = g_pLogWin->GetLastPosition();
         g_pLogWin->SetStyle(startpos, endpos, *wxGREEN);
     }
+#endif
 }
 
 void g_LogError(wxString error)
 {
+#ifdef __WXDEBUG__
     if(g_pLogWin==NULL)
         wxLogError(error);
     else
@@ -104,10 +107,12 @@ void g_LogError(wxString error)
         long endpos = g_pLogWin->GetLastPosition();
         g_pLogWin->SetStyle(startpos, endpos, *wxRED);
     }
+#endif
 }
 
 void g_LogWarning(wxString warning)
 {
+#ifdef __WXDEBUG__
     if(g_pLogWin==NULL)
         wxLogWarning(warning);
     else
@@ -118,17 +123,22 @@ void g_LogWarning(wxString warning)
         long endpos = g_pLogWin->GetLastPosition();
         g_pLogWin->SetStyle(startpos, endpos, wxColour(174, 174, 0));
     }
+#endif
 }
 
 void g_SetActiveTarget(wxTextCtrl *pTC)
 {
+#ifdef __WXDEBUG__
     g_pLogWin = pTC;
+#endif
 }
 
 void g_ClearLog()
 {
+#ifdef __WXDEBUG__
     if (g_pLogWin != NULL)
         g_pLogWin->Clear();
+#endif
 }
 
 bool g_parseResolutionFromFilename(const wxString &filename, wxString  &width, wxString &height)

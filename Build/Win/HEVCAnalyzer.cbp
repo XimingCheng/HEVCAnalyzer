@@ -8,7 +8,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="../../bin/Debug/HEVCAnalyser" prefix_auto="1" extension_auto="1" />
+				<Option output="../../bin/Debug/HEVCAnalyzer" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
@@ -37,7 +37,7 @@
 				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="../../bin/Release/HEVCAnalyser" prefix_auto="1" extension_auto="1" />
+				<Option output="../../bin/Release/HEVCAnalyzer" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
@@ -99,14 +99,97 @@
 		<Unit filename="../../HEVCAnalyzer/ThumbnailThread.h" />
 		<Unit filename="../../HEVCAnalyzer/YUVConfigDlg.cpp" />
 		<Unit filename="../../HEVCAnalyzer/YUVConfigDlg.h" />
+		<Unit filename="../../TAppCommon/program_options_lite.cpp" />
+		<Unit filename="../../TAppCommon/program_options_lite.h" />
+		<Unit filename="../../TAppDecoder/TAppDecCfg.cpp" />
+		<Unit filename="../../TAppDecoder/TAppDecCfg.h" />
+		<Unit filename="../../TAppDecoder/TAppDecTop.cpp" />
+		<Unit filename="../../TAppDecoder/TAppDecTop.h" />
+		<Unit filename="../../TLibCommon/AccessUnit.h" />
 		<Unit filename="../../TLibCommon/CommonDef.h" />
+		<Unit filename="../../TLibCommon/ContextModel.cpp" />
+		<Unit filename="../../TLibCommon/ContextModel.h" />
+		<Unit filename="../../TLibCommon/ContextModel3DBuffer.cpp" />
+		<Unit filename="../../TLibCommon/ContextModel3DBuffer.h" />
+		<Unit filename="../../TLibCommon/ContextTables.h" />
+		<Unit filename="../../TLibCommon/NAL.h" />
+		<Unit filename="../../TLibCommon/SEI.cpp" />
+		<Unit filename="../../TLibCommon/SEI.h" />
+		<Unit filename="../../TLibCommon/TComBitCounter.h" />
+		<Unit filename="../../TLibCommon/TComBitStream.cpp" />
+		<Unit filename="../../TLibCommon/TComBitStream.h" />
+		<Unit filename="../../TLibCommon/TComCABACTables.cpp" />
+		<Unit filename="../../TLibCommon/TComCABACTables.h" />
+		<Unit filename="../../TLibCommon/TComDataCU.cpp" />
+		<Unit filename="../../TLibCommon/TComDataCU.h" />
+		<Unit filename="../../TLibCommon/TComInterpolationFilter.cpp" />
+		<Unit filename="../../TLibCommon/TComInterpolationFilter.h" />
+		<Unit filename="../../TLibCommon/TComList.h" />
+		<Unit filename="../../TLibCommon/TComLoopFilter.cpp" />
+		<Unit filename="../../TLibCommon/TComLoopFilter.h" />
+		<Unit filename="../../TLibCommon/TComMotionInfo.cpp" />
+		<Unit filename="../../TLibCommon/TComMotionInfo.h" />
+		<Unit filename="../../TLibCommon/TComMv.h" />
+		<Unit filename="../../TLibCommon/TComPattern.cpp" />
+		<Unit filename="../../TLibCommon/TComPattern.h" />
+		<Unit filename="../../TLibCommon/TComPic.cpp" />
+		<Unit filename="../../TLibCommon/TComPic.h" />
+		<Unit filename="../../TLibCommon/TComPicSym.cpp" />
+		<Unit filename="../../TLibCommon/TComPicSym.h" />
 		<Unit filename="../../TLibCommon/TComPicYuv.cpp" />
 		<Unit filename="../../TLibCommon/TComPicYuv.h" />
+		<Unit filename="../../TLibCommon/TComPicYuvMD5.cpp" />
+		<Unit filename="../../TLibCommon/TComPrediction.cpp" />
+		<Unit filename="../../TLibCommon/TComPrediction.h" />
+		<Unit filename="../../TLibCommon/TComRdCost.cpp" />
+		<Unit filename="../../TLibCommon/TComRdCost.h" />
+		<Unit filename="../../TLibCommon/TComRdCostWeightPrediction.cpp" />
+		<Unit filename="../../TLibCommon/TComRdCostWeightPrediction.h" />
 		<Unit filename="../../TLibCommon/TComRom.cpp" />
 		<Unit filename="../../TLibCommon/TComRom.h" />
+		<Unit filename="../../TLibCommon/TComSampleAdaptiveOffset.cpp" />
+		<Unit filename="../../TLibCommon/TComSampleAdaptiveOffset.h" />
+		<Unit filename="../../TLibCommon/TComSlice.cpp" />
+		<Unit filename="../../TLibCommon/TComSlice.h" />
+		<Unit filename="../../TLibCommon/TComTrQuant.cpp" />
+		<Unit filename="../../TLibCommon/TComTrQuant.h" />
+		<Unit filename="../../TLibCommon/TComWeightPrediction.cpp" />
+		<Unit filename="../../TLibCommon/TComWeightPrediction.h" />
+		<Unit filename="../../TLibCommon/TComYuv.cpp" />
+		<Unit filename="../../TLibCommon/TComYuv.h" />
 		<Unit filename="../../TLibCommon/TypeDef.h" />
+		<Unit filename="../../TLibDecoder/AnnexBread.cpp" />
+		<Unit filename="../../TLibDecoder/AnnexBread.h" />
+		<Unit filename="../../TLibDecoder/NALread.cpp" />
+		<Unit filename="../../TLibDecoder/NALread.h" />
+		<Unit filename="../../TLibDecoder/SEIread.cpp" />
+		<Unit filename="../../TLibDecoder/SEIread.h" />
+		<Unit filename="../../TLibDecoder/SyntaxElementParser.cpp" />
+		<Unit filename="../../TLibDecoder/SyntaxElementParser.h" />
+		<Unit filename="../../TLibDecoder/TDecBinCoder.h" />
+		<Unit filename="../../TLibDecoder/TDecBinCoderCABAC.cpp" />
+		<Unit filename="../../TLibDecoder/TDecBinCoderCABAC.h" />
+		<Unit filename="../../TLibDecoder/TDecCAVLC.cpp" />
+		<Unit filename="../../TLibDecoder/TDecCAVLC.h" />
+		<Unit filename="../../TLibDecoder/TDecCu.cpp" />
+		<Unit filename="../../TLibDecoder/TDecCu.h" />
+		<Unit filename="../../TLibDecoder/TDecEntropy.cpp" />
+		<Unit filename="../../TLibDecoder/TDecEntropy.h" />
+		<Unit filename="../../TLibDecoder/TDecGop.cpp" />
+		<Unit filename="../../TLibDecoder/TDecGop.h" />
+		<Unit filename="../../TLibDecoder/TDecSbac.cpp" />
+		<Unit filename="../../TLibDecoder/TDecSbac.h" />
+		<Unit filename="../../TLibDecoder/TDecSlice.cpp" />
+		<Unit filename="../../TLibDecoder/TDecSlice.h" />
+		<Unit filename="../../TLibDecoder/TDecTop.cpp" />
+		<Unit filename="../../TLibDecoder/TDecTop.h" />
 		<Unit filename="../../TLibVideoIO/TVideoIOYuv.cpp" />
 		<Unit filename="../../TLibVideoIO/TVideoIOYuv.h" />
+		<Unit filename="../../libmd5/MD5.h" />
+		<Unit filename="../../libmd5/libmd5.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../libmd5/libmd5.h" />
 		<Extensions>
 			<DoxyBlocks>
 				<comment_style block="0" line="1" />
