@@ -1,6 +1,7 @@
 #include "MainFrame.h"
 #include "YUVConfigDlg.h"
 #include "HEVCAnalyzer.h"
+#include "MainUIInstance.h"
 
 enum wxbuildinfoformat {
     short_f, long_f };
@@ -32,6 +33,7 @@ wxString wxbuildinfo(wxbuildinfoformat format)
 DEFINE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD)
 DEFINE_EVENT_TYPE(wxEVT_END_THREAD)
 DEFINE_EVENT_TYPE(wxEVT_DROP_FILES)
+DEFINE_EVENT_TYPE(wxEVT_LOGMSG)
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_EXIT, MainFrame::OnExit)
@@ -52,12 +54,13 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_COMMAND(wxID_ANY, wxEVT_CLOSE_WINDOW, MainFrame::OnFrameClose)
     EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_TEXT_ENTER, MainFrame::OnInputFrameNumber)
     EVT_COMMAND(wxID_ANY, wxEVT_DROP_FILES, MainFrame::OnDropFiles)
+    EVT_COMMAND(wxID_ANY, wxEVT_LOGMSG, MainFrame::OnLogMsg)
     EVT_AUITOOLBAR_TOOL_DROPDOWN(ID_SwitchColorYUV, MainFrame::OnDropDownToolbarYUV)
     EVT_SIZE(MainFrame::OnMainFrameSizeChange)
     EVT_IDLE(MainFrame::OnIdle)
     EVT_LISTBOX(wxID_ANY, MainFrame::OnThumbnailLboxSelect)
     EVT_UPDATE_UI_RANGE(ID_ToolBarLowestID, ID_ToolBarHighestID, MainFrame::OnUpdateUI)
-    EVT_TIMER(TIMER_ID_PLAYING, MainFrame::OnTimer)
+    EVT_TIMER(ID_TimerPlaying, MainFrame::OnTimer)
     EVT_SCROLL(MainFrame::OnScrollChange)
 END_EVENT_TABLE()
 
@@ -81,8 +84,8 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 
     Centre();
     SetStatusBarConnection();
-    g_LogMessage(_T("HEVC Analyzer load sucessfully"));
-    m_pTimer = new wxTimer(this, TIMER_ID_PLAYING);
+    LogMsgUIInstance::GetInstance()->LogMessage(_T("HEVC Analyzer load sucessfully"));
+    m_pTimer = new wxTimer(this, ID_TimerPlaying);
     m_mgr.Update();
 }
 
@@ -203,6 +206,7 @@ void MainFrame::CreateNoteBookPane()
 
 MainFrame::~MainFrame()
 {
+    LogMsgUIInstance::GetInstance()->Destory();
     ClearThumbnalMemory();
     delete m_pCenterPageManager;
     m_mgr.UnInit();
@@ -216,10 +220,11 @@ void MainFrame::OnExit(wxCommandEvent& evt)
 wxNotebook* MainFrame::CreateBottomNotebook()
 {
     wxNotebook* ctrl = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxSize(460,200), 0 );
+    // the log window only shown in DEBUG mode
     wxGridSizer* gSizer = new wxGridSizer(1, 0, 0);
     wxPanel* pLogPanel = new wxPanel(ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
     m_pTCLogWin= new wxTextCtrl(pLogPanel, wxID_ANY, _T(""), wxPoint(0, 0), wxSize(150, 90), wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH|wxHSCROLL);
-    g_SetActiveTarget(m_pTCLogWin);
+    LogMsgUIInstance::GetInstance()->SetActiveTarget(this);
 
     gSizer->Add(m_pTCLogWin, 0, wxEXPAND, 5 );
     pLogPanel->SetSizer( gSizer );
@@ -227,9 +232,10 @@ wxNotebook* MainFrame::CreateBottomNotebook()
     ctrl->AddPage( pLogPanel, _T("Log Window"), true );
     wxPanel* m_panel7 = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
     ctrl->AddPage( m_panel7, _T("Other information"), false );
-    g_LogMessage(_T("Message"));
-    g_LogError(_T("Error"));
-    g_LogWarning(_T("Warning"));
+
+    LogMsgUIInstance::GetInstance()->LogMessage( _T("Message"));
+    LogMsgUIInstance::GetInstance()->LogMessage( _T("Warning"), LogMsgUIInstance::MSG_TYPE_WARNING);
+    LogMsgUIInstance::GetInstance()->LogMessage( _T("Error"), LogMsgUIInstance::MSG_TYPE_ERROR);
     return ctrl;
 }
 
@@ -365,12 +371,12 @@ void MainFrame::OnOpenYUVFile(const wxString& sFile, const wxString& sName, bool
     m_pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, 64, 64, 4 );
     double scaleRate = 165.0/m_iSourceWidth;
     InitThumbnailListView();
-    g_LogMessage(_T("Initialize thumbnail finished"));
+    LogMsgUIInstance::GetInstance()->LogMessage(_T("Initialize thumbnail finished"));
     m_pImageList = new wxImageList((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
     m_pThumbThread = new ThumbnailThread(this, m_pImageList, m_iSourceWidth, m_iSourceHeight, m_iYUVBit, lastFile);
     if(m_pThumbThread->Create() != wxTHREAD_NO_ERROR)
     {
-        g_LogError(_T("Can't create the thread!"));
+        LogMsgUIInstance::GetInstance()->LogMessage(_T("Can't create the thread!"), LogMsgUIInstance::MSG_TYPE_ERROR);
         delete m_pThumbThread;
         m_pThumbThread = NULL;
     }
@@ -378,27 +384,42 @@ void MainFrame::OnOpenYUVFile(const wxString& sFile, const wxString& sName, bool
     {
         if(m_pThumbThread->Run() != wxTHREAD_NO_ERROR)
         {
-            g_LogError(_T("Can't create the thread!"));
+            LogMsgUIInstance::GetInstance()->LogMessage(_T("Can't create the thread!"), LogMsgUIInstance::MSG_TYPE_ERROR);
             delete m_pThumbThread;
             m_pThumbThread = NULL;
         }
     }
 }
 
+void MainFrame::OnOpenStreamFile(const wxString& sFile, const wxString& sName)
+{
+    DecodingThread* pDecodingThread = new DecodingThread(this, sFile, _T("D:\\dec.yuv"));
+    if(pDecodingThread->Create() != wxTHREAD_NO_ERROR)
+    {
+        delete pDecodingThread;
+        pDecodingThread = NULL;
+    }
+    else
+    {
+        if(pDecodingThread->Run() != wxTHREAD_NO_ERROR)
+        {
+            delete pDecodingThread;
+            pDecodingThread = NULL;
+        }
+    }
+}
+
 void MainFrame::OnOpenFile(wxCommandEvent& event)
 {
-    wxFileDialog dlg(this, wxT("Open YUV file or HEVC stream file"), _T(""), _T(""),
-                     _T("YUV files (*.yuv)|*.yuv"), wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+    wxFileDialog dlg(this, _T("Open YUV file or HEVC Stream file"), _T(""), _T(""),
+                     _T("YUV files or HEVC Stream file(*.yuv;*.bim)|*.yuv;*.bin|YUV files(*.yuv)|*.yuv|HEVC Stream file(*.bin)|*.bin|All file(*.*)|*.*"), wxFD_OPEN|wxFD_FILE_MUST_EXIST);
     if (dlg.ShowModal() == wxID_CANCEL)
         return;
     wxString sfile = dlg.GetPath();
     if(sfile.Lower().EndsWith(_T(".yuv")))
         m_bYUVFile = true;
     else
-    {
         m_bYUVFile = false;
-        g_LogError(_T("The file to be open must be YUV file"));
-    }
 
     if(m_bYUVFile)
     {
@@ -406,9 +427,10 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_sCurOpenedFileName = dlg.GetFilename();
         OnOpenYUVFile(dlg.GetPath(), dlg.GetFilename());
     }
-    else
+    else // the opened file may be the HEVC stream file
     {
-        OnCloseFile(event);
+        OnOpenStreamFile(dlg.GetPath(), dlg.GetFilename());
+        //OnCloseFile(event);
         m_bOPened = true;
     }
 }
@@ -457,7 +479,7 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
             m_pPixelViewCtrl->Clear();
             m_pFrameNumberText->SetValue(_T("0"));
             m_pTotalFrameNumberText->SetLabel(_T("/ 0"));
-            g_LogMessage(wxString::Format(_T("OnCloseFile() %d"), m_StrMemFileName.GetCount()));
+            LogMsgUIInstance::GetInstance()->LogMessage(wxString::Format(_T("OnCloseFile() %d"), m_StrMemFileName.GetCount()));
         }
         else
         {
@@ -471,7 +493,7 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
 {
     int frame = event.GetInt();
     long framenumber = event.GetExtraLong();
-    g_LogMessage(wxString::Format(_T("Add some images from %d to %d"), frame-framenumber+1, frame));
+    LogMsgUIInstance::GetInstance()->LogMessage(wxString::Format(_T("Add some images from %d to %d"), frame-framenumber+1, frame));
     for(int i = 0;  i < (int)framenumber; i++)
     {
         int tmp = frame-framenumber+i+1;
@@ -497,12 +519,12 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
         m_pThumbnalList->SetSelection(0);
         m_pThumbnalList->SetFocus();
     }
-    g_LogMessage(wxString::Format(_T("LEAVE Adding some images from %d to %d"), frame-framenumber+1, frame));
+    LogMsgUIInstance::GetInstance()->LogMessage(wxString::Format(_T("LEAVE Adding some images from %d to %d"), frame-framenumber+1, frame));
 }
 
 void MainFrame::OnThreadEnd(wxCommandEvent& event)
 {
-    g_LogMessage(_T("OnThreadEnd called"));
+    LogMsgUIInstance::GetInstance()->LogMessage(_T("OnThreadEnd called"));
     m_pThumbThread = NULL;
     m_pImageList->RemoveAll();
 }
@@ -539,7 +561,7 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
 void MainFrame::InitThumbnailListView()
 {
     int framenumber = m_FileLength/(m_iSourceWidth*m_iSourceHeight*1.5*(m_iYUVBit > 8? 2 : 1));
-    g_LogMessage(wxString::Format(_T("Frame Number: %d\n"), framenumber));
+    LogMsgUIInstance::GetInstance()->LogMessage(wxString::Format(_T("Frame Number: %d\n"), framenumber));
     wxArrayString arr;
     for(int i = 0;  i < framenumber; i++)
     {
@@ -879,7 +901,7 @@ void MainFrame::OnDropFiles(wxCommandEvent& event)
     else
     {
         m_bYUVFile = false;
-        g_LogError(_T("The file to be open must be YUV file"));
+        LogMsgUIInstance::GetInstance()->LogMessage(_T("The file to be open must be YUV file"), LogMsgUIInstance::MSG_TYPE_ERROR);
     }
 
     if(m_bYUVFile)
@@ -899,7 +921,7 @@ void MainFrame::OnDropFiles(wxCommandEvent& event)
 
 void MainFrame::OnScrollChange(wxScrollEvent& event)
 {
-    if(event.GetId() == ZOOMSLIDER_ID)
+    if(event.GetId() == ID_ZoomSlider)
     {
         wxSlider* pSlider = m_pStatusBar->GetSlider();
         double curVal = static_cast<double>(pSlider->GetValue()) / 10000;
@@ -909,6 +931,43 @@ void MainFrame::OnScrollChange(wxScrollEvent& event)
             pPic->SetFitMode(false);
             pPic->ChangeScaleRate(curVal);
         }
+    }
+}
+
+void MainFrame::OnLogMsg(wxCommandEvent& event)
+{
+    LogMsgUIInstance::MSG_TYPE id = (LogMsgUIInstance::MSG_TYPE)event.GetInt();
+    wxString msg = event.GetString();
+    wxString head;
+    wxColour color;
+    switch(id)
+    {
+    case LogMsgUIInstance::MSG_TYPE_NORMAL:
+        head = _T(" [Message] ");
+        color = *wxGREEN;
+        break;
+    case LogMsgUIInstance::MSG_TYPE_WARNING:
+        head = _T(" [Warning] ");
+        color = wxColour(174, 174, 0);
+        break;
+    case LogMsgUIInstance::MSG_TYPE_ERROR:
+        head = _T(" [ Error ] ");
+        color = *wxRED;
+        break;
+    case LogMsgUIInstance::MSG_TYPE_CLEAR:
+        m_pTCLogWin->Clear();
+        break;
+    default:
+        assert(0);
+        break;
+    }
+    if(id < LogMsgUIInstance::MSG_TYPE_CLEAR)
+    {
+        long startpos = m_pTCLogWin->GetLastPosition();
+        msg.Trim();
+        m_pTCLogWin->AppendText(wxDateTime::Now().FormatTime() + head + msg + _T("\n"));
+        long endpos = m_pTCLogWin->GetLastPosition();
+        m_pTCLogWin->SetStyle(startpos, endpos, color);
     }
 }
 
@@ -922,7 +981,7 @@ HEVCStatusBar::HEVCStatusBar(wxWindow *parent)
     static const int widths[Feild_Max] = { -1, 100, 150 };
     SetFieldsCount(Feild_Max);
     SetStatusWidths(Feild_Max, widths);
-    m_pZoomSlider = new wxSlider(this, ZOOMSLIDER_ID, 0, 0, 100);
+    m_pZoomSlider = new wxSlider(this, ID_ZoomSlider, 0, 0, 100);
     wxRect rect;
     GetFieldRect(Feild_ZoomSlider, rect);
     m_pZoomSlider->SetSize(rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2);

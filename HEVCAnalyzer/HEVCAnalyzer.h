@@ -25,19 +25,11 @@
 
 #include "../TLibVideoIO/TVideoIOYuv.h"
 
-#define MINDIFF 1e-15
+#define MINDIFF    1e-15
 
-void g_tranformYUV2RGB(const int w, const int h, TComPicYuv* pcPicYuvOrg, const int iYUVBit,
-                       wxBitmap& bmp, wxBitmap& bmp_Y, wxBitmap& bmp_U, wxBitmap& bmp_V, bool bUseYUV = false);
-
-extern wxTextCtrl *g_pLogWin ;
-
-void g_LogMessage(wxString);
-void g_LogError(wxString);
-void g_LogWarning(wxString);
-void g_SetActiveTarget(wxTextCtrl *pTC);
-void g_ClearLog();
-bool g_parseResolutionFromFilename(const wxString &filename, wxString  &width, wxString &height);
+void               g_tranformYUV2RGB(const int w, const int h, TComPicYuv* pcPicYuvOrg, const int iYUVBit,
+                        wxBitmap& bmp, wxBitmap& bmp_Y, wxBitmap& bmp_U, wxBitmap& bmp_V, bool bUseYUV = false);
+bool               g_parseResolutionFromFilename(const wxString &filename, wxString  &width, wxString &height);
 unsigned long long g_getCurrentMS();
 
 #endif // HEVCANALYZER_H_INCLUDED

@@ -12,8 +12,8 @@ public:
       m_iFrameNumbers(framenumbers), m_pcPicYuvOrg(NULL), m_bAdaptiveFrameNumbers(true)
     { }
     ~ThumbnailThread();
-    void setAdaptiveFrameNumbers(bool b) { m_bAdaptiveFrameNumbers = b; }
-    bool getAdaptiveFrameNumbers() const { return m_bAdaptiveFrameNumbers; }
+    void SetAdaptiveFrameNumbers(bool b) { m_bAdaptiveFrameNumbers = b; }
+    bool GetAdaptiveFrameNumbers() const { return m_bAdaptiveFrameNumbers; }
 
 protected:
     virtual void* Entry();
@@ -34,6 +34,35 @@ protected:
     bool         m_bAdaptiveFrameNumbers;
     static double m_fixWidth;
     static double m_dOneAddingTime;
+};
+
+class DecodingThread : public wxThread
+{
+public:
+    DecodingThread(wxFrame* pFrame, const wxString& streamPath, const wxString& outYUVPath, bool b10bit = false)
+    : m_sStreamPath(streamPath), m_sOutYUVPath(outYUVPath), m_b10bit(b10bit),
+      m_pFrame(pFrame), m_argcofDecoder(0), m_argvofDecoder(NULL), m_pStreamPathAnsi(NULL), m_pOutYUVPathAnsi(NULL)
+    { }
+    ~DecodingThread();
+    void SetStreamPath(const wxString& path) { m_sStreamPath = path; }
+    void SetOutputYUVpath(const wxString& path) { m_sOutYUVPath = path; }
+    void SetYUVBitsFlag(bool b10bit) { m_b10bit = b10bit; }
+
+protected:
+    virtual void* Entry();
+    void          ReleeaseBuffer();
+    void          GenerateCommandLine();
+    void          OnExit();
+
+    wxString      m_sStreamPath;
+    wxString      m_sOutYUVPath;
+    bool          m_b10bit;
+    wxImageList*  m_pImageList;
+    wxFrame*      m_pFrame;
+    int           m_argcofDecoder;
+    char**        m_argvofDecoder;
+    char*         m_pStreamPathAnsi;
+    char*         m_pOutYUVPathAnsi;
 };
 
 #endif // THUMBNAILTHREAD_H_INCLUDED

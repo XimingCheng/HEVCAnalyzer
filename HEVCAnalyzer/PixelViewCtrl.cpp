@@ -1,4 +1,5 @@
 #include "PixelViewCtrl.h"
+#include "MainUIInstance.h"
 
 DEFINE_EVENT_TYPE(wxEVT_YUVBUFFER_CHANGED)
 DEFINE_EVENT_TYPE(wxEVT_POSITION_CHANGED)
@@ -204,7 +205,7 @@ void PixelViewCtrl::OnMouseMove(wxMouseEvent & event)
         return;
     else
     {
-        g_LogMessage(_T(" start timer"));
+        LogMsgUIInstance::GetInstance()->LogMessage(_T(" start timer"));
         m_pTimer->Start(200);
     }
 
@@ -226,7 +227,7 @@ void PixelViewCtrl::OnLeaveWindow(wxMouseEvent& event)
     {
         m_pTimer->Stop();
     }
-    g_LogMessage(_T("Leave Window"));
+    LogMsgUIInstance::GetInstance()->LogMessage(_T("Leave Window"));
 }
 
 void PixelViewCtrl::OnEnterWindow(wxMouseEvent& event)
@@ -236,7 +237,7 @@ void PixelViewCtrl::OnEnterWindow(wxMouseEvent& event)
     {
         SetCursor(wxCursor(wxCURSOR_SIZING));
     }
-    g_LogMessage(_T("Enter Window"));
+    LogMsgUIInstance::GetInstance()->LogMessage(_T("Enter Window"));
 }
 
 void PixelViewCtrl::ShowOneCell(wxDC& dc, const int xIndex, const int yIndex)
@@ -319,7 +320,7 @@ void PixelViewCtrl:: OnLeftButtonDown(wxMouseEvent& event)
     int xlogic, ylogic;
     CalcUnscrolledPosition(pos.x, pos.y, &xlogic, &ylogic);
     LogicPosToIndex(xlogic, ylogic, &(m_LeftDownPos.x), &(m_LeftDownPos.y));
-    g_LogMessage(wxString::Format(_T("%d %d"), m_LeftDownPos.x, m_LeftDownPos.y));
+    LogMsgUIInstance::GetInstance()->LogMessage(wxString::Format(_T("%d %d"), m_LeftDownPos.x, m_LeftDownPos.y));
 }
 
 void PixelViewCtrl:: OnLeftButtonUp(wxMouseEvent& event)

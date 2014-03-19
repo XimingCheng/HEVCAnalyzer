@@ -1,4 +1,8 @@
 #include "ThumbnailThread.h"
+#include "MainUIInstance.h"
+#include "../TAppDecoder/TAppDecTop.h"
+
+bool g_md5_mismatch = false;
 
 extern const wxEventType wxEVT_ADDANIMAGE_THREAD;
 extern const wxEventType wxEVT_END_THREAD;
@@ -63,7 +67,7 @@ void* ThumbnailThread::Entry()
                     m_iFrameNumbers = 1;
                 if(m_iFrameNumbers > frames_num - frame - 1)
                     m_iFrameNumbers = frames_num - frame - 1;
-                g_LogMessage(wxString::Format(_T("m_iFrameNumbers %d"), m_iFrameNumbers));
+                LogMsgUIInstance::GetInstance()->LogMessage(wxString::Format(_T("m_iFrameNumbers %d"), m_iFrameNumbers));
             }
             wxCommandEvent event(wxEVT_ADDANIMAGE_THREAD, wxID_ANY);
             event.SetExtraLong(framenumbers);
@@ -115,4 +119,86 @@ ThumbnailThread::~ThumbnailThread()
         delete m_pcPicYuvOrg;
         m_pcPicYuvOrg = NULL;
     }
+}
+
+void* DecodingThread::Entry()
+{
+    GenerateCommandLine();
+    g_md5_mismatch = false;
+    TAppDecTop cTAppDecTop;
+    cTAppDecTop.create();
+
+    if(!cTAppDecTop.parseCfg( m_argcofDecoder, m_argvofDecoder ))
+    {
+        cTAppDecTop.destroy();
+        ReleeaseBuffer();
+        return (wxThread::ExitCode)1;
+    }
+    // main HEVC decoder
+    cTAppDecTop.decode();
+    if(g_md5_mismatch)
+        wxMessageBox(_T("A decoding mismatch occured: signalled md5sum does not match"),
+            _T("Decoding Error"), wxICON_ERROR);
+    cTAppDecTop.destroy();
+    ReleeaseBuffer();
+    return g_md5_mismatch ? (wxThread::ExitCode)1 : (wxThread::ExitCode)0;
+}
+
+void DecodingThread::ReleeaseBuffer()
+{
+    if(m_argvofDecoder)
+    {
+        delete [] m_argvofDecoder;
+        m_argvofDecoder = NULL;
+    }
+    if(m_pStreamPathAnsi)
+    {
+        delete [] m_pStreamPathAnsi;
+        m_pStreamPathAnsi = NULL;
+    }
+    if(m_pOutYUVPathAnsi)
+    {
+        delete [] m_pOutYUVPathAnsi;
+        m_pOutYUVPathAnsi = NULL;
+    }
+}
+
+void DecodingThread::OnExit()
+{
+    ReleeaseBuffer();
+}
+
+DecodingThread::~DecodingThread()
+{
+    ReleeaseBuffer();
+}
+
+void DecodingThread::GenerateCommandLine()
+{
+    if(!m_b10bit)
+        m_argcofDecoder = 6;
+    else
+        m_argcofDecoder = 5;
+
+    m_argvofDecoder = new char*[m_argcofDecoder];
+#if defined(__WXMSW__)
+    wxCharBuffer buffStreamPath = m_sStreamPath.mb_str(wxCSConv(wxFONTENCODING_SYSTEM));
+    wxCharBuffer buffOutYUVPath = m_sOutYUVPath.mb_str(wxCSConv(wxFONTENCODING_SYSTEM));
+#else
+    wxCharBuffer buffStreamPath = m_sStreamPath.mb_str(wxCSConv(wxConvUTF8));
+    wxCharBuffer buffOutYUVPath = m_sOutYUVPath.mb_str(wxCSConv(wxConvUTF8));
+#endif
+    const char* pStreamData = buffStreamPath.data();
+    const char* pOutYUVData = buffOutYUVPath.data();
+    m_pStreamPathAnsi = new char[strlen(pStreamData) + 1];
+    m_pOutYUVPathAnsi = new char[strlen(pOutYUVData) + 1];
+    strcpy(m_pStreamPathAnsi, pStreamData);
+    strcpy(m_pOutYUVPathAnsi, pOutYUVData);
+    m_argvofDecoder[0] = "HEVCAnalyzer";
+    m_argvofDecoder[1] = "-b";
+    m_argvofDecoder[2] = m_pStreamPathAnsi;
+    m_argvofDecoder[3] = "-o";
+    m_argvofDecoder[4] = m_pOutYUVPathAnsi;
+    if(!m_b10bit)
+        m_argvofDecoder[5] = "--OutputBitDepth=8";
 }

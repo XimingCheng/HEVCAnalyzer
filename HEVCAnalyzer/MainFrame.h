@@ -8,12 +8,12 @@
 #include "PixelViewCtrl.h"
 #include "RulerCtrl.h"
 
-#define TIMER_ID_PLAYING  wxID_HIGHEST+101
-#define ZOOMSLIDER_ID     wxID_HIGHEST+102
+#define ID_ZoomSlider      MainFrame::ID_MainFrameMax + 100
 
 DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_END_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_DROP_FILES, wxID_ANY)
+DECLARE_EVENT_TYPE(wxEVT_LOGMSG, wxID_ANY)
 
 class ThumbnailThread;
 class CenterPageManager;
@@ -42,6 +42,8 @@ public:
         ID_FastForward,
         ID_FastBackward,
         ID_ToolBarHighestID,
+        ID_TimerPlaying,
+        ID_MainFrameMax,
     };
 
     enum DataBaseType
@@ -83,6 +85,7 @@ private:
     // File IO operators
     void           OnOpenFile(wxCommandEvent& event);
     void           OnOpenYUVFile(const wxString& sFile, const wxString& sName, bool bWrongOpened = false);
+    void           OnOpenStreamFile(const wxString& sFile, const wxString& sName);
     void           OnCloseFile(wxCommandEvent& event);
     void           OnThreadEnd(wxCommandEvent& event);
     void           OnUpdateUI(wxUpdateUIEvent& event);
@@ -99,6 +102,9 @@ private:
     void           OnReOpenWrongConfigYUVFile(wxCommandEvent& event);
     void           OnDropFiles(wxCommandEvent& event);
     void           OnScrollChange(wxScrollEvent& event);
+    void           OnLogMsg(wxCommandEvent& event);
+    void           OnLogMsgWarning(wxCommandEvent& event);
+    void           OnLogMsgError(wxCommandEvent& event);
 
 private:
     wxAuiManager         m_mgr;
