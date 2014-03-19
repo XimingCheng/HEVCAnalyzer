@@ -185,8 +185,8 @@ void DecodingThread::GenerateCommandLine()
     wxCharBuffer buffStreamPath = m_sStreamPath.mb_str(wxCSConv(wxFONTENCODING_SYSTEM));
     wxCharBuffer buffOutYUVPath = m_sOutYUVPath.mb_str(wxCSConv(wxFONTENCODING_SYSTEM));
 #else
-    wxCharBuffer buffStreamPath = m_sStreamPath.mb_str(wxCSConv(wxConvUTF8));
-    wxCharBuffer buffOutYUVPath = m_sOutYUVPath.mb_str(wxCSConv(wxConvUTF8));
+    wxCharBuffer buffStreamPath = m_sStreamPath.mb_str(wxConvUTF8);
+    wxCharBuffer buffOutYUVPath = m_sOutYUVPath.mb_str(wxConvUTF8);
 #endif
     const char* pStreamData = buffStreamPath.data();
     const char* pOutYUVData = buffOutYUVPath.data();

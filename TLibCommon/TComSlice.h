@@ -552,7 +552,7 @@ public:
 #endif
 };
 
-class Window
+class WindowFix
 {
 private:
   Bool          m_enabledFlag;
@@ -561,7 +561,7 @@ private:
   Int           m_winTopOffset;
   Int           m_winBottomOffset;
 public:
-  Window()
+  WindowFix()
   : m_enabledFlag (false)
   , m_winLeftOffset     (0)
   , m_winRightOffset    (0)
@@ -613,7 +613,7 @@ private:
   Bool m_neutralChromaIndicationFlag;
   Bool m_fieldSeqFlag;
 
-  Window m_defaultDisplayWindow;
+  WindowFix m_defaultDisplayWindow;
   Bool m_frameFieldInfoPresentFlag;
   Bool m_hrdParametersPresentFlag;
   Bool m_bitstreamRestrictionFlag;
@@ -729,8 +729,8 @@ public:
   Bool getFrameFieldInfoPresentFlag() { return m_frameFieldInfoPresentFlag; }
   Void setFrameFieldInfoPresentFlag(Bool i) { m_frameFieldInfoPresentFlag = i; }
 
-  Window& getDefaultDisplayWindow()                              { return m_defaultDisplayWindow;                }
-  Void    setDefaultDisplayWindow(Window& defaultDisplayWindow ) { m_defaultDisplayWindow = defaultDisplayWindow; }
+  WindowFix& getDefaultDisplayWindow()                              { return m_defaultDisplayWindow;                }
+  Void    setDefaultDisplayWindow(WindowFix& defaultDisplayWindow ) { m_defaultDisplayWindow = defaultDisplayWindow; }
 
   Bool getHrdParametersPresentFlag() { return m_hrdParametersPresentFlag; }
   Void setHrdParametersPresentFlag(Bool i) { m_hrdParametersPresentFlag = i; }
@@ -786,7 +786,7 @@ private:
   UInt        m_picWidthInLumaSamples;
   UInt        m_picHeightInLumaSamples;
   
-  Window      m_conformanceWindow;
+  WindowFix   m_conformanceWindow;
 
   UInt        m_uiMaxCUWidth;
   UInt        m_uiMaxCUHeight;
@@ -869,8 +869,8 @@ public:
   Void setPicHeightInLumaSamples      ( UInt u ) { m_picHeightInLumaSamples = u;       }
   UInt getPicHeightInLumaSamples      ()         { return  m_picHeightInLumaSamples;   }
 
-  Window& getConformanceWindow()                           { return  m_conformanceWindow;             }
-  Void    setConformanceWindow(Window& conformanceWindow ) { m_conformanceWindow = conformanceWindow; }
+  WindowFix& getConformanceWindow()                           { return  m_conformanceWindow;             }
+  Void    setConformanceWindow(WindowFix& conformanceWindow ) { m_conformanceWindow = conformanceWindow; }
 
   UInt  getNumLongTermRefPicSPS()             { return m_numLongTermRefPicSPS; }
   Void  setNumLongTermRefPicSPS(UInt val)     { m_numLongTermRefPicSPS = val; }

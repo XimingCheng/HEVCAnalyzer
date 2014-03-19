@@ -72,7 +72,7 @@ TComPic::~TComPic()
 {
 }
 
-Void TComPic::create( Int iWidth, Int iHeight, UInt uiMaxWidth, UInt uiMaxHeight, UInt uiMaxDepth, Window &conformanceWindow, Window &defaultDisplayWindow,
+Void TComPic::create( Int iWidth, Int iHeight, UInt uiMaxWidth, UInt uiMaxHeight, UInt uiMaxDepth, WindowFix &conformanceWindow, WindowFix &defaultDisplayWindow,
                       Int *numReorderPics, Bool bIsVirtual)
 
 {

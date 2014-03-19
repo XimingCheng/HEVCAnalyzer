@@ -263,8 +263,8 @@ Void TAppDecTop::xWriteOutput( TComList<TComPic*>* pcListPic, UInt tId )
        not_displayed--;
       if ( m_pchReconFile )
       {
-        const Window &conf = pcPic->getConformanceWindow();
-        const Window &defDisp = m_respectDefDispWindow ? pcPic->getDefDisplayWindow() : Window();
+        const WindowFix &conf = pcPic->getConformanceWindow();
+        const WindowFix &defDisp = m_respectDefDispWindow ? pcPic->getDefDisplayWindow() : WindowFix();
         m_cTVideoIOYuvReconFile.write( pcPic->getPicYuvRec(),
                                        conf.getWindowLeftOffset() + defDisp.getWindowLeftOffset(),
                                        conf.getWindowRightOffset() + defDisp.getWindowRightOffset(),
@@ -320,8 +320,8 @@ Void TAppDecTop::xFlushOutput( TComList<TComPic*>* pcListPic )
       // write to file
       if ( m_pchReconFile )
       {
-        const Window &conf = pcPic->getConformanceWindow();
-        const Window &defDisp = m_respectDefDispWindow ? pcPic->getDefDisplayWindow() : Window();
+        const WindowFix &conf = pcPic->getConformanceWindow();
+        const WindowFix &defDisp = m_respectDefDispWindow ? pcPic->getDefDisplayWindow() : WindowFix();
         m_cTVideoIOYuvReconFile.write( pcPic->getPicYuvRec(),
                                        conf.getWindowLeftOffset() + defDisp.getWindowLeftOffset(),
                                        conf.getWindowRightOffset() + defDisp.getWindowRightOffset(),

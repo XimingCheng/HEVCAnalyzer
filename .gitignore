@@ -6,3 +6,14 @@
 /Build/Linux/HEVCAnalyzerObj/
 /Build/Linux/TLibCommonObj/
 /Build/Linux/TLibVideoIOObj
+/Build/Linux/TAppCommonObj
+/Build/Linux/TAppDecoderObj
+/Build/Linux/TLibDecoderObj
+/Build/Linux/libmd5Obj
+/HEVCAnalyzer.*
+/HEVCAnalyzer/.ycm_extra_conf.*
+/HEVCAnalyzer/*.swp
+/TLibCommonObj/*.swp
+/TLibVideoObj/*.swp
+/Build/Linux/*.swp
+/*.swp
