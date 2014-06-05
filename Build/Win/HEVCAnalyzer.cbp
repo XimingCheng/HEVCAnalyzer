@@ -89,6 +89,8 @@
 		<Unit filename="../../HEVCAnalyzer/HEVCodecApp.h" />
 		<Unit filename="../../HEVCAnalyzer/MainFrame.cpp" />
 		<Unit filename="../../HEVCAnalyzer/MainFrame.h" />
+		<Unit filename="../../HEVCAnalyzer/MainUIInstance.cpp" />
+		<Unit filename="../../HEVCAnalyzer/MainUIInstance.h" />
 		<Unit filename="../../HEVCAnalyzer/PicViewCtrl.cpp" />
 		<Unit filename="../../HEVCAnalyzer/PicViewCtrl.h" />
 		<Unit filename="../../HEVCAnalyzer/PixelViewCtrl.cpp" />

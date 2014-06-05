@@ -25,6 +25,12 @@ void MainUIInstance::Destroy()
     }
 }
 
+void MainUIInstance::SetDecodeWidthandHeight(unsigned int w, unsigned int h)
+{
+    m_iWidth = w;
+    m_iHeight = h;
+}
+
 LogMsgUIInstance* LogMsgUIInstance::GetInstance()
 {
     wxMutexLocker mutexLocker(m_Mutex);

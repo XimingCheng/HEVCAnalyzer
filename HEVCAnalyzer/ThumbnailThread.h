@@ -50,7 +50,7 @@ public:
 
 protected:
     virtual void* Entry();
-    void          ReleeaseBuffer();
+    void          ReleaseBuffer();
     void          GenerateCommandLine();
     void          OnExit();
 

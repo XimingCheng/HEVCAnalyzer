@@ -7,6 +7,11 @@ bool g_md5_mismatch = false;
 extern const wxEventType wxEVT_ADDANIMAGE_THREAD;
 extern const wxEventType wxEVT_END_THREAD;
 
+char opt0[] = "HEVCAnalyzer";
+char opt1[] = "-b";
+char opt3[] = "-o";
+char opt5[] = "--OutputBitDepth=8";
+
 double ThumbnailThread::m_fixWidth       = 165.0;
 double ThumbnailThread::m_dOneAddingTime = 1500;
 
@@ -131,7 +136,7 @@ void* DecodingThread::Entry()
     if(!cTAppDecTop.parseCfg( m_argcofDecoder, m_argvofDecoder ))
     {
         cTAppDecTop.destroy();
-        ReleeaseBuffer();
+        ReleaseBuffer();
         return (wxThread::ExitCode)1;
     }
     // main HEVC decoder
@@ -140,11 +145,11 @@ void* DecodingThread::Entry()
         wxMessageBox(_T("A decoding mismatch occured: signalled md5sum does not match"),
             _T("Decoding Error"), wxICON_ERROR);
     cTAppDecTop.destroy();
-    ReleeaseBuffer();
+    ReleaseBuffer();
     return g_md5_mismatch ? (wxThread::ExitCode)1 : (wxThread::ExitCode)0;
 }
 
-void DecodingThread::ReleeaseBuffer()
+void DecodingThread::ReleaseBuffer()
 {
     if(m_argvofDecoder)
     {
@@ -165,12 +170,12 @@ void DecodingThread::ReleeaseBuffer()
 
 void DecodingThread::OnExit()
 {
-    ReleeaseBuffer();
+    ReleaseBuffer();
 }
 
 DecodingThread::~DecodingThread()
 {
-    ReleeaseBuffer();
+    ReleaseBuffer();
 }
 
 void DecodingThread::GenerateCommandLine()
@@ -194,11 +199,11 @@ void DecodingThread::GenerateCommandLine()
     m_pOutYUVPathAnsi = new char[strlen(pOutYUVData) + 1];
     strcpy(m_pStreamPathAnsi, pStreamData);
     strcpy(m_pOutYUVPathAnsi, pOutYUVData);
-    m_argvofDecoder[0] = "HEVCAnalyzer";
-    m_argvofDecoder[1] = "-b";
+    m_argvofDecoder[0] = opt0;
+    m_argvofDecoder[1] = opt1;
     m_argvofDecoder[2] = m_pStreamPathAnsi;
-    m_argvofDecoder[3] = "-o";
+    m_argvofDecoder[3] = opt3;
     m_argvofDecoder[4] = m_pOutYUVPathAnsi;
     if(!m_b10bit)
-        m_argvofDecoder[5] = "--OutputBitDepth=8";
+        m_argvofDecoder[5] = opt5;
 }

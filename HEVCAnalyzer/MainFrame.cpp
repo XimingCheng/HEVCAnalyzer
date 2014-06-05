@@ -34,6 +34,7 @@ DEFINE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD)
 DEFINE_EVENT_TYPE(wxEVT_END_THREAD)
 DEFINE_EVENT_TYPE(wxEVT_DROP_FILES)
 DEFINE_EVENT_TYPE(wxEVT_LOGMSG)
+DEFINE_EVENT_TYPE(wxEVT_DECODING_MAINFRAME_NOTIFY)
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(wxID_EXIT, MainFrame::OnExit)
@@ -55,6 +56,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_TEXT_ENTER, MainFrame::OnInputFrameNumber)
     EVT_COMMAND(wxID_ANY, wxEVT_DROP_FILES, MainFrame::OnDropFiles)
     EVT_COMMAND(wxID_ANY, wxEVT_LOGMSG, MainFrame::OnLogMsg)
+    EVT_COMMAND(wxID_ANY, wxEVT_DECODING_MAINFRAME_NOTIFY, MainFrame::OnDecodingNotify)
     EVT_AUITOOLBAR_TOOL_DROPDOWN(ID_SwitchColorYUV, MainFrame::OnDropDownToolbarYUV)
     EVT_SIZE(MainFrame::OnMainFrameSizeChange)
     EVT_IDLE(MainFrame::OnIdle)
@@ -969,6 +971,11 @@ void MainFrame::OnLogMsg(wxCommandEvent& event)
         long endpos = m_pTCLogWin->GetLastPosition();
         m_pTCLogWin->SetStyle(startpos, endpos, color);
     }
+}
+
+void MainFrame::OnDecodingNotify(wxCommandEvent& event)
+{
+
 }
 
 BEGIN_EVENT_TABLE(HEVCStatusBar, wxStatusBar)

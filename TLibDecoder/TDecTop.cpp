@@ -1,7 +1,7 @@
 /* The copyright in this software is being made available under the BSD
  * License, included below. This software may be subject to other third party
  * and contributor rights, including patent rights, and no such rights are
- * granted under this license.  
+ * granted under this license.
  *
  * Copyright (c) 2010-2013, ITU/ISO/IEC
  * All rights reserved.
@@ -37,6 +37,7 @@
 
 #include "NALread.h"
 #include "TDecTop.h"
+#include "../HEVCAnalyzer/MainUIInstance.h"
 
 //! \ingroup TLibDecoder
 //! \{
@@ -52,7 +53,7 @@ TDecTop::TDecTop()
 #endif
   m_pocCRA = 0;
   m_prevRAPisBLA = false;
-  m_pocRandomAccess = MAX_INT;          
+  m_pocRandomAccess = MAX_INT;
   m_prevPOC                = MAX_INT;
   m_bFirstSliceInPicture    = true;
   m_bFirstSliceInSequence   = true;
@@ -75,10 +76,10 @@ Void TDecTop::create()
 Void TDecTop::destroy()
 {
   m_cGopDecoder.destroy();
-  
+
   delete m_apcSlicePilot;
   m_apcSlicePilot = NULL;
-  
+
   m_cSliceDecoder.destroy();
 }
 
@@ -95,20 +96,20 @@ Void TDecTop::deletePicBuffer ( )
 {
   TComList<TComPic*>::iterator  iterPic   = m_cListPic.begin();
   Int iSize = Int( m_cListPic.size() );
-  
+
   for (Int i = 0; i < iSize; i++ )
   {
     TComPic* pcPic = *(iterPic++);
     pcPic->destroy();
-    
+
     delete pcPic;
     pcPic = NULL;
   }
-  
+
   m_cSAO.destroy();
-  
+
   m_cLoopFilter.        destroy();
-  
+
   // destroy ROM
   destroyROM();
 }
@@ -119,7 +120,7 @@ Void TDecTop::xGetNewPicBuffer ( TComSlice* pcSlice, TComPic*& rpcPic )
   WindowFix &conformanceWindow = pcSlice->getSPS()->getConformanceWindow();
   WindowFix defaultDisplayWindow = pcSlice->getSPS()->getVuiParametersPresentFlag() ? pcSlice->getSPS()->getVuiParameters()->getDefaultDisplayWindow() : WindowFix();
 
-  for( Int temporalLayer=0; temporalLayer < MAX_TLAYER; temporalLayer++) 
+  for( Int temporalLayer=0; temporalLayer < MAX_TLAYER; temporalLayer++)
   {
     numReorderPics[temporalLayer] = pcSlice->getSPS()->getNumReorderPics(temporalLayer);
   }
@@ -128,15 +129,15 @@ Void TDecTop::xGetNewPicBuffer ( TComSlice* pcSlice, TComPic*& rpcPic )
   if (m_cListPic.size() < (UInt)m_iMaxRefPicNum)
   {
     rpcPic = new TComPic();
-    
-    rpcPic->create ( pcSlice->getSPS()->getPicWidthInLumaSamples(), pcSlice->getSPS()->getPicHeightInLumaSamples(), g_uiMaxCUWidth, g_uiMaxCUHeight, g_uiMaxCUDepth, 
+
+    rpcPic->create ( pcSlice->getSPS()->getPicWidthInLumaSamples(), pcSlice->getSPS()->getPicHeightInLumaSamples(), g_uiMaxCUWidth, g_uiMaxCUHeight, g_uiMaxCUDepth,
                      conformanceWindow, defaultDisplayWindow, numReorderPics, true);
     rpcPic->getPicSym()->allocSaoParam(&m_cSAO);
     m_cListPic.pushBack( rpcPic );
-    
+
     return;
   }
-  
+
   Bool bBufferIsAvailable = false;
   TComList<TComPic*>::iterator  iterPic   = m_cListPic.begin();
   while (iterPic != m_cListPic.end())
@@ -158,7 +159,7 @@ Void TDecTop::xGetNewPicBuffer ( TComSlice* pcSlice, TComPic*& rpcPic )
       break;
     }
   }
-  
+
   if ( !bBufferIsAvailable )
   {
     //There is no room for this picture, either because of faulty encoder or dropped NAL. Extend the buffer.
@@ -179,7 +180,7 @@ Void TDecTop::executeLoopFilters(Int& poc, TComList<TComPic*>*& rpcListPic)
     /* nothing to deblock */
     return;
   }
-  
+
   TComPic*&   pcPic         = m_pcPic;
 
   // Execute Deblock + Cleanup
@@ -188,14 +189,14 @@ Void TDecTop::executeLoopFilters(Int& poc, TComList<TComPic*>*& rpcListPic)
 
   TComSlice::sortPicList( m_cListPic ); // sorting for application output
   poc                 = pcPic->getSlice(m_uiSliceIdx-1)->getPOC();
-  rpcListPic          = &m_cListPic;  
-  m_cCuDecoder.destroy();        
+  rpcListPic          = &m_cListPic;
+  m_cCuDecoder.destroy();
   m_bFirstSliceInPicture  = true;
 
   return;
 }
 
-Void TDecTop::xCreateLostPicture(Int iLostPoc) 
+Void TDecTop::xCreateLostPicture(Int iLostPoc)
 {
   printf("\ninserting lost poc : %d\n",iLostPoc);
   TComSlice cFillSlice;
@@ -207,7 +208,7 @@ Void TDecTop::xCreateLostPicture(Int iLostPoc)
   cFillPic->getSlice(0)->setSPS( m_parameterSetManagerDecoder.getFirstSPS() );
   cFillPic->getSlice(0)->setPPS( m_parameterSetManagerDecoder.getFirstPPS() );
   cFillPic->getSlice(0)->initSlice();
-  
+
   TComList<TComPic*>::iterator iterPic = m_cListPic.begin();
   Int closestPoc = 1000000;
   while ( iterPic != m_cListPic.end())
@@ -230,7 +231,7 @@ Void TDecTop::xCreateLostPicture(Int iLostPoc)
     }
   }
   cFillPic->setCurrSliceIdx(0);
-  for(Int i=0; i<cFillPic->getNumCUsInFrame(); i++) 
+  for(Int i=0; i<cFillPic->getNumCUsInFrame(); i++)
   {
     cFillPic->getCU(i)->initCU(cFillPic,i);
   }
@@ -248,7 +249,7 @@ Void TDecTop::xCreateLostPicture(Int iLostPoc)
 Void TDecTop::xActivateParameterSets()
 {
   m_parameterSetManagerDecoder.applyPrefetchedPS();
-  
+
   TComPPS *pps = m_parameterSetManagerDecoder.getPPS(m_apcSlicePilot->getPPSId());
   assert (pps != 0);
 
@@ -320,7 +321,7 @@ Bool TDecTop::xDecodeSlice(InputNALUnit &nalu, Int &iSkipFrame, Int iPOCLastDisp
     {
       return false;
     }
-  } 
+  }
 
   // exit when a new picture is found
   if (m_apcSlicePilot->isNextSlice() && m_apcSlicePilot->getPOC()!=m_prevPOC && !m_bFirstSliceInSequence)
@@ -335,7 +336,7 @@ Bool TDecTop::xDecodeSlice(InputNALUnit &nalu, Int &iSkipFrame, Int iPOCLastDisp
   // actual decoding starts here
   xActivateParameterSets();
 
-  if (m_apcSlicePilot->isNextSlice()) 
+  if (m_apcSlicePilot->isNextSlice())
   {
     m_prevPOC = m_apcSlicePilot->getPOC();
   }
@@ -377,7 +378,7 @@ Bool TDecTop::xDecodeSlice(InputNALUnit &nalu, Int &iSkipFrame, Int iPOCLastDisp
       deleteSEIs(m_SEIs);
     }
   }
-  
+
   //  Set picture slice pointer
   TComSlice*  pcSlice = m_apcSlicePilot;
   Bool bNextSlice     = pcSlice->isNextSlice();
@@ -401,7 +402,7 @@ Bool TDecTop::xDecodeSlice(InputNALUnit &nalu, Int &iSkipFrame, Int iPOCLastDisp
       for(p=0; p < pcPic->getPicSym()->getNumColumnsMinus1()+1; p++)
       {
         pcPic->getPicSym()->getTComTile( j * (pcPic->getPicSym()->getNumColumnsMinus1()+1) + p )->
-          setTileWidth( (p+1)*pcPic->getPicSym()->getFrameWidthInCU()/(pcPic->getPicSym()->getNumColumnsMinus1()+1) 
+          setTileWidth( (p+1)*pcPic->getPicSym()->getFrameWidthInCU()/(pcPic->getPicSym()->getNumColumnsMinus1()+1)
           - (p*pcPic->getPicSym()->getFrameWidthInCU())/(pcPic->getPicSym()->getNumColumnsMinus1()+1) );
       }
     }
@@ -412,8 +413,8 @@ Bool TDecTop::xDecodeSlice(InputNALUnit &nalu, Int &iSkipFrame, Int iPOCLastDisp
       for(p=0; p < pcPic->getPicSym()->getNumRowsMinus1()+1; p++)
       {
         pcPic->getPicSym()->getTComTile( p * (pcPic->getPicSym()->getNumColumnsMinus1()+1) + j )->
-          setTileHeight( (p+1)*pcPic->getPicSym()->getFrameHeightInCU()/(pcPic->getPicSym()->getNumRowsMinus1()+1) 
-          - (p*pcPic->getPicSym()->getFrameHeightInCU())/(pcPic->getPicSym()->getNumRowsMinus1()+1) );   
+          setTileHeight( (p+1)*pcPic->getPicSym()->getFrameHeightInCU()/(pcPic->getPicSym()->getNumRowsMinus1()+1)
+          - (p*pcPic->getPicSym()->getFrameHeightInCU())/(pcPic->getPicSym()->getNumRowsMinus1()+1) );
       }
     }
   }
@@ -436,7 +437,7 @@ Bool TDecTop::xDecodeSlice(InputNALUnit &nalu, Int &iSkipFrame, Int iPOCLastDisp
     {
       uiCummulativeTileHeight = 0;
       for(i=0; i < pcSlice->getPPS()->getNumRowsMinus1(); i++)
-      { 
+      {
         pcPic->getPicSym()->getTComTile(i * (pcSlice->getPPS()->getNumColumnsMinus1()+1) + j)->setTileHeight( pcSlice->getPPS()->getRowHeight(i) );
         uiCummulativeTileHeight += pcSlice->getPPS()->getRowHeight(i);
       }
@@ -465,7 +466,7 @@ Bool TDecTop::xDecodeSlice(InputNALUnit &nalu, Int &iSkipFrame, Int iPOCLastDisp
     pcSlice->setSliceCurEndCUAddr(pcPic->getPicSym()->getPicSCUEncOrder(pcSlice->getSliceCurEndCUAddr()));
   }
 
-  if (m_bFirstSliceInPicture) 
+  if (m_bFirstSliceInPicture)
   {
     if(pcPic->getNumAllocatedSlice() != 1)
     {
@@ -477,7 +478,7 @@ Bool TDecTop::xDecodeSlice(InputNALUnit &nalu, Int &iSkipFrame, Int iPOCLastDisp
     pcPic->allocateNewSlice();
   }
   assert(pcPic->getNumAllocatedSlice() == (m_uiSliceIdx + 1));
-  m_apcSlicePilot = pcPic->getPicSym()->getSlice(m_uiSliceIdx); 
+  m_apcSlicePilot = pcPic->getPicSym()->getSlice(m_uiSliceIdx);
   pcPic->getPicSym()->setSlice(pcSlice, m_uiSliceIdx);
 
   pcPic->setTLayer(nalu.m_temporalId);
@@ -521,10 +522,10 @@ Bool TDecTop::xDecodeSlice(InputNALUnit &nalu, Int &iSkipFrame, Int iPOCLastDisp
           {
             bLowDelay = false;
           }
-        }        
+        }
       }
 
-      pcSlice->setCheckLDC(bLowDelay);            
+      pcSlice->setCheckLDC(bLowDelay);
     }
 
     //---------------
@@ -537,7 +538,7 @@ Bool TDecTop::xDecodeSlice(InputNALUnit &nalu, Int &iSkipFrame, Int iPOCLastDisp
         pcSlice->setNoBackPredFlag( true );
         for ( i=0; i < pcSlice->getNumRefIdx(RefPicList( 1 ) ); i++ )
         {
-          if ( pcSlice->getRefPOC(RefPicList(1), i) != pcSlice->getRefPOC(RefPicList(0), i) ) 
+          if ( pcSlice->getRefPOC(RefPicList(1), i) != pcSlice->getRefPOC(RefPicList(0), i) )
           {
             pcSlice->setNoBackPredFlag( false );
             break;
@@ -581,15 +582,17 @@ Bool TDecTop::xDecodeSlice(InputNALUnit &nalu, Int &iSkipFrame, Int iPOCLastDisp
 Void TDecTop::xDecodeVPS()
 {
   TComVPS* vps = new TComVPS();
-  
+
   m_cEntropyDecoder.decodeVPS( vps );
-  m_parameterSetManagerDecoder.storePrefetchedVPS(vps);  
+  m_parameterSetManagerDecoder.storePrefetchedVPS(vps);
 }
 
 Void TDecTop::xDecodeSPS()
 {
   TComSPS* sps = new TComSPS();
   m_cEntropyDecoder.decodeSPS( sps );
+  MainUIInstance::GetInstance()->SetDecodeWidthandHeight(sps->getPicWidthInLumaSamples(),
+                    sps->getPicHeightInLumaSamples());
   m_parameterSetManagerDecoder.storePrefetchedSPS(sps);
 }
 
@@ -647,7 +650,7 @@ Bool TDecTop::decode(InputNALUnit& nalu, Int& iSkipFrame, Int& iPOCLastDisplay)
     case NAL_UNIT_VPS:
       xDecodeVPS();
       return false;
-      
+
     case NAL_UNIT_SPS:
       xDecodeSPS();
       return false;
@@ -655,7 +658,7 @@ Bool TDecTop::decode(InputNALUnit& nalu, Int& iSkipFrame, Int& iPOCLastDisplay)
     case NAL_UNIT_PPS:
       xDecodePPS();
       return false;
-      
+
     case NAL_UNIT_SEI:
     case NAL_UNIT_SEI_SUFFIX:
       xDecodeSEI( nalu.m_Bitstream, nalu.m_nalUnitType );
@@ -711,13 +714,13 @@ Bool TDecTop::isSkipPictureForBLA(Int& iPOCLastDisplay)
  * It also checks the type of Nal unit type at the random access point.
  * If the random access point is CRA/CRANT/BLA/BLANT, TFD pictures with POC less than the POC of the random access point are skipped.
  * If the random access point is IDR all pictures after the random access point are decoded.
- * If the random access point is none of the above, a warning is issues, and decoding of pictures with POC 
- * equal to or greater than the random access point POC is attempted. For non IDR/CRA/BLA random 
+ * If the random access point is none of the above, a warning is issues, and decoding of pictures with POC
+ * equal to or greater than the random access point POC is attempted. For non IDR/CRA/BLA random
  * access point there is no guarantee that the decoder will not crash.
  */
 Bool TDecTop::isRandomAccessSkipPicture(Int& iSkipFrame,  Int& iPOCLastDisplay)
 {
-  if (iSkipFrame) 
+  if (iSkipFrame)
   {
     iSkipFrame--;   // decrement the counter
     return true;
@@ -736,7 +739,7 @@ Bool TDecTop::isRandomAccessSkipPicture(Int& iSkipFrame,  Int& iPOCLastDisplay)
     {
       m_pocRandomAccess = -MAX_INT; // no need to skip the reordered pictures in IDR, they are decodable.
     }
-    else 
+    else
     {
       static Bool warningMessage = false;
       if(!warningMessage)
@@ -754,7 +757,7 @@ Bool TDecTop::isRandomAccessSkipPicture(Int& iSkipFrame,  Int& iPOCLastDisplay)
     return true;
   }
   // if we reach here, then the picture is not skipped.
-  return false; 
+  return false;
 }
 
 //! \}

@@ -14,6 +14,7 @@ DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_END_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_DROP_FILES, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_LOGMSG, wxID_ANY)
+DECLARE_EVENT_TYPE(wxEVT_DECODING_MAINFRAME_NOTIFY, wxID_ANY)
 
 class ThumbnailThread;
 class CenterPageManager;
@@ -105,6 +106,7 @@ private:
     void           OnLogMsg(wxCommandEvent& event);
     void           OnLogMsgWarning(wxCommandEvent& event);
     void           OnLogMsgError(wxCommandEvent& event);
+    void           OnDecodingNotify(wxCommandEvent& event);
 
 private:
     wxAuiManager         m_mgr;

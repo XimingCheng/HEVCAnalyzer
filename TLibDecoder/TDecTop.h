@@ -38,6 +38,7 @@
 #ifndef __TDECTOP__
 #define __TDECTOP__
 
+#include "../HEVCAnalyzer/HEVCAnalyzer.h"
 #include "../TLibCommon/CommonDef.h"
 #include "../TLibCommon/TComList.h"
 #include "../TLibCommon/TComPicYuv.h"

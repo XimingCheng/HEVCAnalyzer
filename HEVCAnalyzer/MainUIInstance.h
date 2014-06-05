@@ -15,8 +15,13 @@ protected:
 class MainUIInstance : public NoneCopyable
 {
 public:
+    enum MainMSG_TYPE
+    {
+
+    };
     static MainUIInstance*   GetInstance();
     static void              Destroy();
+    void                     SetDecodeWidthandHeight(unsigned int w, unsigned int h);
 
 private:
     // private data member
@@ -25,6 +30,8 @@ private:
     MainFrame*               m_pMainFrame;
     CenterPageManager*       m_pCenterPageManger;
     wxSQLite3Database*       m_pDataBase;
+    unsigned int             m_iWidth;
+    unsigned int             m_iHeight;
 };
 
 class LogMsgUIInstance : public NoneCopyable
