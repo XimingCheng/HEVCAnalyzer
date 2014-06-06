@@ -122,9 +122,9 @@ public:
     void                     SetActiveTarget(wxFrame* pFrame);
 
     // the code of template function must be put the in the header file
-    // Decoding msg rooter function, the msg is send to MainFrame
+    // Decoding msg rooter function, the msg is sent to MainFrame
     template<typename... T>
-    void                     MessageRooterToMainFrame(MainMSG_TYPE type, const Utils::tuple<T...>& data)
+    void                     MessageRooterToMainFrame(const Utils::tuple<T...>& data)
     {
         if(!m_pMainFrame) assert(0);
         wxCommandEvent event(wxEVT_DECODING_MAINFRAME_NOTIFY, wxID_ANY);

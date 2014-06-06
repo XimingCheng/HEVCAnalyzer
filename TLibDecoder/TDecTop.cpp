@@ -591,11 +591,9 @@ Void TDecTop::xDecodeSPS()
 {
   TComSPS* sps = new TComSPS();
   m_cEntropyDecoder.decodeSPS( sps );
-  Utils::tuple<int, int> val(sps->getPicWidthInLumaSamples(),
-    sps->getPicHeightInLumaSamples());
-  Utils::tuple<int, int> val_test;
-  MainUIInstance::GetInstance()->MessageRooterToMainFrame
-    (MainMSG_SETSIZE_OF_DECODE_FRMAE, val);
+  Utils::tuple<MainMSG_TYPE, int, int> val(MainMSG_SETSIZE_OF_DECODE_FRMAE,
+        sps->getPicWidthInLumaSamples(), sps->getPicHeightInLumaSamples());
+  MainUIInstance::GetInstance()->MessageRooterToMainFrame(val);
   m_parameterSetManagerDecoder.storePrefetchedSPS(sps);
 }
 
