@@ -6,6 +6,7 @@ wxMutex MainUIInstance::m_Mutex;
 wxMutex LogMsgUIInstance::m_Mutex;
 
 extern const wxEventType wxEVT_LOGMSG;
+extern const wxEventType wxEVT_DECODING_MAINFRAME_NOTIFY;
 
 MainUIInstance* MainUIInstance::GetInstance()
 {
@@ -25,10 +26,9 @@ void MainUIInstance::Destroy()
     }
 }
 
-void MainUIInstance::SetDecodeWidthandHeight(unsigned int w, unsigned int h)
+void MainUIInstance::SetActiveTarget(wxFrame* pFrame)
 {
-    m_iWidth = w;
-    m_iHeight = h;
+    m_pMainFrame = pFrame;
 }
 
 LogMsgUIInstance* LogMsgUIInstance::GetInstance()
