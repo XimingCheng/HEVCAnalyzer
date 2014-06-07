@@ -71,11 +71,13 @@ private:
   TDecSbac*       m_pcBufferLowLatSbacDecoders;   ///< dependent tiles: line to store temporary contexts, one per column of tiles.
   TDecBinCABAC*   m_pcBufferLowLatBinCABACs;
   std::vector<TDecSbac*> CTXMem;
+  std::map<int, int>     m_decodingOrder_POC;
 
 public:
   TDecSlice();
   virtual ~TDecSlice();
 
+  std::map<int, int>& getDecodingOrderMap() { return m_decodingOrder_POC; }
   Void  init              ( TDecEntropy* pcEntropyDecoder, TDecCu* pcMbDecoder );
   Void  create            ();
   Void  destroy           ();

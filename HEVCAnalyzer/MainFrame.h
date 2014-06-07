@@ -2,6 +2,7 @@
 #define MAINFRAME_H_INCLUDED
 
 #include <list>
+#include <vector>
 #include "HEVCAnalyzer.h"
 #include "ThumbnailThread.h"
 #include "PicViewCtrl.h"
@@ -108,6 +109,11 @@ private:
     void           OnLogMsgError(wxCommandEvent& event);
     void           OnDecodingNotify(wxCommandEvent& event);
 
+    // decoding notify msg handler
+    void           OnDecodingSetSize(wxCommandEvent& event);
+    void           OnDecodingSetYUVBuffer(wxCommandEvent& event);
+    void           OnDecodingSetThumbnailBuffer(wxCommandEvent& event);
+
 private:
     wxAuiManager         m_mgr;
     wxSimpleHtmlListBox* m_pThumbnalList;
@@ -144,6 +150,8 @@ private:
     HEVCStatusBar*       m_pStatusBar;
     wxAuiToolBar*        m_ioToolBar;
     wxAuiToolBar*        m_yuvToolBar;
+
+    std::vector<int>     m_vPocStore;
 
     DECLARE_EVENT_TABLE()
 };

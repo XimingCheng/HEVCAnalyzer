@@ -114,6 +114,7 @@ public:
   Void  deletePicBuffer();
 
   Void executeLoopFilters(Int& poc, TComList<TComPic*>*& rpcListPic);
+  TDecSlice* getTDecSlice() { return &m_cSliceDecoder; }
 
 protected:
   Void  xGetNewPicBuffer  (TComSlice* pcSlice, TComPic*& rpcPic);

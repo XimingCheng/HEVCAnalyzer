@@ -111,6 +111,8 @@ protected:
 enum MainMSG_TYPE
 {
     MainMSG_SETSIZE_OF_DECODE_FRMAE = 0,
+    MainMSG_SETYUV_BUFFER,
+    MainMSG_SETTHUMBNAIL_BUFFER,
     MainMSG_MAX,
 };
 
@@ -119,17 +121,18 @@ class MainUIInstance : public NoneCopyable
 public:
     static MainUIInstance*   GetInstance();
     static void              Destroy();
-    void                     SetActiveTarget(wxFrame* pFrame);
+    void                     SetActiveTargetMainFrame(wxFrame* pFrame);
 
     // the code of template function must be put the in the header file
-    // Decoding msg rooter function, the msg is sent to MainFrame
+    // Decoding msg router function, the msg is sent to MainFrame
     template<typename... T>
-    void                     MessageRooterToMainFrame(const Utils::tuple<T...>& data)
+    void                     MessageRouterToMainFrame(MainMSG_TYPE type, const Utils::tuple<T...>& data)
     {
         if(!m_pMainFrame) assert(0);
         wxCommandEvent event(wxEVT_DECODING_MAINFRAME_NOTIFY, wxID_ANY);
         Utils::tuple<T...>* pData_val = new Utils::tuple<T...>();
         *pData_val = data;
+        event.SetId((int)type);
         event.SetClientData((void*)pData_val);
         wxPostEvent(m_pMainFrame, event);
     }
@@ -140,6 +143,7 @@ private:
     static MainUIInstance*   m_pInstance;
     static wxMutex           m_Mutex;
     wxFrame*                 m_pMainFrame;
+
     wxSQLite3Database*       m_pDataBase;
 };
 
