@@ -15,5 +15,10 @@
 /HEVCAnalyzer/*.swp
 /TLibCommonObj/*.swp
 /TLibVideoObj/*.swp
+/TLibDecoder/*.swp
+/TLibVideoIO/*.swp
+/TAppDecoder/*.swp
+/TLibCommon/*.swp
+/TAppCommon/*.swp
 /Build/Linux/*.swp
 /*.swp
