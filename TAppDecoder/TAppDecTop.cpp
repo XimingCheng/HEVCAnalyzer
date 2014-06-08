@@ -44,6 +44,7 @@
 #include "TAppDecTop.h"
 #include "../TLibDecoder/AnnexBread.h"
 #include "../TLibDecoder/NALread.h"
+#include "../HEVCAnalyzer/MainUIInstance.h"
 
 //! \ingroup TAppDecoder
 //! \{
@@ -272,9 +273,28 @@ Void TAppDecTop::xWriteOutput( TComList<TComPic*>* pcListPic, UInt tId )
                                        conf.getWindowBottomOffset() + defDisp.getWindowBottomOffset() );
       }
 
+      // decoded YUV buffer
+      std::map<int, int> map_data = m_cTDecTop.getTDecSlice()->getDecodingOrderMap();
+      int decoding_order = map_data[pcPic->getPOC()];
+      TComPicYuv* pDecodedPic      = pcPic->getPicYuvRec();
+      TComPicYuv* pDecodedPic_copy = new TComPicYuv();
+      pDecodedPic_copy->create(pDecodedPic->getWidth(), pDecodedPic->getHeight(), 64, 64, 4);
+      pDecodedPic->copyToPic(pDecodedPic_copy);
+      Utils::tuple<int, TComPicYuv*> msg(decoding_order, pDecodedPic_copy);
+      if(m_iPOCLastDisplay == -MAX_INT)
+      {
+        TComPicYuv* pDecodedPic_copy_thub = new TComPicYuv();
+        pDecodedPic_copy_thub->create(pDecodedPic->getWidth(), pDecodedPic->getHeight(), 64, 64, 4);
+        pDecodedPic->copyToPic(pDecodedPic_copy_thub);
+        Utils::tuple<int, TComPicYuv*> msg_thub(decoding_order, pDecodedPic_copy_thub);
+        MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETYUV_BUFFER, msg);
+        MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETTHUMBNAIL_BUFFER, msg_thub);
+      }
+      else
+        MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETTHUMBNAIL_BUFFER, msg);
       // update POC of display order
       m_iPOCLastDisplay = pcPic->getPOC();
-
+      //wxMessageBox(wxString::Format(_T("%d"), m_iPOCLastDisplay));
       // erase non-referenced picture in the reference picture list after display
       if ( !pcPic->getSlice(0)->isReferenced() && pcPic->getReconMark() == true )
       {
@@ -329,6 +349,14 @@ Void TAppDecTop::xFlushOutput( TComList<TComPic*>* pcListPic )
                                        conf.getWindowBottomOffset() + defDisp.getWindowBottomOffset() );
       }
 
+      std::map<int, int> map_data = m_cTDecTop.getTDecSlice()->getDecodingOrderMap();
+      int decoding_order = map_data[pcPic->getPOC()];
+      TComPicYuv* pDecodedPic      = pcPic->getPicYuvRec();
+      TComPicYuv* pDecodedPic_copy = new TComPicYuv();
+      pDecodedPic_copy->create(pDecodedPic->getWidth(), pDecodedPic->getHeight(), 64, 64, 4);
+      pDecodedPic->copyToPic(pDecodedPic_copy);
+      Utils::tuple<int, TComPicYuv*> msg(decoding_order, pDecodedPic_copy);
+      MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETTHUMBNAIL_BUFFER, msg);
       // update POC of display order
       m_iPOCLastDisplay = pcPic->getPOC();
 

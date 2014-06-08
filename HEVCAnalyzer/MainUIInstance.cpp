@@ -26,7 +26,7 @@ void MainUIInstance::Destroy()
     }
 }
 
-void MainUIInstance::SetActiveTarget(wxFrame* pFrame)
+void MainUIInstance::SetActiveTargetMainFrame(wxFrame* pFrame)
 {
     m_pMainFrame = pFrame;
 }
