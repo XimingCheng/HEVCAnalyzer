@@ -70,7 +70,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
             const wxSize& size, long style)
             : wxFrame(parent, id, title, pos, size, style),
             m_pImageList(NULL), m_bYUVFile(false), m_bOPened(false), m_eYUVComponentChoose(MODE_ORG), m_pcPicYuvOrg(NULL),
-            m_pThumbThread(NULL), m_pCenterPageManager(NULL)
+            m_pThumbThread(NULL), m_pCenterPageManager(NULL), m_pDecodingThread(NULL)
 {
     m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
     m_mgr.SetManagedWindow(this);
@@ -396,22 +396,25 @@ void MainFrame::OnOpenYUVFile(const wxString& sFile, const wxString& sName, bool
 
 void MainFrame::OnOpenStreamFile(const wxString& sFile, const wxString& sName)
 {
+    wxCommandEvent event;
+    OnCloseFile(event);
     wxString name = wxStandardPaths::Get().GetUserLocalDataDir();
     if(!::wxDirExists(name))
         ::wxMkdir(name);
     name += _T("/dec.yuv");
-    DecodingThread* pDecodingThread = new DecodingThread(this, sFile, name);
-    if(pDecodingThread->Create() != wxTHREAD_NO_ERROR)
+    m_pDecodingThread = new DecodingThread(this, sFile, name);
+    m_sDecodedYUVPathName = name;
+    if(m_pDecodingThread->Create() != wxTHREAD_NO_ERROR)
     {
-        delete pDecodingThread;
-        pDecodingThread = NULL;
+        delete m_pDecodingThread;
+        m_pDecodingThread = NULL;
     }
     else
     {
-        if(pDecodingThread->Run() != wxTHREAD_NO_ERROR)
+        if(m_pDecodingThread->Run() != wxTHREAD_NO_ERROR)
         {
-            delete pDecodingThread;
-            pDecodingThread = NULL;
+            delete m_pDecodingThread;
+            m_pDecodingThread = NULL;
         }
     }
 }
@@ -427,17 +430,13 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_bYUVFile = true;
     else
         m_bYUVFile = false;
-
+    m_sCurOpenedFilePath = dlg.GetPath();
+    m_sCurOpenedFileName = dlg.GetFilename();
     if(m_bYUVFile)
-    {
-        m_sCurOpenedFilePath = dlg.GetPath();
-        m_sCurOpenedFileName = dlg.GetFilename();
         OnOpenYUVFile(dlg.GetPath(), dlg.GetFilename());
-    }
     else // the opened file may be the HEVC stream file
     {
         OnOpenStreamFile(dlg.GetPath(), dlg.GetFilename());
-        //OnCloseFile(event);
         m_bOPened = true;
     }
 }
@@ -467,31 +466,32 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
         if(m_bYUVFile)
         {
             m_cYUVIO.close();
+            m_FileLength = 0;
             if(m_pThumbThread)
             {
                 if(m_pThumbThread->IsAlive())
                     m_pThumbThread->Delete();
                 m_pThumbThread = NULL;
             }
-            if(m_pcPicYuvOrg)
-            {
-                m_pcPicYuvOrg->destroy();
-                delete m_pcPicYuvOrg;
-                m_pcPicYuvOrg = NULL;
-            }
-            if(m_StrMemFileName.GetCount())
-                ClearThumbnalMemory();
-            m_FileLength = 0;
-            m_pCenterPageManager->Clear();
-            m_pPixelViewCtrl->Clear();
-            m_pFrameNumberText->SetValue(_T("0"));
-            m_pTotalFrameNumberText->SetLabel(_T("/ 0"));
             LogMsgUIInstance::GetInstance()->LogMessage(wxString::Format(_T("OnCloseFile() %d"), m_StrMemFileName.GetCount()));
         }
         else
         {
-
+            if(wxFile::Exists(m_sDecodedYUVPathName))
+                ::wxRemoveFile(m_sDecodedYUVPathName);
         }
+        if(m_pcPicYuvOrg)
+        {
+            m_pcPicYuvOrg->destroy();
+            delete m_pcPicYuvOrg;
+            m_pcPicYuvOrg = NULL;
+        }
+        if(m_StrMemFileName.GetCount())
+            ClearThumbnalMemory();
+        m_pCenterPageManager->Clear();
+        m_pPixelViewCtrl->Clear();
+        m_pFrameNumberText->SetValue(_T("0"));
+        m_pTotalFrameNumberText->SetLabel(_T("/ 0"));
         m_bOPened = false;
     }
 }
@@ -555,10 +555,19 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
 {
     wxBusyCursor wait;
     int frame = event.GetInt();
-    m_cYUVIO.reset();
+    if(m_bYUVFile)
+        m_cYUVIO.reset();
+    else
+    {
+        m_iYUVBit = 8;
+        m_cYUVIO.open(m_sDecodedYUVPathName.mb_str(wxCSConv(wxFONTENCODING_SYSTEM)).data(),
+                      false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
+    }
     m_cYUVIO.skipFrames(frame, m_iSourceWidth, m_iSourceHeight);
     int pad[] = {0, 0};
     m_cYUVIO.read(m_pcPicYuvOrg, pad);
+    if(!m_bYUVFile)
+        m_cYUVIO.close();
     m_pCenterPageManager->GetPicViewCtrl(0)->SetPicYuvBuffer(m_pcPicYuvOrg, m_iSourceWidth, m_iSourceHeight, m_iYUVBit);
     wxString str;
     str.Printf(_T("%d"), frame + 1);
@@ -652,7 +661,6 @@ void MainFrame::OnUpdateUI(wxUpdateUIEvent& event)
     wxSlider* pSlider = ((HEVCStatusBar*)GetStatusBar())->GetSlider();
     switch(event.GetId())
     {
-    case ID_ReOpenWrongConfigYUVFile:
     case ID_GoToNextFrame:
     case ID_GoToPreFrame:
     case ID_Play_Pause:
@@ -662,6 +670,9 @@ void MainFrame::OnUpdateUI(wxUpdateUIEvent& event)
             pSlider->SetValue(0);
         pSlider->Enable(m_bOPened);
         event.Enable(m_bOPened);
+        break;
+    case ID_ReOpenWrongConfigYUVFile:
+        event.Enable(m_bYUVFile && m_bOPened);
         break;
     case ID_SwitchGrid:
         event.Check(pCtrl->IsShowGrid());
@@ -683,6 +694,7 @@ void MainFrame::OnUpdateUI(wxUpdateUIEvent& event)
         break;
     case ID_SwitchHEXPixel:
         event.Check(m_pPixelViewCtrl->GetHEXFormat());
+        event.Enable(m_bYUVFile && m_bOPened);
         break;
     }
 }
@@ -1017,7 +1029,7 @@ void MainFrame::OnDecodingSetYUVBuffer(wxCommandEvent& event)
     {
         m_pcPicYuvOrg = new TComPicYuv();
         m_pcPicYuvOrg->create(m_iSourceWidth, m_iSourceHeight, 64, 64, 4);
-        m_vPocStore.clear();
+        m_vDecodingOrderStore.clear();
     }
     pcPicYuv->copyToPic(m_pcPicYuvOrg);
     pcPicYuv->destroy();
@@ -1032,7 +1044,7 @@ void MainFrame::OnDecodingSetThumbnailBuffer(wxCommandEvent& event)
     Utils::tuple<int, TComPicYuv*>* pData = (Utils::tuple<int, TComPicYuv*>*)event.GetClientData();
     int iDecodingOrder = Utils::tuple_get<0>(*pData);
     TComPicYuv* pcPicYuv = Utils::tuple_get<1>(*pData);
-    m_vPocStore.push_back(iDecodingOrder);
+    m_vDecodingOrderStore.push_back(iDecodingOrder);
     LogMsgUIInstance::GetInstance()->LogMessage(wxString::Format(_T("%d"), iDecodingOrder));
     double scaleRate = 165.0/m_iSourceWidth;
     if(!m_pImageList)
@@ -1043,7 +1055,7 @@ void MainFrame::OnDecodingSetThumbnailBuffer(wxCommandEvent& event)
     wxImage simg = bimg.Scale((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
     wxBitmap newbmp(simg);
     m_pImageList->Add(newbmp);
-    std::size_t size_pic = m_vPocStore.size();
+    std::size_t size_pic = m_vDecodingOrderStore.size();
     wxMemoryFSHandler::AddFile(wxString::Format(_T("Frame Number %d.bmp"), size_pic),
                 newbmp, wxBITMAP_TYPE_BMP);
     wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:Frame Number %d.bmp\"><br></p><span text-align=center>FN %d/DO %d</span><br>"),

@@ -18,6 +18,7 @@ DECLARE_EVENT_TYPE(wxEVT_LOGMSG, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_DECODING_MAINFRAME_NOTIFY, wxID_ANY)
 
 class ThumbnailThread;
+class DecodingThread;
 class CenterPageManager;
 
 class MainFrame : public wxFrame
@@ -151,7 +152,9 @@ private:
     wxAuiToolBar*        m_ioToolBar;
     wxAuiToolBar*        m_yuvToolBar;
 
-    std::vector<int>     m_vPocStore;
+    DecodingThread*      m_pDecodingThread;
+    std::vector<int>     m_vDecodingOrderStore;
+    wxString             m_sDecodedYUVPathName;
 
     DECLARE_EVENT_TABLE()
 };

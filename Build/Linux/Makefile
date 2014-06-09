@@ -2,7 +2,7 @@
 # These are configurable options:
 # -------------------------------------------------------------------------
 
-# C++ compile
+# C++ compiler
 CXX = clang++
 # CXX = g++
 
