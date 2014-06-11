@@ -430,6 +430,7 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_bYUVFile = true;
     else
         m_bYUVFile = false;
+    m_sLastOpenedFileName = m_sCurOpenedFileName;
     m_sCurOpenedFilePath = dlg.GetPath();
     m_sCurOpenedFileName = dlg.GetFilename();
     if(m_bYUVFile)
@@ -458,12 +459,13 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
 {
     if(m_bOPened)
     {
-        m_sCurOpenedFilePath = _T("");
-        m_sCurOpenedFileName = _T("");
+        bool bLastYUV = true;
+        if(!m_sLastOpenedFileName.Lower().EndsWith(_T(".yuv")))
+            bLastYUV = false;
         if(m_pTimer->IsRunning())
             m_pTimer->Stop();
         m_pCenterPageManager->Close();
-        if(m_bYUVFile)
+        if(bLastYUV)
         {
             m_cYUVIO.close();
             m_FileLength = 0;
@@ -493,6 +495,8 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
         m_pFrameNumberText->SetValue(_T("0"));
         m_pTotalFrameNumberText->SetLabel(_T("/ 0"));
         m_bOPened = false;
+        m_sCurOpenedFilePath = _T("");
+        m_sCurOpenedFileName = _T("");
     }
 }
 

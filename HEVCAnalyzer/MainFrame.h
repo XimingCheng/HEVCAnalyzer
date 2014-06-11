@@ -122,6 +122,7 @@ private:
     wxArrayString        m_StrMemFileName;
     wxString             m_sCurOpenedFilePath;
     wxString             m_sCurOpenedFileName;
+    wxString             m_sLastOpenedFileName;
     wxTextCtrl*          m_pTCLogWin;
     wxTextCtrl*          m_pFrameNumberText;
     wxStaticText*        m_pTotalFrameNumberText;
