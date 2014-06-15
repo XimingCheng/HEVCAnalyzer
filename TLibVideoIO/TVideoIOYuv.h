@@ -55,7 +55,15 @@ class TVideoIOYuv
 {
 private:
   Bool      m_bOpened;
-  fstream   m_cHandle;                                      ///< file handle
+  // Under Linux the fstream class in TVideoIOYuv will crash on its destruction function
+  // nobody knows its reason, including Google and Stack Overflow
+  // crash stack info
+  //  std::locale::~locale() () from /usr/lib/i386-linux-gnu/libstdc++.so.6
+  //  std::basic_fstream<char, std::char_traits<char> >::~basic_fstream() () from /usr/lib/i386-linux-gnu/libstdc++.so.6
+  //  TVideoIOYuv::~TVideoIOYuv (this=0xab3ccecc) at ../../HEVCAnalyzer/../TLibVideoIO/TVideoIOYuv.h:66
+  // so I change the fstream into basic file pointer
+  //fstream   m_cHandle;                                      ///< file handle
+  FILE*     m_filePointer;
   Int m_fileBitDepthY; ///< bitdepth of input/output video file luma component
   Int m_fileBitDepthC; ///< bitdepth of input/output video file chroma component
   Int m_bitDepthShiftY;  ///< number of bits to increase or decrease luma by before/after write/read
