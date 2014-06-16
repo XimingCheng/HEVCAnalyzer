@@ -154,7 +154,7 @@ private:
     wxAuiToolBar*        m_yuvToolBar;
 
     DecodingThread*      m_pDecodingThread;
-    std::vector<int>     m_vDecodingOrderStore;
+    std::vector<int>     m_vDecodingPOCStore;
     wxString             m_sDecodedYUVPathName;
 
     DECLARE_EVENT_TABLE()

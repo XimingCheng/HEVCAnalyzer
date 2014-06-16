@@ -560,14 +560,17 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
     wxBusyCursor wait;
     int frame = event.GetInt();
     if(m_bYUVFile)
+    {
         m_cYUVIO.reset();
+        m_cYUVIO.skipFrames(frame, m_iSourceWidth, m_iSourceHeight);
+    }
     else
     {
         m_iYUVBit = 8;
         m_cYUVIO.open(m_sDecodedYUVPathName.mb_str(wxCSConv(wxFONTENCODING_SYSTEM)).data(),
                       false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
+        m_cYUVIO.skipFrames(m_vDecodingPOCStore[frame], m_iSourceWidth, m_iSourceHeight);
     }
-    m_cYUVIO.skipFrames(frame, m_iSourceWidth, m_iSourceHeight);
     int pad[] = {0, 0};
     m_cYUVIO.read(m_pcPicYuvOrg, pad);
     if(!m_bYUVFile)
@@ -698,7 +701,7 @@ void MainFrame::OnUpdateUI(wxUpdateUIEvent& event)
         break;
     case ID_SwitchHEXPixel:
         event.Check(m_pPixelViewCtrl->GetHEXFormat());
-        event.Enable(m_bYUVFile && m_bOPened);
+        event.Enable(m_bOPened);
         break;
     }
 }
@@ -1033,7 +1036,7 @@ void MainFrame::OnDecodingSetYUVBuffer(wxCommandEvent& event)
     {
         m_pcPicYuvOrg = new TComPicYuv();
         m_pcPicYuvOrg->create(m_iSourceWidth, m_iSourceHeight, 64, 64, 4);
-        m_vDecodingOrderStore.clear();
+        m_vDecodingPOCStore.clear();
     }
     pcPicYuv->copyToPic(m_pcPicYuvOrg);
     pcPicYuv->destroy();
@@ -1046,10 +1049,10 @@ void MainFrame::OnDecodingSetYUVBuffer(wxCommandEvent& event)
 void MainFrame::OnDecodingSetThumbnailBuffer(wxCommandEvent& event)
 {
     Utils::tuple<int, TComPicYuv*>* pData = (Utils::tuple<int, TComPicYuv*>*)event.GetClientData();
-    int iDecodingOrder = Utils::tuple_get<0>(*pData);
+    int iPOC = Utils::tuple_get<0>(*pData);
     TComPicYuv* pcPicYuv = Utils::tuple_get<1>(*pData);
-    m_vDecodingOrderStore.push_back(iDecodingOrder);
-    LogMsgUIInstance::GetInstance()->LogMessage(wxString::Format(_T("%d"), iDecodingOrder));
+    m_vDecodingPOCStore.push_back(iPOC);
+    LogMsgUIInstance::GetInstance()->LogMessage(wxString::Format(_T("decoded POC %d"), iPOC));
     double scaleRate = 165.0/m_iSourceWidth;
     if(!m_pImageList)
         m_pImageList = new wxImageList((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
@@ -1059,11 +1062,11 @@ void MainFrame::OnDecodingSetThumbnailBuffer(wxCommandEvent& event)
     wxImage simg = bimg.Scale((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);
     wxBitmap newbmp(simg);
     m_pImageList->Add(newbmp);
-    std::size_t size_pic = m_vDecodingOrderStore.size();
+    std::size_t size_pic = m_vDecodingPOCStore.size();
     wxMemoryFSHandler::AddFile(wxString::Format(_T("Frame Number %d.bmp"), size_pic),
                 newbmp, wxBITMAP_TYPE_BMP);
-    wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:Frame Number %d.bmp\"><br></p><span text-align=center>FN %d/DO %d</span><br>"),
-                                      size_pic, size_pic - 1, iDecodingOrder);
+    wxString label = wxString::Format(_T("<span>&nbsp;</span><p align=\"center\"><img src=\"memory:Frame Number %d.bmp\"><br></p><span text-align=center>%d/%d</span><br>"),
+                                      size_pic, iPOC, size_pic - 1);
     m_pThumbnalList->Append(label);
     wxString filename = wxString::Format(_T("Frame Number %d.bmp"), size_pic);
     m_StrMemFileName.Add(filename);

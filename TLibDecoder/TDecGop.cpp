@@ -42,6 +42,7 @@
 #include "TDecBinCoderCABAC.h"
 #include "../libmd5/MD5.h"
 #include "../TLibCommon/SEI.h"
+#include "../HEVCAnalyzer/MainUIInstance.h"
 
 #include <time.h>
 
@@ -208,6 +209,23 @@ Void TDecGop::filterPicture(TComPic*& rpcPic)
   Char c = (pcSlice->isIntra() ? 'I' : pcSlice->isInterP() ? 'P' : 'B');
   if (!pcSlice->isReferenced()) c += 32;
 
+  // decoded YUV buffer for one frame
+  TComPicYuv* pDecodedPic      = rpcPic->getPicYuvRec();
+  TComPicYuv* pDecodedPic_copy = new TComPicYuv();
+  pDecodedPic_copy->create(pDecodedPic->getWidth(), pDecodedPic->getHeight(), 64, 64, 4);
+  pDecodedPic->copyToPic(pDecodedPic_copy);
+  Utils::tuple<int, TComPicYuv*> msg(pcSlice->getPOC(), pDecodedPic_copy);
+  if(pcSlice->getPOC() == 0) // the first frame
+  {
+    TComPicYuv* pDecodedPic_copy_thub = new TComPicYuv();
+    pDecodedPic_copy_thub->create(pDecodedPic->getWidth(), pDecodedPic->getHeight(), 64, 64, 4);
+    pDecodedPic->copyToPic(pDecodedPic_copy_thub);
+    Utils::tuple<int, TComPicYuv*> msg_thub(pcSlice->getPOC(), pDecodedPic_copy_thub);
+    MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETYUV_BUFFER, msg);
+    MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETTHUMBNAIL_BUFFER, msg_thub);
+  }
+  else
+    MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETTHUMBNAIL_BUFFER, msg);
   //-- For time output for each slice
   printf("\nPOC %4d TId: %1d ( %c-SLICE, QP%3d ) ", pcSlice->getPOC(),
                                                     pcSlice->getTLayer(),

@@ -101,7 +101,6 @@ Void TDecSlice::destroy()
 
 Void TDecSlice::init(TDecEntropy* pcEntropyDecoder, TDecCu* pcCuDecoder)
 {
-  m_decodingOrder_POC.clear();
   m_pcEntropyDecoder  = pcEntropyDecoder;
   m_pcCuDecoder       = pcCuDecoder;
 }
@@ -383,11 +382,6 @@ Void TDecSlice::decompressSlice(TComInputBitstream** ppcSubstreams, TComPic*& rp
       return;
     }
   }
-  int poc = rpcPic->getPOC();
-  int data = (int)m_decodingOrder_POC.size();
-  std::map<int, int>::iterator it = m_decodingOrder_POC.find(rpcPic->getPOC());
-  if(it == m_decodingOrder_POC.end())
-    m_decodingOrder_POC[rpcPic->getPOC()] = data;
 }
 
 ParameterSetManagerDecoder::ParameterSetManagerDecoder()

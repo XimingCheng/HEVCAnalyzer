@@ -6,20 +6,20 @@
 CXX = clang++
 # CXX = g++
 
-# Standard flags for C++ 
-CXXFLAGS ?= 
+# Standard flags for C++
+CXXFLAGS ?= -std=c++11
 
-# Standard preprocessor flags (common for CC and CXX) 
+# Standard preprocessor flags (common for CC and CXX)
 CPPFLAGS ?= 
 
 # Standard linker flags, the wxsqlite3 lib version is specified as follow
 # You may want to change the wxsqlite3 lib version
 LDFLAGS ?= -lX11 -lwxsqlite3-2.8
 
-# Location and arguments of wx-config script 
+# Location and arguments of wx-config script
 WX_CONFIG ?= wx-config
 
-# C++ flags to use with wxWidgets code 
+# C++ flags to use with wxWidgets code
 WX_CXXFLAGS ?= `$(WX_CONFIG) --cxxflags`
 
 ### Variables: ###
@@ -113,22 +113,6 @@ install:
 uninstall: 
 
 clean: 
-#	rm -f $(HEVCANALYZER_OBJDIR)/*.o
-#	rm -f $(HEVCANALYZER_OBJDIR)/*.d
-#	rm -f $(LIBCOMMON_OBJDIR)/*.o
-#	rm -f $(LIBCOMMON_OBJDIR)/*.d
-#	rm -f $(LIBVIDEOIO_OBJDIR)/*.o
-#	rm -f $(LIBVIDEOIO_OBJDIR)/*.d
-#	rm -f $(APPCOMMOM_OBJDIR)/*.o
-#	rm -f $(APPCOMMOM_OBJDIR)/*.d
-#	rm -f $(APPDECODER_OBJDIR)/*.o
-#	rm -f $(APPDECODER_OBJDIR)/*.d
-#	rm -f $(LIBDECODER_SRCDIR)/*.o
-#	rm -f $(LIBDECODER_SRCDIR)/*.d
-#	rm -f $(LIBMD5_OBJDIR)/*.o
-#	rm -f $(LIBMD5_OBJDIR)/*.d
-#	rm -f $(BIN_DIR)/HEVCAnalyzer
-#	rm -f $(BIN_DIR)/HEVCAnalyzer_d
 	rm -rf $(BIN_DIR)
 	rm -rf $(HEVCANALYZER_OBJDIR)
 	rm -rf $(LIBCOMMON_OBJDIR)
