@@ -402,6 +402,12 @@ void MainFrame::OnOpenStreamFile(const wxString& sFile, const wxString& sName)
     if(!::wxDirExists(name))
         ::wxMkdir(name);
     name += _T("/dec.yuv");
+    wxString info_db = GetDataBaseFileName(ID_StreamInfoData);
+    if(wxFile::Exists(info_db))
+        ::wxRemoveFile(info_db);
+    wxSQLite3Database* pDb = new wxSQLite3Database();
+    pDb->Open(info_db);
+    MainUIInstance::GetInstance()->SetCurrentInfoDb(pDb);
     m_pDecodingThread = new DecodingThread(this, sFile, name);
     m_sDecodedYUVPathName = name;
     if(m_pDecodingThread->Create() != wxTHREAD_NO_ERROR)
@@ -440,10 +446,12 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         OnOpenStreamFile(dlg.GetPath(), dlg.GetFilename());
         m_bOPened = true;
     }
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetOpenedIsYUVfile(m_bYUVFile);
 }
 
 void MainFrame::OnFrameClose(wxCommandEvent& event)
 {
+    m_sLastOpenedFileName = m_sCurOpenedFileName;
     OnCloseFile(event);
     event.Skip();
 }
@@ -481,6 +489,12 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
         {
             if(wxFile::Exists(m_sDecodedYUVPathName))
                 ::wxRemoveFile(m_sDecodedYUVPathName);
+            wxSQLite3Database* pDb = MainUIInstance::GetInstance()->GetDataBase();
+            pDb->Close();
+            delete pDb;
+            wxString info_db = GetDataBaseFileName(ID_StreamInfoData);
+            if(wxFile::Exists(info_db))
+                ::wxRemoveFile(info_db);
         }
         if(m_pcPicYuvOrg)
         {
@@ -570,15 +584,47 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
         m_cYUVIO.open(m_sDecodedYUVPathName.mb_str(wxCSConv(wxFONTENCODING_SYSTEM)).data(),
                       false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
         m_cYUVIO.skipFrames(m_vDecodingPOCStore[frame], m_iSourceWidth, m_iSourceHeight);
+        SetPicViewTilesInfo(frame);
     }
     int pad[] = {0, 0};
     m_cYUVIO.read(m_pcPicYuvOrg, pad);
     if(!m_bYUVFile)
         m_cYUVIO.close();
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetOpenedIsYUVfile(m_bYUVFile);
     m_pCenterPageManager->GetPicViewCtrl(0)->SetPicYuvBuffer(m_pcPicYuvOrg, m_iSourceWidth, m_iSourceHeight, m_iYUVBit);
     wxString str;
     str.Printf(_T("%d"), frame + 1);
     m_pFrameNumberText->SetValue(str);
+}
+
+void MainFrame::SetPicViewTilesInfo(int decoding_order)
+{
+    wxSQLite3Database* db = new wxSQLite3Database();
+    db->Open(GetDataBaseFileName(ID_StreamInfoData));
+    wxString sqlQuery = _T("SELECT * FROM TILES_INFO WHERE DecodingOrder=\"");
+    wxString str_order = wxString::Format(_T("%d"), decoding_order + 1);
+    sqlQuery += ( str_order + _T("\"") );
+    wxSQLite3ResultSet result = db->ExecuteQuery(sqlQuery);
+    int row_num = 0, col_num = 0;
+    if(result.NextRow())
+    {
+        row_num = result.GetInt(1);
+        col_num = result.GetInt(2);
+    }
+    wxSQLite3Blob readBlob = db->GetReadOnlyBlob(decoding_order + 1,
+        _T("row_data"), _T("TILES_INFO"));
+    wxMemoryBuffer memBuffer, memBuffer_col;
+    readBlob.Read(memBuffer, row_num * sizeof(int), 0);
+    readBlob.Finalize();
+    int *pRowData = static_cast<int*>(memBuffer.GetData());
+    readBlob = db->GetReadOnlyBlob(decoding_order + 1,
+        _T("col_data"), _T("TILES_INFO"));
+    readBlob.Read(memBuffer_col, col_num * sizeof(int), 0);
+    int *pColData = static_cast<int*>(memBuffer_col.GetData());
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetRowData(row_num, pRowData);
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetColData(col_num, pColData);
+    db->Close();
+    delete db;
 }
 
 void MainFrame::InitThumbnailListView()
@@ -1011,6 +1057,9 @@ void MainFrame::OnDecodingNotify(wxCommandEvent& event)
     case MainMSG_SETTHUMBNAIL_BUFFER:
         OnDecodingSetThumbnailBuffer(event);
         break;
+    case MainMSG_SETTILESINFO:
+        OnDecodingSetTilesInfo(event);
+        break;
     default:
         assert(0);
         break;
@@ -1079,6 +1128,20 @@ void MainFrame::OnDecodingSetThumbnailBuffer(wxCommandEvent& event)
     pcPicYuv->destroy();
     delete pcPicYuv;
     delete pData;
+}
+
+void MainFrame::OnDecodingSetTilesInfo(wxCommandEvent& event)
+{
+    typedef Utils::tuple<int, int, int*, int*>* data_ptr;
+    data_ptr pData = (data_ptr)event.GetClientData();
+    int num_row = Utils::tuple_get<0>(*pData);
+    int num_col = Utils::tuple_get<1>(*pData);
+    int* pRowData = Utils::tuple_get<2>(*pData);
+    int* pColData = Utils::tuple_get<3>(*pData);
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetRowData(num_row, pRowData);
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetColData(num_col, pColData);
+    delete [] pRowData;
+    delete [] pColData;
 }
 
 BEGIN_EVENT_TABLE(HEVCStatusBar, wxStatusBar)

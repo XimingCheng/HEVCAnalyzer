@@ -113,6 +113,7 @@ enum MainMSG_TYPE
     MainMSG_SETSIZE_OF_DECODE_FRMAE = 0,
     MainMSG_SETYUV_BUFFER,
     MainMSG_SETTHUMBNAIL_BUFFER,
+    MainMSG_SETTILESINFO,
     MainMSG_MAX,
 };
 
@@ -122,6 +123,8 @@ public:
     static MainUIInstance*   GetInstance();
     static void              Destroy();
     void                     SetActiveTargetMainFrame(wxFrame* pFrame);
+    void                     SetCurrentInfoDb(wxSQLite3Database* pDataBase);
+    wxSQLite3Database*       GetDataBase() { return m_pDataBase; }
 
     // the code of template function must be put the in the header file
     // Decoding msg router function, the msg is sent to MainFrame

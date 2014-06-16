@@ -31,6 +31,11 @@ void MainUIInstance::SetActiveTargetMainFrame(wxFrame* pFrame)
     m_pMainFrame = pFrame;
 }
 
+void MainUIInstance::SetCurrentInfoDb(wxSQLite3Database* pDataBase)
+{
+    m_pDataBase = pDataBase;
+}
+
 LogMsgUIInstance* LogMsgUIInstance::GetInstance()
 {
     wxMutexLocker mutexLocker(m_Mutex);

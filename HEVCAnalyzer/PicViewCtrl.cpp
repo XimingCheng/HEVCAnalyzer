@@ -24,9 +24,10 @@ PicViewCtrl::PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* p
     : wxControl(parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxWANTS_CHARS),
     m_bClearFlag(true), m_bFitMode(true), m_dScaleRate(1.0), m_dMinScaleRate(0.1), m_dMaxScaleRate(2.0), m_dFitScaleRate(1.0),
     m_dScaleRateStep(0.02), m_delta(-1, -1), m_curLCUStart(-1, -1), m_curLCUEnd(-1, -1), m_iLCURasterID(-1), m_pList(pList),
-    m_pFrame(pFrame), m_bShowGrid(false), m_bMouseWheelPageUpDown(false), m_bShowPUType(true), m_pBuffer(NULL),
+    m_pFrame(pFrame), m_bShowGrid(false), m_bOpenedYUVfile(true), m_bShowTilesInfo(true), m_bMouseWheelPageUpDown(false), m_bShowPUType(true), m_pBuffer(NULL),
     m_iYUVBit(8), m_iShowWhich_O_Y_U_V(MODE_ORG), m_pHRuler(pHRuler), m_pVRuler(pVRuler), m_bFullRefresh(true),
-    m_pPixelCtrl(pPixelCtrl), m_iSelectedLCUId(-1), m_curSelLCUStart(-1, -1), m_curSelLCUEnd(-1, -1)
+    m_pPixelCtrl(pPixelCtrl), m_iSelectedLCUId(-1), m_curSelLCUStart(-1, -1), m_curSelLCUEnd(-1, -1),
+    m_piRowData(NULL), m_piColData(NULL)
 {
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
     //DragAcceptFiles(true);
@@ -43,6 +44,10 @@ PicViewCtrl::~PicViewCtrl()
 //       delete m_pDragDropFile;
 //       m_pDragDropFile = NULL;
 //   }
+    if(m_piRowData)
+        delete [] m_piRowData;
+    if(m_piColData)
+        delete [] m_piColData;
 }
 
 void PicViewCtrl::OnPaint(wxPaintEvent& event)
@@ -505,6 +510,8 @@ void PicViewCtrl::DrawBackGround(wxGraphicsContext* gc)
     }
     if(m_bShowGrid)
         DrawGrid(gc);
+    if(!m_bOpenedYUVfile && m_bShowTilesInfo)
+        DrawTilesGrid(gc);
 }
 
 void PicViewCtrl::DrawNoPictureTips(wxGraphicsContext* gc)
@@ -706,6 +713,42 @@ void PicViewCtrl::SetCurSliderInStatusBarPos()
     int curVal = (int)(m_dScaleRate * 10000);
     pSlider->SetRange(minVal, maxVal);
     pSlider->SetValue(curVal);
+}
+
+void PicViewCtrl::SetRowData(const int num_row, const int* pRowData)
+{
+    assert(pRowData);
+    m_iNumRow = num_row;
+    if(m_piRowData)
+        delete [] m_piRowData;
+    m_piRowData = new int [num_row];
+    memcpy(m_piRowData, pRowData, num_row * sizeof(int));
+}
+
+void PicViewCtrl::SetColData(const int num_col, const int* pColData)
+{
+    assert(pColData);
+    m_iNumCol = num_col;
+    if(m_piColData)
+        delete [] m_piColData;
+    m_piColData = new int [num_col];
+    memcpy(m_piColData, pColData, num_col * sizeof(int));
+}
+
+void PicViewCtrl::DrawTilesGrid(wxGraphicsContext* gc)
+{
+    gc->SetPen(wxPen(wxColor(255, 0, 0, 255)));
+    int w = 0, h = 0;
+    for(int i = 0 ; i < m_iNumRow; i++)
+    {
+        h += m_piRowData[i]*m_LCUSize.GetY();
+        gc->StrokeLine(0, h, m_cViewBitmap.GetWidth(), h);
+    }
+    for(int i = 0; i < m_iNumCol; i++)
+    {
+        w += m_piColData[i]*m_LCUSize.GetX();
+        gc->StrokeLine(w, 0, w, m_cViewBitmap.GetHeight());
+    }
 }
 
 bool DragDropFile::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames)

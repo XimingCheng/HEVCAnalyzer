@@ -61,6 +61,9 @@ public:
     //bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames);
     void OnDropFiles(wxDropFilesEvent& event);
     void ChangeScaleRate(const double rate);
+    void SetRowData(const int num_row, const int* pRowData);
+    void SetColData(const int num_col, const int* pColData);
+    void SetOpenedIsYUVfile(const bool b) { m_bOpenedYUVfile = b; }
 
 private:
     void OnMouseMove(wxMouseEvent& event);
@@ -82,6 +85,7 @@ private:
     void GetCurPicViewCtrlPosOnParent(wxPoint& pt1, wxPoint& pt2);
     void CalCurScrolledRectOnPicView(wxRect& rect);
     void CalTwoRectsOutsideBox(wxRect& rect, const wxPoint& start, const wxPoint& end);
+    void DrawTilesGrid(wxGraphicsContext* gc);
 
 private:
     bool                 m_bClearFlag;
@@ -105,6 +109,8 @@ private:
     wxSimpleHtmlListBox* m_pList;
     wxFrame*             m_pFrame;
     bool                 m_bShowGrid;
+    bool                 m_bOpenedYUVfile;
+    bool                 m_bShowTilesInfo;
     bool                 m_bMouseWheelPageUpDown;
     bool                 m_bShowPUType;
     TComPicYuv*          m_pBuffer;
@@ -121,6 +127,12 @@ private:
     wxPoint              m_curSelLCUEnd;
     HEVCStatusBar*       m_pStatusBar;
     DragDropFile*        m_pDragDropFile;
+
+    // tiles info
+    int                  m_iNumRow;
+    int                  m_iNumCol;
+    int*                 m_piRowData;
+    int*                 m_piColData;
 
     DECLARE_EVENT_TABLE();
 };

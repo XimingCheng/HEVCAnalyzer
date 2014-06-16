@@ -109,11 +109,13 @@ private:
     void           OnLogMsgWarning(wxCommandEvent& event);
     void           OnLogMsgError(wxCommandEvent& event);
     void           OnDecodingNotify(wxCommandEvent& event);
+    void           SetPicViewTilesInfo(int decoding_order);
 
     // decoding notify msg handler
     void           OnDecodingSetSize(wxCommandEvent& event);
     void           OnDecodingSetYUVBuffer(wxCommandEvent& event);
     void           OnDecodingSetThumbnailBuffer(wxCommandEvent& event);
+    void           OnDecodingSetTilesInfo(wxCommandEvent& event);
 
 private:
     wxAuiManager         m_mgr;
