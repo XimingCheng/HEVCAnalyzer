@@ -18,11 +18,11 @@
 					<Add option="-Wno-attributes" />
 					<Add option="-O0" />
 					<Add option="-D__WXDEBUG__" />
-					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll/mswud" />
-					<Add directory="E:/Projects/GitHub/wxsqlite3-3.0.3/include" />
+					<Add directory="E:/Project/wxMSW-2.8.12/lib/gcc_dll/mswud" />
+					<Add directory="E:/Project/wxsqlite3-3.1.1/include" />
 				</Compiler>
 				<ResourceCompiler>
-					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll/mswud" />
+					<Add directory="E:/Project/wxMSW-2.8.12/lib/gcc_dll/mswud" />
 				</ResourceCompiler>
 				<Linker>
 					<Add library="libwxmsw28ud_core.a" />
@@ -32,8 +32,8 @@
 					<Add library="libwxmsw28ud_aui.a" />
 					<Add library="libwxmsw28ud_html.a" />
 					<Add library="libwxcode_msw28ud_wxsqlite3.a" />
-					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll" />
-					<Add directory="E:/Projects/GitHub/wxsqlite3-3.0.3/lib/gcc_dll" />
+					<Add directory="E:/Project/wxMSW-2.8.12/lib/gcc_dll" />
+					<Add directory="E:/Project/wxsqlite3-3.1.1/lib/gcc_dll" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -45,11 +45,11 @@
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-Wno-attributes" />
-					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll/mswu" />
-					<Add directory="E:/Projects/GitHub/wxsqlite3-3.0.3/include" />
+					<Add directory="E:/Project/wxMSW-2.8.12/lib/gcc_dll/mswu" />
+					<Add directory="E:/Project/wxsqlite3-3.1.1/include" />
 				</Compiler>
 				<ResourceCompiler>
-					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll/mswu" />
+					<Add directory="E:/Project/wxMSW-2.8.12/lib/gcc_dll/mswu" />
 				</ResourceCompiler>
 				<Linker>
 					<Add option="-s" />
@@ -60,8 +60,8 @@
 					<Add library="libwxmsw28u_aui.a" />
 					<Add library="libwxmsw28u_html.a" />
 					<Add library="libwxcode_msw28u_wxsqlite3.a" />
-					<Add directory="D:/wxMSW-2.8.12/lib/gcc_dll" />
-					<Add directory="E:/Projects/GitHub/wxsqlite3-3.0.3/lib/gcc_dll" />
+					<Add directory="E:/Project/wxMSW-2.8.12/lib/gcc_dll" />
+					<Add directory="E:/Project/wxsqlite3-3.1.1/lib/gcc_dll" />
 				</Linker>
 			</Target>
 		</Build>
@@ -74,11 +74,11 @@
 			<Add option="-DwxUSE_UNICODE" />
 			<Add option='[[if (PLATFORM == PLATFORM_MSW &amp;&amp; (GetCompilerFactory().GetCompilerVersionString(_T(&quot;gcc&quot;)) &gt;= _T(&quot;4.0.0&quot;))) print(_T(&quot;-Wno-attributes&quot;));]]' />
 			<Add option="-Wall" />
-			<Add directory="D:/wxMSW-2.8.12/include" />
-			<Add directory="D:/wxMSW-2.8.12/contrib/include" />
+			<Add directory="E:/Project/wxMSW-2.8.12/include" />
+			<Add directory="E:/Project/wxMSW-2.8.12/contrib/include" />
 		</Compiler>
 		<ResourceCompiler>
-			<Add directory="D:/wxMSW-2.8.12/include" />
+			<Add directory="E:/Project/wxMSW-2.8.12/include" />
 		</ResourceCompiler>
 		<Linker>
 			<Add option="-mthreads" />

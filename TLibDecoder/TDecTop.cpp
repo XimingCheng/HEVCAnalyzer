@@ -598,6 +598,8 @@ Void TDecTop::xDecodeSPS()
 
 Void TDecTop::xDecodePPS()
 {
+  // m_prevPOC shows the last poc, if m_prevPOC not changed, the new data
+  // should not be inserted into database
   TComPPS* pps = new TComPPS();
   m_cEntropyDecoder.decodePPS( pps );
   m_parameterSetManagerDecoder.storePrefetchedPPS( pps );

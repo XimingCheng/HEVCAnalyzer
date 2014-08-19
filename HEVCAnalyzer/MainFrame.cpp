@@ -468,8 +468,13 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
     if(m_bOPened)
     {
         bool bLastYUV = true;
-        if(!m_sLastOpenedFileName.Lower().EndsWith(_T(".yuv")))
-            bLastYUV = false;
+        if(m_sLastOpenedFileName.size() == 0)
+            bLastYUV = true;
+        else
+        {
+            if(!m_sLastOpenedFileName.Lower().EndsWith(_T(".yuv")))
+                bLastYUV = false;
+        }
         if(m_pTimer->IsRunning())
             m_pTimer->Stop();
         m_pCenterPageManager->Close();
@@ -608,21 +613,27 @@ void MainFrame::SetPicViewTilesInfo(int decoding_order)
     int row_num = 0, col_num = 0;
     if(result.NextRow())
     {
+        // if the pps data with this decoding_order can be found in database
+        // just assign the data from the database
         row_num = result.GetInt(1);
         col_num = result.GetInt(2);
+        wxSQLite3Blob readBlob = db->GetReadOnlyBlob(decoding_order + 1,
+            _T("row_data"), _T("TILES_INFO"));
+        wxMemoryBuffer memBuffer, memBuffer_col;
+        readBlob.Read(memBuffer, row_num * sizeof(int), 0);
+        readBlob.Finalize();
+        int *pRowData = static_cast<int*>(memBuffer.GetData());
+        readBlob = db->GetReadOnlyBlob(decoding_order + 1,
+            _T("col_data"), _T("TILES_INFO"));
+        readBlob.Read(memBuffer_col, col_num * sizeof(int), 0);
+        int *pColData = static_cast<int*>(memBuffer_col.GetData());
+        m_pCenterPageManager->GetPicViewCtrl(0)->SetRowData(row_num, pRowData);
+        m_pCenterPageManager->GetPicViewCtrl(0)->SetColData(col_num, pColData);
     }
-    wxSQLite3Blob readBlob = db->GetReadOnlyBlob(decoding_order + 1,
-        _T("row_data"), _T("TILES_INFO"));
-    wxMemoryBuffer memBuffer, memBuffer_col;
-    readBlob.Read(memBuffer, row_num * sizeof(int), 0);
-    readBlob.Finalize();
-    int *pRowData = static_cast<int*>(memBuffer.GetData());
-    readBlob = db->GetReadOnlyBlob(decoding_order + 1,
-        _T("col_data"), _T("TILES_INFO"));
-    readBlob.Read(memBuffer_col, col_num * sizeof(int), 0);
-    int *pColData = static_cast<int*>(memBuffer_col.GetData());
-    m_pCenterPageManager->GetPicViewCtrl(0)->SetRowData(row_num, pRowData);
-    m_pCenterPageManager->GetPicViewCtrl(0)->SetColData(col_num, pColData);
+    else // set the last col data in the database
+    {
+
+    }
     db->Close();
     delete db;
 }
