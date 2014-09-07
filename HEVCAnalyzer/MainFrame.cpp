@@ -602,37 +602,56 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
     m_pFrameNumberText->SetValue(str);
 }
 
+void MainFrame::SetCurrentTiles(int order, wxSQLite3Database* db, wxSQLite3ResultSet* pResult)
+{
+    int row_num = 0, col_num = 0;
+    // if the pps data with this decoding order can be found in database
+    // just assign the data from the database
+    row_num = pResult->GetInt(1);
+    col_num = pResult->GetInt(2);
+    wxSQLite3Blob readBlob = db->GetReadOnlyBlob(order,
+        _T("row_data"), _T("TILES_INFO"));
+    wxMemoryBuffer memBuffer, memBuffer_col;
+    readBlob.Read(memBuffer, row_num * sizeof(int), 0);
+    readBlob.Finalize();
+    int *pRowData = static_cast<int*>(memBuffer.GetData());
+    readBlob = db->GetReadOnlyBlob(order,
+        _T("col_data"), _T("TILES_INFO"));
+    readBlob.Read(memBuffer_col, col_num * sizeof(int), 0);
+    int *pColData = static_cast<int*>(memBuffer_col.GetData());
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetRowData(row_num, pRowData);
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetColData(col_num, pColData);
+}
+
 void MainFrame::SetPicViewTilesInfo(int decoding_order)
 {
     wxSQLite3Database* db = new wxSQLite3Database();
     db->Open(GetDataBaseFileName(ID_StreamInfoData));
     wxString sqlQuery = _T("SELECT * FROM TILES_INFO WHERE DecodingOrder=\"");
-    wxString str_order = wxString::Format(_T("%d"), decoding_order + 1);
+    wxString str_order = wxString::Format(_T("%d"), decoding_order);
     sqlQuery += ( str_order + _T("\"") );
     wxSQLite3ResultSet result = db->ExecuteQuery(sqlQuery);
-    int row_num = 0, col_num = 0;
+
     if(result.NextRow())
     {
-        // if the pps data with this decoding_order can be found in database
-        // just assign the data from the database
-        row_num = result.GetInt(1);
-        col_num = result.GetInt(2);
-        wxSQLite3Blob readBlob = db->GetReadOnlyBlob(decoding_order + 1,
-            _T("row_data"), _T("TILES_INFO"));
-        wxMemoryBuffer memBuffer, memBuffer_col;
-        readBlob.Read(memBuffer, row_num * sizeof(int), 0);
-        readBlob.Finalize();
-        int *pRowData = static_cast<int*>(memBuffer.GetData());
-        readBlob = db->GetReadOnlyBlob(decoding_order + 1,
-            _T("col_data"), _T("TILES_INFO"));
-        readBlob.Read(memBuffer_col, col_num * sizeof(int), 0);
-        int *pColData = static_cast<int*>(memBuffer_col.GetData());
-        m_pCenterPageManager->GetPicViewCtrl(0)->SetRowData(row_num, pRowData);
-        m_pCenterPageManager->GetPicViewCtrl(0)->SetColData(col_num, pColData);
+        SetCurrentTiles(decoding_order, db, &result);
     }
     else // set the last col data in the database
     {
-
+        wxString sqlQuery = _T("SELECT * FROM TILES_INFO WHERE DecodingOrder=\"");
+        for(int order = decoding_order - 1; order >= 0; order--)
+        {
+            wxString str_order = wxString::Format(_T("%d"), order);
+            sqlQuery += ( str_order + _T("\"") );
+            wxSQLite3ResultSet result = db->ExecuteQuery(sqlQuery);
+            if(result.NextRow())
+            {
+                SetCurrentTiles(order, db, &result);
+                break;
+            }
+        }
+        wxMessageBox(wxString::Format(_T("Could not find valid tile info for decoding_order: %d"),
+            decoding_order));
     }
     db->Close();
     delete db;

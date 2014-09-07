@@ -110,6 +110,7 @@ private:
     void           OnLogMsgError(wxCommandEvent& event);
     void           OnDecodingNotify(wxCommandEvent& event);
     void           SetPicViewTilesInfo(int decoding_order);
+    void           SetCurrentTiles(int order, wxSQLite3Database* db, wxSQLite3ResultSet* pResult);
 
     // decoding notify msg handler
     void           OnDecodingSetSize(wxCommandEvent& event);

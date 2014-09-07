@@ -600,11 +600,12 @@ Void TDecTop::xDecodePPS()
 {
   // m_prevPOC shows the last poc, if m_prevPOC not changed, the new data
   // should not be inserted into database
+  static int order = 0, lastpRrePOC = 0;
   TComPPS* pps = new TComPPS();
   m_cEntropyDecoder.decodePPS( pps );
   m_parameterSetManagerDecoder.storePrefetchedPPS( pps );
   Bool bTilesEnableFlag = pps->getTilesEnabledFlag();
-  if(bTilesEnableFlag)
+  if(bTilesEnableFlag && lastpRrePOC != m_prevPOC)
   {
     int num_row = pps->getNumRowsMinus1();
     int num_col = pps->getNumColumnsMinus1();
@@ -617,13 +618,20 @@ Void TDecTop::xDecodePPS()
     wxSQLite3Database* pDb = MainUIInstance::GetInstance()->GetDataBase();
     if(!pDb->TableExists(_T("TILES_INFO")))
     {
-      wxString sql = _T("CREATE TABLE TILES_INFO (DecodingOrder INTEGER PRIMARY KEY AUTOINCREMENT,");
+      wxString sql = _T("CREATE TABLE TILES_INFO (DecodingOrder INTEGER PRIMARY KEY,");
       sql += _T("num_row int, num_col int, row_data blob, col_data blob)");
       pDb->ExecuteUpdate(sql);
     }
-    wxString sql = _T("INSERT INTO TILES_INFO (num_row, num_col, row_data, col_data) VALUES (");
+    if(m_prevPOC == MAX_INT)
+      order = 0;
+    else
+      order += 1;
+
+    wxString sql = _T("INSERT INTO TILES_INFO (DecodingOrder, num_row, num_col, row_data, col_data) VALUES (");
+    wxString str_order   = wxString::Format(_T("%d, "), order);
     wxString str_num_row = wxString::Format(_T("%d, "), num_row);
     wxString str_num_col = wxString::Format(_T("%d, "), num_col);
+    sql += str_order;
     sql += str_num_row;
     sql += str_num_col;
     sql += _T("zeroblob(100), zeroblob(100))");
@@ -639,20 +647,17 @@ Void TDecTop::xDecodePPS()
     memBuffer_col.AppendData(col_width_data, num_col * sizeof(int));
     write_blob.Write(memBuffer_col, 0);
     write_blob.Finalize();
-
-    if(id == 1)
-    {
-        int* row_height_data_copy = new int[num_row];
-        int* col_width_data_copy  = new int[num_col];
-        memcpy(row_height_data_copy, row_height_data, sizeof(int) * num_row);
-        memcpy(col_width_data_copy, col_width_data, sizeof(int) * num_col);
-        Utils::tuple<int, int, int*, int*> msg(num_row, num_col,
-            row_height_data_copy, col_width_data_copy);
-        MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETTILESINFO, msg);
-    }
+    int* row_height_data_copy = new int[num_row];
+    int* col_width_data_copy  = new int[num_col];
+    memcpy(row_height_data_copy, row_height_data, sizeof(int) * num_row);
+    memcpy(col_width_data_copy, col_width_data, sizeof(int) * num_col);
+    Utils::tuple<int, int, int*, int*> msg(num_row, num_col,
+        row_height_data_copy, col_width_data_copy);
+    MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETTILESINFO, msg);
     delete [] row_height_data;
     delete [] col_width_data;
   }
+  lastpRrePOC = m_prevPOC;
   if( pps->getDependentSliceSegmentsEnabledFlag() )
   {
     Int NumCtx = pps->getEntropyCodingSyncEnabledFlag()?2:1;
