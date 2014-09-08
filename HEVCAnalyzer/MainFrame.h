@@ -117,6 +117,7 @@ private:
     void           OnDecodingSetYUVBuffer(wxCommandEvent& event);
     void           OnDecodingSetThumbnailBuffer(wxCommandEvent& event);
     void           OnDecodingSetTilesInfo(wxCommandEvent& event);
+    void           OnDecodingSetCUSplitInfo(wxCommandEvent& event);
 
 private:
     wxAuiManager         m_mgr;

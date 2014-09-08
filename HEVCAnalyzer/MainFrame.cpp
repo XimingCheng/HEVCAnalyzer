@@ -417,6 +417,7 @@ void MainFrame::OnOpenStreamFile(const wxString& sFile, const wxString& sName)
     m_sDecodedYUVPathName = name;
     if(m_pDecodingThread->Create() != wxTHREAD_NO_ERROR)
     {
+        pDb->Close();
         delete m_pDecodingThread;
         m_pDecodingThread = NULL;
     }
@@ -424,6 +425,7 @@ void MainFrame::OnOpenStreamFile(const wxString& sFile, const wxString& sName)
     {
         if(m_pDecodingThread->Run() != wxTHREAD_NO_ERROR)
         {
+            pDb->Close();
             delete m_pDecodingThread;
             m_pDecodingThread = NULL;
         }
@@ -1089,6 +1091,9 @@ void MainFrame::OnDecodingNotify(wxCommandEvent& event)
     case MainMSG_SETTILESINFO:
         OnDecodingSetTilesInfo(event);
         break;
+    case MainMSG_SETCUSPLITINFO:
+        OnDecodingSetCUSplitInfo(event);
+        break;
     default:
         assert(0);
         break;
@@ -1176,6 +1181,16 @@ void MainFrame::OnDecodingSetTilesInfo(wxCommandEvent& event)
     m_pCenterPageManager->GetPicViewCtrl(0)->SetColData(num_col, pColData);
     delete [] pRowData;
     delete [] pColData;
+}
+
+void MainFrame::OnDecodingSetCUSplitInfo(wxCommandEvent& event)
+{
+    typedef Utils::tuple<int, int, int*>* data_ptr;
+    data_ptr pData = (data_ptr)event.GetClientData();
+    int size = Utils::tuple_get<1>(*pData);
+    int* pPtData = Utils::tuple_get<2>(*pData);
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetCUSplitData(size, pPtData);
+    delete [] pPtData;
 }
 
 BEGIN_EVENT_TABLE(HEVCStatusBar, wxStatusBar)

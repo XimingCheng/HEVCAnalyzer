@@ -49,6 +49,7 @@
 #include "TDecCu.h"
 #include "TDecSbac.h"
 #include "TDecBinCoderCABAC.h"
+#include "../HEVCAnalyzer/MainUIInstance.h"
 
 //! \ingroup TLibDecoder
 //! \{
@@ -71,6 +72,7 @@ private:
   TDecSbac*       m_pcBufferLowLatSbacDecoders;   ///< dependent tiles: line to store temporary contexts, one per column of tiles.
   TDecBinCABAC*   m_pcBufferLowLatBinCABACs;
   std::vector<TDecSbac*> CTXMem;
+  std::vector<PtInfo> m_cuSplitPoints;
 
 public:
   TDecSlice();

@@ -44,6 +44,7 @@
 
 #include "../TLibCommon/TComTrQuant.h"
 #include "../TLibCommon/TComPrediction.h"
+#include "../HEVCAnalyzer/MainUIInstance.h"
 #include "TDecEntropy.h"
 
 //! \ingroup TLibDecoder
@@ -68,6 +69,7 @@ private:
   TDecEntropy*        m_pcEntropyDecoder;
 
   Bool                m_bDecodeDQP;
+  std::vector<PtInfo>*  m_pCuSplitInfo;
 
 public:
   TDecCu();
@@ -83,7 +85,7 @@ public:
   Void  destroy                 ();
 
   /// decode CU information
-  Void  decodeCU                ( TComDataCU* pcCU, UInt& ruiIsLast );
+  Void  decodeCU                ( TComDataCU* pcCU, UInt& ruiIsLast, std::vector<PtInfo>& pt );
 
   /// reconstruct CU information
   Void  decompressCU            ( TComDataCU* pcCU );

@@ -24,13 +24,12 @@ PicViewCtrl::PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* p
     : wxControl(parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE | wxWANTS_CHARS),
     m_bClearFlag(true), m_bFitMode(true), m_dScaleRate(1.0), m_dMinScaleRate(0.1), m_dMaxScaleRate(2.0), m_dFitScaleRate(1.0),
     m_dScaleRateStep(0.02), m_delta(-1, -1), m_curLCUStart(-1, -1), m_curLCUEnd(-1, -1), m_iLCURasterID(-1), m_pList(pList),
-    m_pFrame(pFrame), m_bShowGrid(false), m_bOpenedYUVfile(true), m_bShowTilesInfo(true), m_bMouseWheelPageUpDown(false), m_bShowPUType(true), m_pBuffer(NULL),
+    m_pFrame(pFrame), m_bShowGrid(true), m_bOpenedYUVfile(true), m_bShowTilesInfo(true), m_bMouseWheelPageUpDown(false), m_bShowPUType(true), m_pBuffer(NULL),
     m_iYUVBit(8), m_iShowWhich_O_Y_U_V(MODE_ORG), m_pHRuler(pHRuler), m_pVRuler(pVRuler), m_bFullRefresh(true),
     m_pPixelCtrl(pPixelCtrl), m_iSelectedLCUId(-1), m_curSelLCUStart(-1, -1), m_curSelLCUEnd(-1, -1),
-    m_piRowData(NULL), m_piColData(NULL)
+    m_piRowData(NULL), m_piColData(NULL), m_piCurCUSplitPoints(NULL), m_iCUSplitPtSize(0)
 {
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
-    //DragAcceptFiles(true);
     m_pDragDropFile = new DragDropFile();
     m_pDragDropFile->setFrameWindow(m_pFrame);
     SetDropTarget(m_pDragDropFile);
@@ -38,16 +37,12 @@ PicViewCtrl::PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* p
 
 PicViewCtrl::~PicViewCtrl()
 {
-//   could not delete the m_pDragDropFile, the pointer buffer will release by wxWidgets
-//   if(m_pDragDropFile)
-//   {
-//       delete m_pDragDropFile;
-//       m_pDragDropFile = NULL;
-//   }
     if(m_piRowData)
         delete [] m_piRowData;
     if(m_piColData)
         delete [] m_piColData;
+    if(m_piCurCUSplitPoints)
+        delete [] m_piCurCUSplitPoints;
 }
 
 void PicViewCtrl::OnPaint(wxPaintEvent& event)
@@ -73,7 +68,7 @@ void PicViewCtrl::Render(wxGraphicsContext* gc, wxGraphicsContext* gct)
     if(!m_bClearFlag)
     {
         gc->Scale(m_dScaleRate, m_dScaleRate);
-        DrawBackGround(gc);
+        DrawBackGround(gc, gct);
         m_pHRuler->SetTagValue(m_curLCUStart.x);
         m_pVRuler->SetTagValue(m_curLCUStart.y);
         gct->Scale(1, 1);
@@ -481,7 +476,7 @@ void PicViewCtrl::DrawGrid(wxGraphicsContext* gc)
         gc->StrokeLine(i*cuw, 0, i*cuw, m_cViewBitmap.GetHeight());
 }
 
-void PicViewCtrl::DrawBackGround(wxGraphicsContext* gc)
+void PicViewCtrl::DrawBackGround(wxGraphicsContext* gc, wxGraphicsContext* gct)
 {
     switch(m_iShowWhich_O_Y_U_V)
     {
@@ -508,10 +503,13 @@ void PicViewCtrl::DrawBackGround(wxGraphicsContext* gc)
 //        gc->SetBrush(wxBrush(wxColor(255, 0, 0, 50)));
 //        gc->DrawRectangle(0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
     }
+    if(!m_bOpenedYUVfile && m_bShowTilesInfo)
+    {
+        DrawCUSplitInfo(gct);
+        DrawTilesGrid(gc);
+    }
     if(m_bShowGrid)
         DrawGrid(gc);
-    if(!m_bOpenedYUVfile && m_bShowTilesInfo)
-        DrawTilesGrid(gc);
 }
 
 void PicViewCtrl::DrawNoPictureTips(wxGraphicsContext* gc)
@@ -735,9 +733,32 @@ void PicViewCtrl::SetColData(const int num_col, const int* pColData)
     memcpy(m_piColData, pColData, num_col * sizeof(int));
 }
 
+void PicViewCtrl::SetCUSplitData(const int size, const int* pData)
+{
+    assert(size);
+    m_iCUSplitPtSize = size;
+    if(m_piCurCUSplitPoints)
+        delete [] m_piCurCUSplitPoints;
+    m_piCurCUSplitPoints = new int[4*size];
+    memcpy(m_piCurCUSplitPoints, pData, 4*size*sizeof(int));
+}
+
+void PicViewCtrl::DrawCUSplitInfo(wxGraphicsContext* gc)
+{
+    gc->SetPen(wxPen(wxColor(200, 200, 200, 255)));
+    for(int i = 0; i < m_iCUSplitPtSize; i++)
+    {
+        int sx = m_piCurCUSplitPoints[4*i];
+        int sy = m_piCurCUSplitPoints[4*i + 1];
+        int ex = m_piCurCUSplitPoints[4*i + 2];
+        int ey = m_piCurCUSplitPoints[4*i + 3];
+        gc->DrawRectangle(sx * m_dScaleRate, sy * m_dScaleRate, (ex - sx + 1) * m_dScaleRate, (ey - sy + 1) * m_dScaleRate);
+    }
+}
+
 void PicViewCtrl::DrawTilesGrid(wxGraphicsContext* gc)
 {
-    gc->SetPen(wxPen(wxColor(255, 0, 0, 255)));
+    gc->SetPen(wxPen(wxColor(255, 0, 0, 255), 2));
     int w = 0, h = 0;
     for(int i = 0 ; i < m_iNumRow; i++)
     {

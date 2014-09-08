@@ -4,6 +4,8 @@
 #include "HEVCAnalyzer.h"
 #include "RulerCtrl.h"
 #include "PixelViewCtrl.h"
+#include "MainUIInstance.h"
+#include <list>
 #include <wx/dnd.h>
 
 class HEVCStatusBar;
@@ -64,6 +66,7 @@ public:
     void SetRowData(const int num_row, const int* pRowData);
     void SetColData(const int num_col, const int* pColData);
     void SetOpenedIsYUVfile(const bool b) { m_bOpenedYUVfile = b; }
+    void SetCUSplitData(const int size, const int* pData);
 
 private:
     void OnMouseMove(wxMouseEvent& event);
@@ -79,13 +82,14 @@ private:
     int  GetCurLCURasterID(const double x, const double y, wxPoint& start, wxPoint& end);
     void MoveLCURect(const Direction& d);
     void CalStartEndPointByLCUId(const int id, wxPoint& start, wxPoint& end);
-    void DrawBackGround(wxGraphicsContext* gc);
+    void DrawBackGround(wxGraphicsContext* gc, wxGraphicsContext* gct);
     void DrawNoPictureTips(wxGraphicsContext* gc);
     void DrawGrid(wxGraphicsContext* gc);
     void GetCurPicViewCtrlPosOnParent(wxPoint& pt1, wxPoint& pt2);
     void CalCurScrolledRectOnPicView(wxRect& rect);
     void CalTwoRectsOutsideBox(wxRect& rect, const wxPoint& start, const wxPoint& end);
     void DrawTilesGrid(wxGraphicsContext* gc);
+    void DrawCUSplitInfo(wxGraphicsContext* gc);
 
 private:
     bool                 m_bClearFlag;
@@ -133,6 +137,10 @@ private:
     int                  m_iNumCol;
     int*                 m_piRowData;
     int*                 m_piColData;
+
+    // cu split info
+    int*                 m_piCurCUSplitPoints;
+    int                  m_iCUSplitPtSize;
 
     DECLARE_EVENT_TABLE();
 };

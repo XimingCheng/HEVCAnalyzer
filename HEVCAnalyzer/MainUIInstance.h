@@ -114,7 +114,16 @@ enum MainMSG_TYPE
     MainMSG_SETYUV_BUFFER,
     MainMSG_SETTHUMBNAIL_BUFFER,
     MainMSG_SETTILESINFO,
+    MainMSG_SETCUSPLITINFO,
     MainMSG_MAX,
+};
+
+struct PtInfo
+{
+    UInt _ptStartX;
+    UInt _ptStartY;
+    UInt _ptEndX;
+    UInt _ptEndY;
 };
 
 class MainUIInstance : public NoneCopyable
