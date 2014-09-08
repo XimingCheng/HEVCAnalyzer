@@ -365,6 +365,8 @@ void MainFrame::OnOpenYUVFile(const wxString& sFile, const wxString& sName, bool
     SetTotalFrameNumber();
     m_pCenterPageManager->GetPicViewCtrl(0)->SetScale(1.0);
     m_pCenterPageManager->GetPicViewCtrl(0)->SetFitMode(true);
+    m_sCurOpenedFilePath = sFile;
+    m_sCurOpenedFileName = sName;
 #if defined(__WXMSW__)
     m_cYUVIO.open(lastFile.mb_str(wxCSConv(wxFONTENCODING_SYSTEM)).data(), false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
 #else
@@ -405,9 +407,12 @@ void MainFrame::OnOpenStreamFile(const wxString& sFile, const wxString& sName)
     wxString info_db = GetDataBaseFileName(ID_StreamInfoData);
     if(wxFile::Exists(info_db))
         ::wxRemoveFile(info_db);
+    m_sCurOpenedFilePath = sFile;
+    m_sCurOpenedFileName = sName;
     wxSQLite3Database* pDb = new wxSQLite3Database();
     pDb->Open(info_db);
     MainUIInstance::GetInstance()->SetCurrentInfoDb(pDb);
+    m_pFrameNumberText->SetValue(_T("1"));
     m_pDecodingThread = new DecodingThread(this, sFile, name);
     m_sDecodedYUVPathName = name;
     if(m_pDecodingThread->Create() != wxTHREAD_NO_ERROR)
@@ -436,9 +441,6 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
         m_bYUVFile = true;
     else
         m_bYUVFile = false;
-    m_sLastOpenedFileName = m_sCurOpenedFileName;
-    m_sCurOpenedFilePath = dlg.GetPath();
-    m_sCurOpenedFileName = dlg.GetFilename();
     if(m_bYUVFile)
         OnOpenYUVFile(dlg.GetPath(), dlg.GetFilename());
     else // the opened file may be the HEVC stream file
@@ -451,7 +453,6 @@ void MainFrame::OnOpenFile(wxCommandEvent& event)
 
 void MainFrame::OnFrameClose(wxCommandEvent& event)
 {
-    m_sLastOpenedFileName = m_sCurOpenedFileName;
     OnCloseFile(event);
     event.Skip();
 }
@@ -468,13 +469,8 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
     if(m_bOPened)
     {
         bool bLastYUV = true;
-        if(m_sLastOpenedFileName.size() == 0)
-            bLastYUV = true;
-        else
-        {
-            if(!m_sLastOpenedFileName.Lower().EndsWith(_T(".yuv")))
-                bLastYUV = false;
-        }
+        if(!m_sCurOpenedFileName.Lower().EndsWith(_T(".yuv")))
+            bLastYUV = false;
         if(m_pTimer->IsRunning())
             m_pTimer->Stop();
         m_pCenterPageManager->Close();
@@ -679,11 +675,14 @@ void MainFrame::OnMainFrameSizeChange(wxSizeEvent& event)
         m_pCenterPageManager->GetPicViewCtrl(0)->SetRulerCtrlFited();
     }
     if(!m_bOPened) return;
-    int t = m_iYUVBit > 8 ? 2 : 1;
-    int framenum = m_FileLength/(m_iSourceWidth*m_iSourceHeight*3/2*t);
-    m_iTotalFrame = framenum;
+    if(m_bYUVFile)
+    {
+        int t = m_iYUVBit > 8 ? 2 : 1;
+        int framenum = m_FileLength/(m_iSourceWidth*m_iSourceHeight*3/2*t);
+        m_iTotalFrame = framenum;
+    }
     wxString str;
-    str.Printf(_T("/ %d"), framenum);
+    str.Printf(_T("/ %d"), m_iTotalFrame);
     m_pTotalFrameNumberText->SetLabel(str);
 }
 
@@ -1132,6 +1131,11 @@ void MainFrame::OnDecodingSetThumbnailBuffer(wxCommandEvent& event)
     TComPicYuv* pcPicYuv = Utils::tuple_get<1>(*pData);
     m_vDecodingPOCStore.push_back(iPOC);
     LogMsgUIInstance::GetInstance()->LogMessage(wxString::Format(_T("decoded POC %d"), iPOC));
+    wxString str;
+    str.Printf(_T("/ %d"), m_vDecodingPOCStore.size());
+    m_pTotalFrameNumberText->SetLabel(str);
+    m_iTotalFrame = m_vDecodingPOCStore.size();
+
     double scaleRate = 165.0/m_iSourceWidth;
     if(!m_pImageList)
         m_pImageList = new wxImageList((int)m_iSourceWidth*scaleRate, (int)m_iSourceHeight*scaleRate);

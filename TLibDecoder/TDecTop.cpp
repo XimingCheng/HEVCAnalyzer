@@ -647,13 +647,16 @@ Void TDecTop::xDecodePPS()
     memBuffer_col.AppendData(col_width_data, num_col * sizeof(int));
     write_blob.Write(memBuffer_col, 0);
     write_blob.Finalize();
-    int* row_height_data_copy = new int[num_row];
-    int* col_width_data_copy  = new int[num_col];
-    memcpy(row_height_data_copy, row_height_data, sizeof(int) * num_row);
-    memcpy(col_width_data_copy, col_width_data, sizeof(int) * num_col);
-    Utils::tuple<int, int, int*, int*> msg(num_row, num_col,
-        row_height_data_copy, col_width_data_copy);
-    MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETTILESINFO, msg);
+    if(order == 0)
+    {
+      int* row_height_data_copy = new int[num_row];
+      int* col_width_data_copy  = new int[num_col];
+      memcpy(row_height_data_copy, row_height_data, sizeof(int) * num_row);
+      memcpy(col_width_data_copy, col_width_data, sizeof(int) * num_col);
+      Utils::tuple<int, int, int*, int*> msg(num_row, num_col,
+          row_height_data_copy, col_width_data_copy);
+      MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETTILESINFO, msg);
+    }
     delete [] row_height_data;
     delete [] col_width_data;
   }
