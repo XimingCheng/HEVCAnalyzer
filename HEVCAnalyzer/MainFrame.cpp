@@ -588,6 +588,7 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
                       false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
         m_cYUVIO.skipFrames(m_vDecodingPOCStore[frame], m_iSourceWidth, m_iSourceHeight);
         SetPicViewTilesInfo(frame);
+        SetPicViewCUSplitInfo(m_vDecodingPOCStore[frame]);
     }
     int pad[] = {0, 0};
     m_cYUVIO.read(m_pcPicYuvOrg, pad);
@@ -607,18 +608,33 @@ void MainFrame::SetCurrentTiles(int order, wxSQLite3Database* db, wxSQLite3Resul
     // just assign the data from the database
     row_num = pResult->GetInt(1);
     col_num = pResult->GetInt(2);
-    wxSQLite3Blob readBlob = db->GetReadOnlyBlob(order,
-        _T("row_data"), _T("TILES_INFO"));
     wxMemoryBuffer memBuffer, memBuffer_col;
-    readBlob.Read(memBuffer, row_num * sizeof(int), 0);
-    readBlob.Finalize();
+    pResult->GetBlob(3, memBuffer);
+    pResult->GetBlob(4, memBuffer_col);
     int *pRowData = static_cast<int*>(memBuffer.GetData());
-    readBlob = db->GetReadOnlyBlob(order,
-        _T("col_data"), _T("TILES_INFO"));
-    readBlob.Read(memBuffer_col, col_num * sizeof(int), 0);
     int *pColData = static_cast<int*>(memBuffer_col.GetData());
     m_pCenterPageManager->GetPicViewCtrl(0)->SetRowData(row_num, pRowData);
     m_pCenterPageManager->GetPicViewCtrl(0)->SetColData(col_num, pColData);
+}
+
+void MainFrame::SetPicViewCUSplitInfo(int poc)
+{
+    wxSQLite3Database* db = new wxSQLite3Database();
+    db->Open(GetDataBaseFileName(ID_StreamInfoData));
+    wxString sqlQuery = _T("SELECT * FROM CUSPLIT_INFO WHERE POC=\"");
+    wxString str_poc = wxString::Format(_T("%d"), poc);
+    sqlQuery += ( str_poc + _T("\"") );
+    wxSQLite3ResultSet result = db->ExecuteQuery(sqlQuery);
+    if(result.NextRow())
+    {
+        int data_size = result.GetInt(1);
+        wxMemoryBuffer memBuffer;
+        result.GetBlob(2, memBuffer);
+        int *pData = static_cast<int*>(memBuffer.GetData());
+        m_pCenterPageManager->GetPicViewCtrl(0)->SetCUSplitData(data_size, pData);
+    }
+    db->Close();
+    delete db;
 }
 
 void MainFrame::SetPicViewTilesInfo(int decoding_order)

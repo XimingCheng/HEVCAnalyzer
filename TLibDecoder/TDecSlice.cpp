@@ -218,7 +218,8 @@ Void TDecSlice::decompressSlice(TComInputBitstream** ppcSubstreams, TComPic*& rp
       CTXMem[0]->loadContexts(pcSbacDecoder);
     }
   }
-  for( Int iCUAddr = iStartCUAddr; !uiIsLast && iCUAddr < rpcPic->getNumCUsInFrame(); iCUAddr = rpcPic->getPicSym()->xCalculateNxtCUAddr(iCUAddr) )
+  Int iCUAddr = 0;
+  for( iCUAddr = iStartCUAddr; !uiIsLast && iCUAddr < rpcPic->getNumCUsInFrame(); iCUAddr = rpcPic->getPicSym()->xCalculateNxtCUAddr(iCUAddr) )
   {
     pcCU = rpcPic->getCU( iCUAddr );
     pcCU->initCU( rpcPic, iCUAddr );
@@ -384,7 +385,8 @@ Void TDecSlice::decompressSlice(TComInputBitstream** ppcSubstreams, TComPic*& rp
       return;
     }
   }
-  if(m_cuSplitPoints.size() == 0) return;
+  if(m_cuSplitPoints.size() == 0 || iCUAddr < rpcPic->getNumCUsInFrame()) return;
+
   wxSQLite3Database* pDb = MainUIInstance::GetInstance()->GetDataBase();
   if(!pDb->TableExists(_T("CUSPLIT_INFO")))
   {
