@@ -390,7 +390,7 @@ Void TDecSlice::decompressSlice(TComInputBitstream** ppcSubstreams, TComPic*& rp
   wxSQLite3Database* pDb = MainUIInstance::GetInstance()->GetDataBase();
   if(!pDb->TableExists(_T("CUSPLIT_INFO")))
   {
-    wxString sql = _T("CREATE TABLE CUSPLIT_INFO (POC INTEGER, size int, data blob)");
+    wxString sql = _T("CREATE TABLE CUSPLIT_INFO (POC INTEGER PRIMARY KEY, size int, data blob)");
     pDb->ExecuteUpdate(sql);
   }
 

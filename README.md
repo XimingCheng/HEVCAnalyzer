@@ -47,24 +47,26 @@ Download wxWidgets-2.8-12 source code, you can build it with Visual Studio or ot
 
 Build the wxWidgets source code you can located the build dir the source dir:
 
-`mingw32-make -f makefile.gcc MONOLITHIC=0 SHARED=1 UNICODE=1 USE_GDIPLUS=1  BUILD=release`
+    mingw32-make -f makefile.gcc MONOLITHIC=0 SHARED=1 UNICODE=1 USE_GDIPLUS=1  BUILD=release
 
 You may change the BUILD mode to debug:
 
-`mingw32-make -f makefile.gcc MONOLITHIC=0 SHARED=1 UNICODE=1 USE_GDIPLUS=1  BUILD=debug`
+    mingw32-make -f makefile.gcc MONOLITHIC=0 SHARED=1 UNICODE=1 USE_GDIPLUS=1  BUILD=debug
 
 then you have to download the wxsqlite3 source code, and build it with mingw
 
-`mingw32-make -f makefile.gcc WX_VERSION=28 WX_SHARED=1 WX_MONOLITHIC=0 WX_UNICODE=1 WX_DEBUG=0 WX_DIR=/e/Project/wxMSW-2.8.12/`
-
-`mingw32-make -f makefile.gcc WX_VERSION=28 WX_SHARED=1 WX_MONOLITHIC=0 WX_UNICODE=1 WX_DEBUG=1 WX_DIR=/e/Project/wxMSW-2.8.12/`
+    mingw32-make -f makefile.gcc WX_VERSION=28 WX_SHARED=1 WX_MONOLITHIC=0 WX_UNICODE=1 WX_DEBUG=0 WX_DIR=/e/Project/wxMSW-2.8.12/
+    mingw32-make -f makefile.gcc WX_VERSION=28 WX_SHARED=1 WX_MONOLITHIC=0 WX_UNICODE=1 WX_DEBUG=1 WX_DIR=/e/Project/wxMSW-2.8.12/
 
 **NOTICE THAT** you must change `WX_DIR` to your own wxWidgets src dir
 
 You can use the Code::Blocks project in HEVCAnalyzer/Build/Win/
 
-Linux Mint
-![linux](https://f.cloud.github.com/assets/2611722/1792373/710f7022-699e-11e3-8415-6e2f1dfc60e5.jpg)
+Ubuntu
+![ubuntu](https://cloud.githubusercontent.com/assets/2611722/4212011/ab9afc00-3894-11e4-95c8-ca3febcffe64.png)
+
+Linux Mint (old version)
+![mint](https://f.cloud.github.com/assets/2611722/1792373/710f7022-699e-11e3-8415-6e2f1dfc60e5.jpg)
 
 Win7
-![win32](https://f.cloud.github.com/assets/2611722/1792380/a197fdc2-699e-11e3-8219-b33c2b1e1599.jpg)
+![win32](https://cloud.githubusercontent.com/assets/2611722/4212005/7ed71fa0-3894-11e4-84d2-29f45b90bfef.png)
