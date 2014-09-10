@@ -120,9 +120,8 @@ Void TDecCu::destroy()
 /** \param    pcCU        pointer of CU data
  \param    ruiIsLast   last data?
  */
-Void TDecCu::decodeCU( TComDataCU* pcCU, UInt& ruiIsLast, std::vector<PtInfo>& pt )
+Void TDecCu::decodeCU( TComDataCU* pcCU, UInt& ruiIsLast )
 {
-  m_pCuSplitInfo = &pt;
   if ( pcCU->getSlice()->getPPS()->getUseDQP() )
   {
     setdQPFlag(true);
@@ -134,8 +133,9 @@ Void TDecCu::decodeCU( TComDataCU* pcCU, UInt& ruiIsLast, std::vector<PtInfo>& p
 
 /** \param    pcCU        pointer of CU data
  */
-Void TDecCu::decompressCU( TComDataCU* pcCU )
+Void TDecCu::decompressCU( TComDataCU* pcCU, std::vector<PtInfo>& pt )
 {
+  m_pCuSplitInfo = &pt;
   xDecompressCU( pcCU, 0,  0 );
 }
 
@@ -265,12 +265,6 @@ Void TDecCu::xDecodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth, UInt&
     return;
   }
   //LogMsgUIInstance::GetInstance()->LogMessage(wxString::Format(_T("POC %d uiLPelX %d uiTPelY %d uiRPelX %d uiBPelY %d"), pcSlice->getPOC(), uiLPelX, uiTPelY, uiRPelX, uiBPelY));
-  PtInfo pt;
-  pt._ptStartX = uiLPelX;
-  pt._ptStartY = uiTPelY;
-  pt._ptEndX   = uiRPelX;
-  pt._ptEndY   = uiBPelY;
-  m_pCuSplitInfo->push_back(pt);
 
   if( (g_uiMaxCUWidth>>uiDepth) >= pcCU->getSlice()->getPPS()->getMinCuDQPSize() && pcCU->getSlice()->getPPS()->getUseDQP())
   {
@@ -396,6 +390,160 @@ Void TDecCu::xDecompressCU( TComDataCU* pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
     return;
   }
 
+  PtInfo pt;
+  pt._ptStartX = uiLPelX;
+  pt._ptStartY = uiTPelY;
+  pt._ptEndX   = uiRPelX + 1;
+  pt._ptEndY   = uiBPelY + 1;
+  pt._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+  pt._sType    = Type_CU;
+  m_pCuSplitInfo->push_back(pt);
+
+  int h = 0, w = 0;
+  PtInfo ptp1, ptp2, ptp3, ptp4;
+  PartSize part = pcCU->getPartitionSize(uiAbsPartIdx);
+  switch(part)
+  {
+  case SIZE_2Nx2N: // pass
+    break;
+  case SIZE_2NxN:
+    h = (uiBPelY - uiTPelY + 1) / 2;
+    ptp1._sType    = Type_PU;
+    ptp1._ptStartX = uiLPelX;
+    ptp1._ptStartY = uiTPelY;
+    ptp1._ptEndX   = uiRPelX + 1;
+    ptp1._ptEndY   = uiTPelY + h;
+    ptp1._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp1._sType    = Type_PU;
+    ptp2._ptStartX = uiLPelX;
+    ptp2._ptStartY = uiTPelY + h;
+    ptp2._ptEndX   = uiRPelX + 1;
+    ptp2._ptEndY   = uiBPelY + 1;
+    ptp2._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp2._sType    = Type_PU;
+    m_pCuSplitInfo->push_back(ptp1);
+    m_pCuSplitInfo->push_back(ptp2);
+    break;
+  case SIZE_Nx2N:
+    w = (uiRPelX - uiLPelX + 1) / 2;
+    ptp1._sType    = Type_PU;
+    ptp1._ptStartX = uiLPelX;
+    ptp1._ptStartY = uiTPelY;
+    ptp1._ptEndX   = uiLPelX + w;
+    ptp1._ptEndY   = uiBPelY + 1;
+    ptp1._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp2._sType    = Type_PU;
+    ptp2._ptStartX = uiLPelX + w;
+    ptp2._ptStartY = uiTPelY;
+    ptp2._ptEndX   = uiRPelX + 1;
+    ptp2._ptEndY   = uiBPelY + 1;
+    ptp2._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    m_pCuSplitInfo->push_back(ptp1);
+    m_pCuSplitInfo->push_back(ptp2);
+    break;
+  case SIZE_NxN:
+    w = (uiRPelX - uiLPelX + 1) / 2;
+    h = (uiBPelY - uiTPelY + 1) / 2;
+    ptp1._sType    = Type_PU;
+    ptp1._ptStartX = uiLPelX;
+    ptp1._ptStartY = uiTPelY;
+    ptp1._ptEndX   = uiLPelX + w;
+    ptp1._ptEndY   = uiTPelY + h;
+    ptp1._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp2._sType    = Type_PU;
+    ptp2._ptStartX = uiLPelX + w;
+    ptp2._ptStartY = uiTPelY;
+    ptp2._ptEndX   = uiRPelX + 1;
+    ptp2._ptEndY   = uiTPelY + h;
+    ptp2._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp3._sType    = Type_PU;
+    ptp3._ptStartX = uiLPelX;
+    ptp3._ptStartY = uiTPelY + h;
+    ptp3._ptEndX   = uiLPelX + w;
+    ptp3._ptEndY   = uiBPelY + 1;
+    ptp3._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp4._sType    = Type_PU;
+    ptp4._ptStartX = uiLPelX + w;
+    ptp4._ptStartY = uiTPelY + h;
+    ptp4._ptEndX   = uiRPelX + 1;
+    ptp4._ptEndY   = uiBPelY + 1;
+    ptp4._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    m_pCuSplitInfo->push_back(ptp1);
+    m_pCuSplitInfo->push_back(ptp2);
+    m_pCuSplitInfo->push_back(ptp3);
+    m_pCuSplitInfo->push_back(ptp4);
+    break;
+  case SIZE_2NxnU:
+    h = (uiBPelY - uiTPelY + 1) / 4;
+    ptp1._ptStartX = uiLPelX;
+    ptp1._ptStartY = uiTPelY;
+    ptp1._ptEndX   = uiRPelX + 1;
+    ptp1._ptEndY   = uiTPelY + h;
+    ptp1._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp1._sType    = Type_PU;
+    ptp2._ptStartX = uiLPelX;
+    ptp2._ptStartY = uiTPelY + h;
+    ptp2._ptEndX   = uiRPelX + 1;
+    ptp2._ptEndY   = uiBPelY + 1;
+    ptp2._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp2._sType    = Type_PU;
+    m_pCuSplitInfo->push_back(ptp1);
+    m_pCuSplitInfo->push_back(ptp2);
+    break;
+  case SIZE_2NxnD:
+    h = 3 * (uiBPelY - uiTPelY + 1) / 4;
+    ptp1._ptStartX = uiLPelX;
+    ptp1._ptStartY = uiTPelY;
+    ptp1._ptEndX   = uiRPelX + 1;
+    ptp1._ptEndY   = uiTPelY + h;
+    ptp1._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp1._sType    = Type_PU;
+    ptp2._ptStartX = uiLPelX;
+    ptp2._ptStartY = uiTPelY + h;
+    ptp2._ptEndX   = uiRPelX + 1;
+    ptp2._ptEndY   = uiBPelY + 1;
+    ptp2._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp2._sType    = Type_PU;
+    m_pCuSplitInfo->push_back(ptp1);
+    m_pCuSplitInfo->push_back(ptp2);
+    break;
+  case SIZE_nLx2N:
+    w = (uiRPelX - uiLPelX + 1) / 4;
+    ptp1._ptStartX = uiLPelX;
+    ptp1._ptStartY = uiTPelY;
+    ptp1._ptEndX   = uiLPelX + w;
+    ptp1._ptEndY   = uiBPelY + 1;
+    ptp1._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp1._sType    = Type_PU;
+    ptp2._ptStartX = uiLPelX + w;
+    ptp2._ptStartY = uiTPelY;
+    ptp2._ptEndX   = uiRPelX + 1;
+    ptp2._ptEndY   = uiBPelY + 1;
+    ptp2._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp2._sType    = Type_PU;
+    m_pCuSplitInfo->push_back(ptp1);
+    m_pCuSplitInfo->push_back(ptp2);
+    break;
+  case SIZE_nRx2N:
+    w = 3 * (uiRPelX - uiLPelX + 1) / 4;
+    ptp1._ptStartX = uiLPelX;
+    ptp1._ptStartY = uiTPelY;
+    ptp1._ptEndX   = uiLPelX + w;
+    ptp1._ptEndY   = uiBPelY + 1;
+    ptp1._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp1._sType    = Type_PU;
+    ptp2._ptStartX = uiLPelX + w;
+    ptp2._ptStartY = uiTPelY;
+    ptp2._ptEndX   = uiRPelX + 1;
+    ptp2._ptEndY   = uiBPelY + 1;
+    ptp2._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp2._sType    = Type_PU;
+    m_pCuSplitInfo->push_back(ptp1);
+    m_pCuSplitInfo->push_back(ptp2);
+    break;
+  default: // mistake
+    break;
+  }
   // Residual reconstruction
   m_ppcYuvResi[uiDepth]->clear();
 

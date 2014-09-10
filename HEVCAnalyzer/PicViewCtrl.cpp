@@ -1,5 +1,6 @@
 #include "PicViewCtrl.h"
 #include "MainFrame.h"
+#include <algorithm>
 
 extern const wxEventType wxEVT_YUVBUFFER_CHANGED;
 extern const wxEventType wxEVT_POSITION_CHANGED;
@@ -27,7 +28,7 @@ PicViewCtrl::PicViewCtrl(wxWindow* parent, wxWindowID id, wxSimpleHtmlListBox* p
     m_pFrame(pFrame), m_bShowGrid(true), m_bOpenedYUVfile(true), m_bShowTilesInfo(true), m_bMouseWheelPageUpDown(false), m_bShowPUType(true), m_pBuffer(NULL),
     m_iYUVBit(8), m_iShowWhich_O_Y_U_V(MODE_ORG), m_pHRuler(pHRuler), m_pVRuler(pVRuler), m_bFullRefresh(true),
     m_pPixelCtrl(pPixelCtrl), m_iSelectedLCUId(-1), m_curSelLCUStart(-1, -1), m_curSelLCUEnd(-1, -1),
-    m_piRowData(NULL), m_piColData(NULL), m_piCurCUSplitPoints(NULL), m_iCUSplitPtSize(0)
+    m_piRowData(NULL), m_piColData(NULL), m_pCurSplitInfo(NULL), m_iSplitPtSize(0)
 {
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
     m_pDragDropFile = new DragDropFile();
@@ -41,8 +42,8 @@ PicViewCtrl::~PicViewCtrl()
         delete [] m_piRowData;
     if(m_piColData)
         delete [] m_piColData;
-    if(m_piCurCUSplitPoints)
-        delete [] m_piCurCUSplitPoints;
+    if(m_pCurSplitInfo)
+        delete [] m_pCurSplitInfo;
 }
 
 void PicViewCtrl::OnPaint(wxPaintEvent& event)
@@ -505,7 +506,7 @@ void PicViewCtrl::DrawBackGround(wxGraphicsContext* gc, wxGraphicsContext* gct)
     }
     if(!m_bOpenedYUVfile && m_bShowTilesInfo)
     {
-        DrawCUSplitInfo(gct);
+        DrawSplitInfo(gct);
         DrawTilesGrid(gc);
     }
     if(m_bShowGrid)
@@ -733,26 +734,48 @@ void PicViewCtrl::SetColData(const int num_col, const int* pColData)
     memcpy(m_piColData, pColData, num_col * sizeof(int));
 }
 
-void PicViewCtrl::SetCUSplitData(const int size, const int* pData)
+void PicViewCtrl::SetSplitData(const int size, const PtInfo* pData)
 {
     assert(size);
-    m_iCUSplitPtSize = size;
-    if(m_piCurCUSplitPoints)
-        delete [] m_piCurCUSplitPoints;
-    m_piCurCUSplitPoints = new int[4*size];
-    memcpy(m_piCurCUSplitPoints, pData, 4*size*sizeof(int));
+    m_iSplitPtSize = size;
+    if(m_pCurSplitInfo)
+        delete [] m_pCurSplitInfo;
+    int data_size = sizeof(PtInfo);
+    m_pCurSplitInfo = new PtInfo[size];
+    memcpy(m_pCurSplitInfo, pData, size*data_size);
+//    std::sort(m_pCurSplitInfo, m_pCurSplitInfo + m_iSplitPtSize, [](PtInfo pt1, PtInfo pt2) {
+//        return pt1._sType < pt2._sType;
+//    });
 }
 
-void PicViewCtrl::DrawCUSplitInfo(wxGraphicsContext* gc)
+void PicViewCtrl::DrawSplitInfo(wxGraphicsContext* gc)
 {
-    gc->SetPen(wxPen(wxColor(200, 200, 200, 255)));
-    for(int i = 0; i < m_iCUSplitPtSize; i++)
+    wxPen pen1(wxColor(200, 200, 200, 255));
+    wxPen pen2(wxColor(100, 0, 100, 255));
+
+    gc->SetPen(pen1);
+    for(int i = 0; i < m_iSplitPtSize; i++)
     {
-        int sx = m_piCurCUSplitPoints[4*i];
-        int sy = m_piCurCUSplitPoints[4*i + 1];
-        int ex = m_piCurCUSplitPoints[4*i + 2];
-        int ey = m_piCurCUSplitPoints[4*i + 3];
-        gc->DrawRectangle(sx * m_dScaleRate, sy * m_dScaleRate, (ex - sx + 1) * m_dScaleRate, (ey - sy + 1) * m_dScaleRate);
+        if(m_pCurSplitInfo[i]._sType == Type_CU)
+        {
+            int sx = m_pCurSplitInfo[i]._ptStartX;
+            int sy = m_pCurSplitInfo[i]._ptStartY;
+            int ex = m_pCurSplitInfo[i]._ptEndX;
+            int ey = m_pCurSplitInfo[i]._ptEndY;
+            gc->DrawRectangle(sx * m_dScaleRate, sy * m_dScaleRate, (ex - sx) * m_dScaleRate, (ey - sy) * m_dScaleRate);
+        }
+    }
+    gc->SetPen(pen2);
+    for(int i = 0; i < m_iSplitPtSize; i++)
+    {
+        if(m_pCurSplitInfo[i]._sType == Type_PU)
+        {
+            int sx = m_pCurSplitInfo[i]._ptStartX;
+            int sy = m_pCurSplitInfo[i]._ptStartY;
+            int ex = m_pCurSplitInfo[i]._ptEndX;
+            int ey = m_pCurSplitInfo[i]._ptEndY;
+            gc->DrawRectangle(sx * m_dScaleRate, sy * m_dScaleRate, (ex - sx) * m_dScaleRate, (ey - sy) * m_dScaleRate);
+        }
     }
 }
 

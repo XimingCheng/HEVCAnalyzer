@@ -362,8 +362,8 @@ Void TDecSlice::decompressSlice(TComInputBitstream** ppcSubstreams, TComPic*& rp
         }
       }
     }
-    m_pcCuDecoder->decodeCU     ( pcCU, uiIsLast, m_cuSplitPoints );
-    m_pcCuDecoder->decompressCU ( pcCU );
+    m_pcCuDecoder->decodeCU     ( pcCU, uiIsLast );
+    m_pcCuDecoder->decompressCU ( pcCU, m_cuSplitPoints );
 
 #if ENC_DEC_TRACE
     g_bJustDoIt = g_bEncDecTraceDisable;
@@ -388,32 +388,33 @@ Void TDecSlice::decompressSlice(TComInputBitstream** ppcSubstreams, TComPic*& rp
   if(m_cuSplitPoints.size() == 0 || iCUAddr < rpcPic->getNumCUsInFrame()) return;
 
   wxSQLite3Database* pDb = MainUIInstance::GetInstance()->GetDataBase();
-  if(!pDb->TableExists(_T("CUSPLIT_INFO")))
+  if(!pDb->TableExists(_T("SPLIT_INFO")))
   {
-    wxString sql = _T("CREATE TABLE CUSPLIT_INFO (POC INTEGER PRIMARY KEY, size int, data blob)");
+    wxString sql = _T("CREATE TABLE SPLIT_INFO (POC INTEGER PRIMARY KEY, size int, data blob)");
     pDb->ExecuteUpdate(sql);
   }
 
-  wxString sql = _T("INSERT INTO CUSPLIT_INFO (POC, size, data) VALUES (");
+  int single_size = sizeof(PtInfo);
+  wxString sql = _T("INSERT INTO SPLIT_INFO (POC, size, data) VALUES (");
   wxString str_poc   = wxString::Format(_T("%d, "), pcSlice->getPOC());
   wxString str_size  = wxString::Format(_T("%d, "), m_cuSplitPoints.size());
-  wxString blob_size = wxString::Format(_T("zeroblob(%d))"), 4*m_cuSplitPoints.size()*sizeof(int));
+  wxString blob_size = wxString::Format(_T("zeroblob(%d))"), single_size*m_cuSplitPoints.size());
   sql += str_poc;
   sql += str_size;
   sql += blob_size;
   pDb->ExecuteUpdate(sql);
   wxLongLong id = pDb->GetLastRowId();
-  wxSQLite3Blob write_blob = pDb->GetWritableBlob(id, _T("data"), _T("CUSPLIT_INFO"));
+  wxSQLite3Blob write_blob = pDb->GetWritableBlob(id, _T("data"), _T("SPLIT_INFO"));
   wxMemoryBuffer memBuffer;
-  memBuffer.AppendData(&m_cuSplitPoints[0], 4*m_cuSplitPoints.size() * sizeof(int));
+  memBuffer.AppendData(&m_cuSplitPoints[0], single_size*m_cuSplitPoints.size());
   write_blob.Write(memBuffer, 0);
   write_blob.Finalize();
-  int* pData_copy = new int [4*m_cuSplitPoints.size()];
-  memcpy(pData_copy, &m_cuSplitPoints[0], 4*m_cuSplitPoints.size()*sizeof(int));
+  PtInfo* pData_copy = new PtInfo [single_size*m_cuSplitPoints.size()];
+  memcpy(pData_copy, &m_cuSplitPoints[0], single_size*m_cuSplitPoints.size());
   if(pcSlice->getPOC() == 0)
   {
-    Utils::tuple<int, int, int*> msg(pcSlice->getPOC(), m_cuSplitPoints.size(), pData_copy);
-    MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETCUSPLITINFO, msg);
+    Utils::tuple<int, int, PtInfo*> msg(pcSlice->getPOC(), m_cuSplitPoints.size(), pData_copy);
+    MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETSPLITINFO, msg);
   }
 }
 

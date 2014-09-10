@@ -588,7 +588,7 @@ void MainFrame::OnThumbnailLboxSelect(wxCommandEvent& event)
                       false, m_iYUVBit, m_iYUVBit, m_iYUVBit, m_iYUVBit);
         m_cYUVIO.skipFrames(m_vDecodingPOCStore[frame], m_iSourceWidth, m_iSourceHeight);
         SetPicViewTilesInfo(frame);
-        SetPicViewCUSplitInfo(m_vDecodingPOCStore[frame]);
+        SetPicViewSplitInfo(m_vDecodingPOCStore[frame]);
     }
     int pad[] = {0, 0};
     m_cYUVIO.read(m_pcPicYuvOrg, pad);
@@ -617,11 +617,11 @@ void MainFrame::SetCurrentTiles(int order, wxSQLite3Database* db, wxSQLite3Resul
     m_pCenterPageManager->GetPicViewCtrl(0)->SetColData(col_num, pColData);
 }
 
-void MainFrame::SetPicViewCUSplitInfo(int poc)
+void MainFrame::SetPicViewSplitInfo(int poc)
 {
     wxSQLite3Database* db = new wxSQLite3Database();
     db->Open(GetDataBaseFileName(ID_StreamInfoData));
-    wxString sqlQuery = _T("SELECT * FROM CUSPLIT_INFO WHERE POC=\"");
+    wxString sqlQuery = _T("SELECT * FROM SPLIT_INFO WHERE POC=\"");
     wxString str_poc = wxString::Format(_T("%d"), poc);
     sqlQuery += ( str_poc + _T("\"") );
     wxSQLite3ResultSet result = db->ExecuteQuery(sqlQuery);
@@ -630,8 +630,8 @@ void MainFrame::SetPicViewCUSplitInfo(int poc)
         int data_size = result.GetInt(1);
         wxMemoryBuffer memBuffer;
         result.GetBlob(2, memBuffer);
-        int *pData = static_cast<int*>(memBuffer.GetData());
-        m_pCenterPageManager->GetPicViewCtrl(0)->SetCUSplitData(data_size, pData);
+        PtInfo *pData = static_cast<PtInfo*>(memBuffer.GetData());
+        m_pCenterPageManager->GetPicViewCtrl(0)->SetSplitData(data_size, pData);
     }
     db->Close();
     delete db;
@@ -1107,8 +1107,8 @@ void MainFrame::OnDecodingNotify(wxCommandEvent& event)
     case MainMSG_SETTILESINFO:
         OnDecodingSetTilesInfo(event);
         break;
-    case MainMSG_SETCUSPLITINFO:
-        OnDecodingSetCUSplitInfo(event);
+    case MainMSG_SETSPLITINFO:
+        OnDecodingSetSplitInfo(event);
         break;
     default:
         assert(0);
@@ -1199,13 +1199,13 @@ void MainFrame::OnDecodingSetTilesInfo(wxCommandEvent& event)
     delete [] pColData;
 }
 
-void MainFrame::OnDecodingSetCUSplitInfo(wxCommandEvent& event)
+void MainFrame::OnDecodingSetSplitInfo(wxCommandEvent& event)
 {
-    typedef Utils::tuple<int, int, int*>* data_ptr;
+    typedef Utils::tuple<int, int, PtInfo*>* data_ptr;
     data_ptr pData = (data_ptr)event.GetClientData();
     int size = Utils::tuple_get<1>(*pData);
-    int* pPtData = Utils::tuple_get<2>(*pData);
-    m_pCenterPageManager->GetPicViewCtrl(0)->SetCUSplitData(size, pPtData);
+    PtInfo* pPtData = Utils::tuple_get<2>(*pData);
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetSplitData(size, pPtData);
     delete [] pPtData;
 }
 

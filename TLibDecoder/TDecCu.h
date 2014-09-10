@@ -85,10 +85,10 @@ public:
   Void  destroy                 ();
 
   /// decode CU information
-  Void  decodeCU                ( TComDataCU* pcCU, UInt& ruiIsLast, std::vector<PtInfo>& pt );
+  Void  decodeCU                ( TComDataCU* pcCU, UInt& ruiIsLast );
 
   /// reconstruct CU information
-  Void  decompressCU            ( TComDataCU* pcCU );
+  Void  decompressCU            ( TComDataCU* pcCU, std::vector<PtInfo>& pt );
 
 protected:
 

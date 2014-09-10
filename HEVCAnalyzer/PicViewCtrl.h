@@ -66,7 +66,7 @@ public:
     void SetRowData(const int num_row, const int* pRowData);
     void SetColData(const int num_col, const int* pColData);
     void SetOpenedIsYUVfile(const bool b) { m_bOpenedYUVfile = b; }
-    void SetCUSplitData(const int size, const int* pData);
+    void SetSplitData(const int size, const PtInfo* pData);
 
 private:
     void OnMouseMove(wxMouseEvent& event);
@@ -89,7 +89,7 @@ private:
     void CalCurScrolledRectOnPicView(wxRect& rect);
     void CalTwoRectsOutsideBox(wxRect& rect, const wxPoint& start, const wxPoint& end);
     void DrawTilesGrid(wxGraphicsContext* gc);
-    void DrawCUSplitInfo(wxGraphicsContext* gc);
+    void DrawSplitInfo(wxGraphicsContext* gc);
 
 private:
     bool                 m_bClearFlag;
@@ -139,8 +139,8 @@ private:
     int*                 m_piColData;
 
     // cu split info
-    int*                 m_piCurCUSplitPoints;
-    int                  m_iCUSplitPtSize;
+    PtInfo*              m_pCurSplitInfo;
+    int                  m_iSplitPtSize;
 
     DECLARE_EVENT_TABLE();
 };

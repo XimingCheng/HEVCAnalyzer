@@ -114,8 +114,17 @@ enum MainMSG_TYPE
     MainMSG_SETYUV_BUFFER,
     MainMSG_SETTHUMBNAIL_BUFFER,
     MainMSG_SETTILESINFO,
-    MainMSG_SETCUSPLITINFO,
+    MainMSG_SETSPLITINFO,
     MainMSG_MAX,
+};
+
+enum SplitType
+{
+    Type_CU = 0,
+    Type_PU,
+    Type_TU_LUMA,
+    Type_TU_CHROMA,
+    Type_MAX,
 };
 
 struct PtInfo
@@ -124,6 +133,8 @@ struct PtInfo
     UInt _ptStartY;
     UInt _ptEndX;
     UInt _ptEndY;
+    SplitType _sType;   // the PU split
+    PredMode  _preMode; // the mb predict type
 };
 
 class MainUIInstance : public NoneCopyable
