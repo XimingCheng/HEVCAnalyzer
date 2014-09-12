@@ -752,7 +752,6 @@ void PicViewCtrl::DrawSplitInfo(wxGraphicsContext* gc)
 {
     wxPen pen1(wxColor(200, 200, 200, 255));
     wxPen pen2(wxColor(100, 0, 100, 255));
-
     gc->SetPen(pen1);
     for(int i = 0; i < m_iSplitPtSize; i++)
     {
@@ -762,10 +761,29 @@ void PicViewCtrl::DrawSplitInfo(wxGraphicsContext* gc)
             int sy = m_pCurSplitInfo[i]._ptStartY;
             int ex = m_pCurSplitInfo[i]._ptEndX;
             int ey = m_pCurSplitInfo[i]._ptEndY;
+            switch(m_pCurSplitInfo[i]._preMode)
+            {
+            case Type_INTRA:
+                gc->SetBrush(wxColor(196, 14, 14, 128));
+                break;
+            case Type_SKIP:
+                gc->SetBrush(wxColor(255, 255, 255, 0));
+                break;
+            case Type_INTER_P:
+                gc->SetBrush(wxColor(0, 0, 255, 128));
+                break;
+            case Type_INTER_B:
+                gc->SetBrush(wxColor(0, 255, 0, 128));
+                break;
+            default:
+                assert(0);
+                break;
+            }
             gc->DrawRectangle(sx * m_dScaleRate, sy * m_dScaleRate, (ex - sx) * m_dScaleRate, (ey - sy) * m_dScaleRate);
         }
     }
     gc->SetPen(pen2);
+    gc->SetBrush(wxColor(255, 255, 255, 0));
     for(int i = 0; i < m_iSplitPtSize; i++)
     {
         if(m_pCurSplitInfo[i]._sType == Type_PU)

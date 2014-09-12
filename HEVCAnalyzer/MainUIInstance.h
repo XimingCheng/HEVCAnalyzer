@@ -124,7 +124,16 @@ enum SplitType
     Type_PU,
     Type_TU_LUMA,
     Type_TU_CHROMA,
-    Type_MAX,
+    Type_SplitType_MAX,
+};
+
+enum PreType
+{
+    Type_INTRA = 0,
+    Type_SKIP,
+    Type_INTER_P,
+    Type_INTER_B,
+    Type_PreType_MAX,
 };
 
 struct PtInfo
@@ -134,7 +143,7 @@ struct PtInfo
     UInt _ptEndX;
     UInt _ptEndY;
     SplitType _sType;   // the PU split
-    PredMode  _preMode; // the mb predict type
+    PreType   _preMode; // the mb predict type
 };
 
 class MainUIInstance : public NoneCopyable

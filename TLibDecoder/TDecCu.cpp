@@ -390,12 +390,38 @@ Void TDecCu::xDecompressCU( TComDataCU* pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
     return;
   }
 
+  PreType mode;
+  if(pcCU->getPredictionMode(uiAbsPartIdx) == MODE_INTRA)
+    mode = Type_INTRA;
+  else if(pcCU->isSkipped(uiAbsPartIdx))
+    mode = Type_SKIP;
+  else
+  {
+    mode = Type_INTER_P;
+    Int         iWidth;
+    Int         iHeight;
+    UInt        uiPartAddr;
+    pcCU->getPartIndexAndSize( -1, uiPartAddr, iWidth, iHeight );
+    if( pcCU->getSlice()->isInterB() && !pcCU->getSlice()->getPPS()->getWPBiPred() )
+    {
+      if( pcCU->getCUMvField(REF_PIC_LIST_0)->getRefIdx(uiPartAddr) >= 0 && pcCU->getCUMvField(REF_PIC_LIST_1)->getRefIdx(uiPartAddr) >= 0)
+      {
+        Int RefPOCL0 = pcCU->getSlice()->getRefPic(REF_PIC_LIST_0, pcCU->getCUMvField(REF_PIC_LIST_0)->getRefIdx(uiPartAddr))->getPOC();
+        Int RefPOCL1 = pcCU->getSlice()->getRefPic(REF_PIC_LIST_1, pcCU->getCUMvField(REF_PIC_LIST_1)->getRefIdx(uiPartAddr))->getPOC();
+        if(RefPOCL0 == RefPOCL1 && pcCU->getCUMvField(REF_PIC_LIST_0)->getMv(uiPartAddr) == pcCU->getCUMvField(REF_PIC_LIST_1)->getMv(uiPartAddr))
+        {
+          mode = Type_INTER_B;
+        }
+      }
+    }
+  }
+
   PtInfo pt;
   pt._ptStartX = uiLPelX;
   pt._ptStartY = uiTPelY;
   pt._ptEndX   = uiRPelX + 1;
   pt._ptEndY   = uiBPelY + 1;
-  pt._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+  pt._preMode  = mode;
   pt._sType    = Type_CU;
   m_pCuSplitInfo->push_back(pt);
 
@@ -413,13 +439,13 @@ Void TDecCu::xDecompressCU( TComDataCU* pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
     ptp1._ptStartY = uiTPelY;
     ptp1._ptEndX   = uiRPelX + 1;
     ptp1._ptEndY   = uiTPelY + h;
-    ptp1._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp1._preMode  = mode;
     ptp1._sType    = Type_PU;
     ptp2._ptStartX = uiLPelX;
     ptp2._ptStartY = uiTPelY + h;
     ptp2._ptEndX   = uiRPelX + 1;
     ptp2._ptEndY   = uiBPelY + 1;
-    ptp2._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp2._preMode  = mode;
     ptp2._sType    = Type_PU;
     m_pCuSplitInfo->push_back(ptp1);
     m_pCuSplitInfo->push_back(ptp2);
@@ -431,13 +457,13 @@ Void TDecCu::xDecompressCU( TComDataCU* pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
     ptp1._ptStartY = uiTPelY;
     ptp1._ptEndX   = uiLPelX + w;
     ptp1._ptEndY   = uiBPelY + 1;
-    ptp1._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp1._preMode  = mode;
     ptp2._sType    = Type_PU;
     ptp2._ptStartX = uiLPelX + w;
     ptp2._ptStartY = uiTPelY;
     ptp2._ptEndX   = uiRPelX + 1;
     ptp2._ptEndY   = uiBPelY + 1;
-    ptp2._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp2._preMode  = mode;
     m_pCuSplitInfo->push_back(ptp1);
     m_pCuSplitInfo->push_back(ptp2);
     break;
@@ -449,25 +475,25 @@ Void TDecCu::xDecompressCU( TComDataCU* pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
     ptp1._ptStartY = uiTPelY;
     ptp1._ptEndX   = uiLPelX + w;
     ptp1._ptEndY   = uiTPelY + h;
-    ptp1._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp1._preMode  = mode;
     ptp2._sType    = Type_PU;
     ptp2._ptStartX = uiLPelX + w;
     ptp2._ptStartY = uiTPelY;
     ptp2._ptEndX   = uiRPelX + 1;
     ptp2._ptEndY   = uiTPelY + h;
-    ptp2._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp2._preMode  = mode;
     ptp3._sType    = Type_PU;
     ptp3._ptStartX = uiLPelX;
     ptp3._ptStartY = uiTPelY + h;
     ptp3._ptEndX   = uiLPelX + w;
     ptp3._ptEndY   = uiBPelY + 1;
-    ptp3._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp3._preMode  = mode;
     ptp4._sType    = Type_PU;
     ptp4._ptStartX = uiLPelX + w;
     ptp4._ptStartY = uiTPelY + h;
     ptp4._ptEndX   = uiRPelX + 1;
     ptp4._ptEndY   = uiBPelY + 1;
-    ptp4._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp4._preMode  = mode;
     m_pCuSplitInfo->push_back(ptp1);
     m_pCuSplitInfo->push_back(ptp2);
     m_pCuSplitInfo->push_back(ptp3);
@@ -479,13 +505,13 @@ Void TDecCu::xDecompressCU( TComDataCU* pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
     ptp1._ptStartY = uiTPelY;
     ptp1._ptEndX   = uiRPelX + 1;
     ptp1._ptEndY   = uiTPelY + h;
-    ptp1._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp1._preMode  = mode;
     ptp1._sType    = Type_PU;
     ptp2._ptStartX = uiLPelX;
     ptp2._ptStartY = uiTPelY + h;
     ptp2._ptEndX   = uiRPelX + 1;
     ptp2._ptEndY   = uiBPelY + 1;
-    ptp2._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp2._preMode  = mode;
     ptp2._sType    = Type_PU;
     m_pCuSplitInfo->push_back(ptp1);
     m_pCuSplitInfo->push_back(ptp2);
@@ -496,13 +522,13 @@ Void TDecCu::xDecompressCU( TComDataCU* pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
     ptp1._ptStartY = uiTPelY;
     ptp1._ptEndX   = uiRPelX + 1;
     ptp1._ptEndY   = uiTPelY + h;
-    ptp1._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp1._preMode  = mode;
     ptp1._sType    = Type_PU;
     ptp2._ptStartX = uiLPelX;
     ptp2._ptStartY = uiTPelY + h;
     ptp2._ptEndX   = uiRPelX + 1;
     ptp2._ptEndY   = uiBPelY + 1;
-    ptp2._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp2._preMode  = mode;
     ptp2._sType    = Type_PU;
     m_pCuSplitInfo->push_back(ptp1);
     m_pCuSplitInfo->push_back(ptp2);
@@ -513,13 +539,13 @@ Void TDecCu::xDecompressCU( TComDataCU* pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
     ptp1._ptStartY = uiTPelY;
     ptp1._ptEndX   = uiLPelX + w;
     ptp1._ptEndY   = uiBPelY + 1;
-    ptp1._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp1._preMode  = mode;
     ptp1._sType    = Type_PU;
     ptp2._ptStartX = uiLPelX + w;
     ptp2._ptStartY = uiTPelY;
     ptp2._ptEndX   = uiRPelX + 1;
     ptp2._ptEndY   = uiBPelY + 1;
-    ptp2._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp2._preMode  = mode;
     ptp2._sType    = Type_PU;
     m_pCuSplitInfo->push_back(ptp1);
     m_pCuSplitInfo->push_back(ptp2);
@@ -530,13 +556,13 @@ Void TDecCu::xDecompressCU( TComDataCU* pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
     ptp1._ptStartY = uiTPelY;
     ptp1._ptEndX   = uiLPelX + w;
     ptp1._ptEndY   = uiBPelY + 1;
-    ptp1._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp1._preMode  = mode;
     ptp1._sType    = Type_PU;
     ptp2._ptStartX = uiLPelX + w;
     ptp2._ptStartY = uiTPelY;
     ptp2._ptEndX   = uiRPelX + 1;
     ptp2._ptEndY   = uiBPelY + 1;
-    ptp2._preMode  = pcCU->getPredictionMode(uiAbsPartIdx);
+    ptp2._preMode  = mode;
     ptp2._sType    = Type_PU;
     m_pCuSplitInfo->push_back(ptp1);
     m_pCuSplitInfo->push_back(ptp2);
