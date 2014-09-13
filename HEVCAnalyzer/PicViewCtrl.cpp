@@ -472,9 +472,9 @@ void PicViewCtrl::DrawGrid(wxGraphicsContext* gc)
     int endy   = height/cuh + (height%cuh != 0);
     gc->SetPen(*wxBLACK_PEN);
     for(int i = starty; i < endy; i++)
-        gc->StrokeLine(0, i*cuh, m_cViewBitmap.GetWidth(), i*cuh);
+        gc->StrokeLine(0, i*cuh*m_dScaleRate, m_cViewBitmap.GetWidth()*m_dScaleRate, i*cuh*m_dScaleRate);
     for(int i = startx; i < endx; i++)
-        gc->StrokeLine(i*cuw, 0, i*cuw, m_cViewBitmap.GetHeight());
+        gc->StrokeLine(i*cuw*m_dScaleRate, 0, i*cuw*m_dScaleRate, m_cViewBitmap.GetHeight()*m_dScaleRate);
 }
 
 void PicViewCtrl::DrawBackGround(wxGraphicsContext* gc, wxGraphicsContext* gct)
@@ -504,13 +504,13 @@ void PicViewCtrl::DrawBackGround(wxGraphicsContext* gc, wxGraphicsContext* gct)
 //        gc->SetBrush(wxBrush(wxColor(255, 0, 0, 50)));
 //        gc->DrawRectangle(0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
     }
+    if(m_bOpenedYUVfile && m_bShowGrid)
+        DrawGrid(gct);
     if(!m_bOpenedYUVfile && m_bShowTilesInfo)
     {
         DrawSplitInfo(gct);
-        DrawTilesGrid(gc);
+        DrawTilesGrid(gct);
     }
-    if(m_bShowGrid)
-        DrawGrid(gc);
 }
 
 void PicViewCtrl::DrawNoPictureTips(wxGraphicsContext* gc)
@@ -750,35 +750,29 @@ void PicViewCtrl::SetSplitData(const int size, const PtInfo* pData)
 
 void PicViewCtrl::DrawSplitInfo(wxGraphicsContext* gc)
 {
-    wxPen pen1(wxColor(200, 200, 200, 255));
+    wxPen pen1(wxColor(0, 0, 0, 255));
     wxPen pen2(wxColor(100, 0, 100, 255));
     gc->SetPen(pen1);
     for(int i = 0; i < m_iSplitPtSize; i++)
     {
         if(m_pCurSplitInfo[i]._sType == Type_CU)
         {
-            int sx = m_pCurSplitInfo[i]._ptStartX;
-            int sy = m_pCurSplitInfo[i]._ptStartY;
-            int ex = m_pCurSplitInfo[i]._ptEndX;
-            int ey = m_pCurSplitInfo[i]._ptEndY;
             switch(m_pCurSplitInfo[i]._preMode)
             {
             case Type_INTRA:
-                gc->SetBrush(wxColor(196, 14, 14, 128));
+                gc->SetBrush(wxColor(255, 0, 0, 80));
                 break;
             case Type_SKIP:
                 gc->SetBrush(wxColor(255, 255, 255, 0));
                 break;
-            case Type_INTER_P:
-                gc->SetBrush(wxColor(0, 0, 255, 128));
-                break;
-            case Type_INTER_B:
-                gc->SetBrush(wxColor(0, 255, 0, 128));
-                break;
             default:
-                assert(0);
+                gc->SetBrush(wxColor(255, 255, 255, 0));
                 break;
             }
+            int sx = m_pCurSplitInfo[i]._ptStartX;
+            int sy = m_pCurSplitInfo[i]._ptStartY;
+            int ex = m_pCurSplitInfo[i]._ptEndX;
+            int ey = m_pCurSplitInfo[i]._ptEndY;
             gc->DrawRectangle(sx * m_dScaleRate, sy * m_dScaleRate, (ex - sx) * m_dScaleRate, (ey - sy) * m_dScaleRate);
         }
     }
@@ -792,6 +786,18 @@ void PicViewCtrl::DrawSplitInfo(wxGraphicsContext* gc)
             int sy = m_pCurSplitInfo[i]._ptStartY;
             int ex = m_pCurSplitInfo[i]._ptEndX;
             int ey = m_pCurSplitInfo[i]._ptEndY;
+            switch(m_pCurSplitInfo[i]._preMode)
+            {
+            case Type_INTER_P:
+                gc->SetBrush(wxColor(0, 0, 255, 80));
+                break;
+            case Type_INTER_B:
+                gc->SetBrush(wxColor(0, 255, 0, 80));
+                break;
+            default:
+                gc->SetBrush(wxColor(255, 255, 255, 0));
+                break;
+            }
             gc->DrawRectangle(sx * m_dScaleRate, sy * m_dScaleRate, (ex - sx) * m_dScaleRate, (ey - sy) * m_dScaleRate);
         }
     }
@@ -799,17 +805,17 @@ void PicViewCtrl::DrawSplitInfo(wxGraphicsContext* gc)
 
 void PicViewCtrl::DrawTilesGrid(wxGraphicsContext* gc)
 {
-    gc->SetPen(wxPen(wxColor(255, 0, 0, 255), 2));
+    gc->SetPen(wxPen(wxColor(255, 255, 0, 255), 2));
     int w = 0, h = 0;
     for(int i = 0 ; i < m_iNumRow; i++)
     {
         h += m_piRowData[i]*m_LCUSize.GetY();
-        gc->StrokeLine(0, h, m_cViewBitmap.GetWidth(), h);
+        gc->StrokeLine(0, h * m_dScaleRate, m_cViewBitmap.GetWidth() * m_dScaleRate, h * m_dScaleRate);
     }
     for(int i = 0; i < m_iNumCol; i++)
     {
         w += m_piColData[i]*m_LCUSize.GetX();
-        gc->StrokeLine(w, 0, w, m_cViewBitmap.GetHeight());
+        gc->StrokeLine(w * m_dScaleRate, 0, w * m_dScaleRate, m_cViewBitmap.GetHeight() * m_dScaleRate);
     }
 }
 
