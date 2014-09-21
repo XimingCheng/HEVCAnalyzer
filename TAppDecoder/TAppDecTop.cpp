@@ -89,7 +89,7 @@ Void TAppDecTop::destroy()
  - destroy internal class
  .
  */
-Void TAppDecTop::decode()
+Void TAppDecTop::decode(wxThread* pThread)
 {
     Int                 poc;
     TComList<TComPic *> *pcListPic = NULL;
@@ -111,7 +111,7 @@ Void TAppDecTop::decode()
     // main decoder loop
     Bool recon_opened = false; // reconstruction file not yet opened. (must be performed after SPS is seen)
 
-    while (!!bitstreamFile)
+    while (!!bitstreamFile && !pThread->TestDestroy())
     {
         /* location serves to work around a design fault in the decoder, whereby
          * the process of reading a new slice that is the first slice of a new frame

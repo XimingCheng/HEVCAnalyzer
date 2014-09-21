@@ -73,7 +73,7 @@ public:
 
     Void  create            (); ///< create internal members
     Void  destroy           (); ///< destroy internal members
-    Void  decode            (); ///< main decoding function
+    Void  decode            (wxThread* pThread); ///< main decoding function
 
 protected:
     Void  xCreateDecLib     (); ///< create internal classes

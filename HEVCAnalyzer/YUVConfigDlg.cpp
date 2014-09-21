@@ -9,7 +9,7 @@ YUVConfigDlg::YUVConfigDlg(wxWindow *parent, bool bReload)
     : wxDialog(parent, wxID_ANY, wxString(_T("YUV Param Settings"))),
     m_iWith(-1), m_iHeight(-1), m_bReload(bReload)
 {
-    SetSize(250, 180);
+    SetSize(210, 160);
     wxFlexGridSizer* fgSizer;
     fgSizer = new wxFlexGridSizer( 0, 2, 0, 0 );
     fgSizer->SetFlexibleDirection( wxBOTH );

@@ -31,7 +31,8 @@ wxString wxbuildinfo(wxbuildinfoformat format)
 }
 
 DEFINE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD)
-DEFINE_EVENT_TYPE(wxEVT_END_THREAD)
+DEFINE_EVENT_TYPE(wxEVT_END_THUMB_THREAD)
+DEFINE_EVENT_TYPE(wxEVT_END_DECODING_THREAD)
 DEFINE_EVENT_TYPE(wxEVT_DROP_FILES)
 DEFINE_EVENT_TYPE(wxEVT_LOGMSG)
 DEFINE_EVENT_TYPE(wxEVT_DECODING_MAINFRAME_NOTIFY)
@@ -51,7 +52,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(ID_FastBackward, MainFrame::OnFastBackward)
     EVT_MENU(ID_ReOpenWrongConfigYUVFile, MainFrame::OnReOpenWrongConfigYUVFile)
     EVT_COMMAND(wxID_ANY, wxEVT_ADDANIMAGE_THREAD, MainFrame::OnThreadAddImage)
-    EVT_COMMAND(wxID_ANY, wxEVT_END_THREAD, MainFrame::OnThreadEnd)
+    EVT_COMMAND(wxID_ANY, wxEVT_END_THUMB_THREAD, MainFrame::OnThumbThreadEnd)
+    EVT_COMMAND(wxID_ANY, wxEVT_END_DECODING_THREAD, MainFrame::OnDecodingThreadEnd)
     EVT_COMMAND(wxID_ANY, wxEVT_CLOSE_WINDOW, MainFrame::OnFrameClose)
     EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_TEXT_ENTER, MainFrame::OnInputFrameNumber)
     EVT_COMMAND(wxID_ANY, wxEVT_DROP_FILES, MainFrame::OnDropFiles)
@@ -490,6 +492,13 @@ void MainFrame::OnCloseFile(wxCommandEvent& event)
         }
         else
         {
+            // close the decoding thread
+            if(m_pDecodingThread)
+            {
+                if(m_pDecodingThread->IsAlive())
+                    m_pDecodingThread->Delete();
+                m_pDecodingThread = NULL;
+            }
             if(wxFile::Exists(m_sDecodedYUVPathName))
                 ::wxRemoveFile(m_sDecodedYUVPathName);
             wxSQLite3Database* pDb = MainUIInstance::GetInstance()->GetDataBase();
@@ -550,11 +559,17 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
     LogMsgUIInstance::GetInstance()->LogMessage(wxString::Format(_T("LEAVE Adding some images from %d to %d"), frame-framenumber+1, frame));
 }
 
-void MainFrame::OnThreadEnd(wxCommandEvent& event)
+void MainFrame::OnThumbThreadEnd(wxCommandEvent& event)
 {
-    LogMsgUIInstance::GetInstance()->LogMessage(_T("OnThreadEnd called"));
+    LogMsgUIInstance::GetInstance()->LogMessage(_T("OnThumbThreadEnd called"));
     m_pThumbThread = NULL;
     m_pImageList->RemoveAll();
+}
+
+void MainFrame::OnDecodingThreadEnd(wxCommandEvent& event)
+{
+    LogMsgUIInstance::GetInstance()->LogMessage(_T("OnDecodingThreadEnd called"));
+    m_pDecodingThread = NULL;
 }
 
 void MainFrame::ClearThumbnalMemory()

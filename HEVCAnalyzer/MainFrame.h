@@ -12,7 +12,8 @@
 #define ID_ZoomSlider      MainFrame::ID_MainFrameMax + 100
 
 DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
-DECLARE_EVENT_TYPE(wxEVT_END_THREAD, wxID_ANY)
+DECLARE_EVENT_TYPE(wxEVT_END_THUMB_THREAD, wxID_ANY)
+DECLARE_EVENT_TYPE(wxEVT_END_DECODING_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_DROP_FILES, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_LOGMSG, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_DECODING_MAINFRAME_NOTIFY, wxID_ANY)
@@ -90,7 +91,8 @@ private:
     void           OnOpenYUVFile(const wxString& sFile, const wxString& sName, bool bWrongOpened = false);
     void           OnOpenStreamFile(const wxString& sFile, const wxString& sName);
     void           OnCloseFile(wxCommandEvent& event);
-    void           OnThreadEnd(wxCommandEvent& event);
+    void           OnThumbThreadEnd(wxCommandEvent& event);
+    void           OnDecodingThreadEnd(wxCommandEvent& event);
     void           OnUpdateUI(wxUpdateUIEvent& event);
     void           OnDropDownToolbarYUV(wxAuiToolBarEvent& event);
     void           OnSwitchShowGrid(wxCommandEvent& event);

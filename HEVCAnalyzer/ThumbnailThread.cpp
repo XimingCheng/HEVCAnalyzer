@@ -5,7 +5,8 @@
 bool g_md5_mismatch = false;
 
 extern const wxEventType wxEVT_ADDANIMAGE_THREAD;
-extern const wxEventType wxEVT_END_THREAD;
+extern const wxEventType wxEVT_END_THUMB_THREAD;
+extern const wxEventType wxEVT_END_DECODING_THREAD;
 
 char opt0[] = "HEVCAnalyzer";
 char opt1[] = "-b";
@@ -109,7 +110,7 @@ void ThumbnailThread::OnExit()
     }
     if(!TestDestroy())
     {
-        wxCommandEvent event(wxEVT_END_THREAD, wxID_ANY);
+        wxCommandEvent event(wxEVT_END_THUMB_THREAD, wxID_ANY);
         wxPostEvent(m_pFrame, event);
     }
 }
@@ -140,7 +141,7 @@ void* DecodingThread::Entry()
         return (wxThread::ExitCode)1;
     }
     // main HEVC decoder
-    cTAppDecTop.decode();
+    cTAppDecTop.decode(this);
     if(g_md5_mismatch)
         wxMessageBox(_T("A decoding mismatch occured: signalled md5sum does not match"),
             _T("Decoding Error"), wxICON_ERROR);
@@ -171,6 +172,11 @@ void DecodingThread::ReleaseBuffer()
 void DecodingThread::OnExit()
 {
     ReleaseBuffer();
+    if(!TestDestroy())
+    {
+        wxCommandEvent event(wxEVT_END_DECODING_THREAD, wxID_ANY);
+        wxPostEvent(m_pFrame, event);
+    }
 }
 
 DecodingThread::~DecodingThread()
