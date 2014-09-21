@@ -132,8 +132,9 @@ Void TDecCu::destroy()
 /** \param    pcCU        pointer of CU data
  \param    ruiIsLast   last data?
  */
-Void TDecCu::decodeCU( TComDataCU *pcCU, UInt &ruiIsLast )
+Void TDecCu::decodeCU( TComDataCU *pcCU, UInt &ruiIsLast, std::vector<PtInfo> &pt )
 {
+    m_pCuSplitInfo = &pt;
     if ( pcCU->getSlice()->getPPS()->getUseDQP() )
     {
         setdQPFlag(true);
@@ -147,7 +148,7 @@ Void TDecCu::decodeCU( TComDataCU *pcCU, UInt &ruiIsLast )
  */
 Void TDecCu::decompressCU( TComDataCU *pcCU, std::vector<PtInfo> &pt )
 {
-    m_pCuSplitInfo = &pt;
+    //m_pCuSplitInfo = &pt;
     xDecompressCU( pcCU, 0,  0 );
 }
 
@@ -348,7 +349,7 @@ Void TDecCu::xDecodeCU( TComDataCU *pcCU, UInt uiAbsPartIdx, UInt uiDepth, UInt 
 
     // Coefficient decoding
     Bool bCodeDQP = getdQPFlag();
-    m_pcEntropyDecoder->decodeCoeff( pcCU, uiAbsPartIdx, uiDepth, uiCurrWidth, uiCurrHeight, bCodeDQP );
+    m_pcEntropyDecoder->decodeCoeff( pcCU, uiAbsPartIdx, uiDepth, uiCurrWidth, uiCurrHeight, bCodeDQP, *m_pCuSplitInfo);
     setdQPFlag( bCodeDQP );
     xFinishDecodeCU( pcCU, uiAbsPartIdx, uiDepth, ruiIsLast );
 }

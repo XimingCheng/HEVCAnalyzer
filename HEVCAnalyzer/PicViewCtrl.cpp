@@ -504,13 +504,13 @@ void PicViewCtrl::DrawBackGround(wxGraphicsContext* gc, wxGraphicsContext* gct)
 //        gc->SetBrush(wxBrush(wxColor(255, 0, 0, 50)));
 //        gc->DrawRectangle(0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
     }
-    if(m_bOpenedYUVfile && m_bShowGrid)
-        DrawGrid(gct);
     if(!m_bOpenedYUVfile && m_bShowTilesInfo)
     {
         DrawSplitInfo(gct);
         DrawTilesGrid(gct);
     }
+    if(m_bShowGrid)
+        DrawGrid(gct);
 }
 
 void PicViewCtrl::DrawNoPictureTips(wxGraphicsContext* gc)
@@ -750,9 +750,11 @@ void PicViewCtrl::SetSplitData(const int size, const PtInfo* pData)
 
 void PicViewCtrl::DrawSplitInfo(wxGraphicsContext* gc)
 {
-    wxPen pen1(wxColor(0, 0, 0, 255));
-    wxPen pen2(wxColor(100, 0, 100, 255));
-    gc->SetPen(pen1);
+    wxPen penCU(wxColor(0, 0, 0, 255), 1);
+    wxPen penPU(wxColor(0, 0, 100, 255), 1);
+    wxPen penTU_LUMA(wxColor(100, 0, 0, 255), 1);
+    wxPen penTU_CHROMA(wxColor(0, 100, 0, 255), 1);
+    gc->SetPen(penCU);
     for(int i = 0; i < m_iSplitPtSize; i++)
     {
         if(m_pCurSplitInfo[i]._sType == Type_CU)
@@ -776,7 +778,7 @@ void PicViewCtrl::DrawSplitInfo(wxGraphicsContext* gc)
             gc->DrawRectangle(sx * m_dScaleRate, sy * m_dScaleRate, (ex - sx) * m_dScaleRate, (ey - sy) * m_dScaleRate);
         }
     }
-    gc->SetPen(pen2);
+    gc->SetPen(penPU);
     gc->SetBrush(wxColor(255, 255, 255, 0));
     for(int i = 0; i < m_iSplitPtSize; i++)
     {
@@ -801,6 +803,31 @@ void PicViewCtrl::DrawSplitInfo(wxGraphicsContext* gc)
             gc->DrawRectangle(sx * m_dScaleRate, sy * m_dScaleRate, (ex - sx) * m_dScaleRate, (ey - sy) * m_dScaleRate);
         }
     }
+    gc->SetPen(penTU_LUMA);
+    gc->SetBrush(wxColor(255, 255, 255, 0));
+    for(int i = 0; i < m_iSplitPtSize; i++)
+    {
+        if(m_pCurSplitInfo[i]._sType == Type_TU_LUMA)
+        {
+            int sx = m_pCurSplitInfo[i]._ptStartX;
+            int sy = m_pCurSplitInfo[i]._ptStartY;
+            int ex = m_pCurSplitInfo[i]._ptEndX;
+            int ey = m_pCurSplitInfo[i]._ptEndY;
+            gc->DrawRectangle(sx * m_dScaleRate, sy * m_dScaleRate, (ex - sx) * m_dScaleRate, (ey - sy) * m_dScaleRate);
+        }
+    }
+//    gc->SetPen(penTU_CHROMA);
+//    for(int i = 0; i < m_iSplitPtSize; i++)
+//    {
+//        if(m_pCurSplitInfo[i]._sType == Type_TU_CHROMA)
+//        {
+//            int sx = m_pCurSplitInfo[i]._ptStartX;
+//            int sy = m_pCurSplitInfo[i]._ptStartY;
+//            int ex = m_pCurSplitInfo[i]._ptEndX;
+//            int ey = m_pCurSplitInfo[i]._ptEndY;
+//            gc->DrawRectangle(sx * m_dScaleRate, sy * m_dScaleRate, (ex - sx) * m_dScaleRate, (ey - sy) * m_dScaleRate);
+//        }
+//    }
 }
 
 void PicViewCtrl::DrawTilesGrid(wxGraphicsContext* gc)

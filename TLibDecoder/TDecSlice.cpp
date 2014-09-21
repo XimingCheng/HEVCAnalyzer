@@ -362,7 +362,7 @@ Void TDecSlice::decompressSlice(TComInputBitstream **ppcSubstreams, TComPic *&rp
                 }
             }
         }
-        m_pcCuDecoder->decodeCU     ( pcCU, uiIsLast );
+        m_pcCuDecoder->decodeCU     ( pcCU, uiIsLast, m_cuSplitPoints );
         m_pcCuDecoder->decompressCU ( pcCU, m_cuSplitPoints );
 
 #if ENC_DEC_TRACE

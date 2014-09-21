@@ -44,6 +44,7 @@
 #include "../TLibCommon/TComPic.h"
 #include "../TLibCommon/TComPrediction.h"
 #include "../TLibCommon/TComSampleAdaptiveOffset.h"
+#include "../HEVCAnalyzer/MainUIInstance.h"
 
 class TDecSbac;
 class TDecCavlc;
@@ -188,10 +189,10 @@ public:
 
 
 private:
-    Void xDecodeTransform        ( TComDataCU *pcCU, UInt offsetLuma, UInt offsetChroma, UInt uiAbsPartIdx, UInt uiDepth, UInt width, UInt height, UInt uiTrIdx, Bool &bCodeDQP );
+    Void xDecodeTransform        ( TComDataCU *pcCU, UInt offsetLuma, UInt offsetChroma, UInt uiAbsPartIdx, UInt uiDepth, UInt width, UInt height, UInt uiTrIdx, Bool &bCodeDQP, std::vector<PtInfo> &pt );
 
 public:
-    Void decodeCoeff             ( TComDataCU *pcCU                 , UInt uiAbsPartIdx, UInt uiDepth, UInt uiWidth, UInt uiHeight, Bool &bCodeDQP );
+    Void decodeCoeff             ( TComDataCU *pcCU                 , UInt uiAbsPartIdx, UInt uiDepth, UInt uiWidth, UInt uiHeight, Bool &bCodeDQP, std::vector<PtInfo> &pt );
 
 };// END CLASS DEFINITION TDecEntropy
 

@@ -85,7 +85,7 @@ public:
     Void  destroy                 ();
 
     /// decode CU information
-    Void  decodeCU                ( TComDataCU *pcCU, UInt &ruiIsLast );
+    Void  decodeCU                ( TComDataCU *pcCU, UInt &ruiIsLast, std::vector<PtInfo> &pt );
 
     /// reconstruct CU information
     Void  decompressCU            ( TComDataCU *pcCU, std::vector<PtInfo> &pt );
