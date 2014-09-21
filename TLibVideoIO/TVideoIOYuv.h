@@ -54,37 +54,40 @@ using namespace std;
 class TVideoIOYuv
 {
 private:
-  Bool      m_bOpened;
-  // Under Linux the fstream class in TVideoIOYuv will crash on its destruction function
-  // nobody knows its reason, including Google and Stack Overflow
-  // crash stack info
-  //  std::locale::~locale() () from /usr/lib/i386-linux-gnu/libstdc++.so.6
-  //  std::basic_fstream<char, std::char_traits<char> >::~basic_fstream() () from /usr/lib/i386-linux-gnu/libstdc++.so.6
-  //  TVideoIOYuv::~TVideoIOYuv (this=0xab3ccecc) at ../../HEVCAnalyzer/../TLibVideoIO/TVideoIOYuv.h:66
-  // so I change the fstream into basic file pointer
-  //fstream   m_cHandle;                                      ///< file handle
-  FILE*     m_filePointer;
-  Int m_fileBitDepthY; ///< bitdepth of input/output video file luma component
-  Int m_fileBitDepthC; ///< bitdepth of input/output video file chroma component
-  Int m_bitDepthShiftY;  ///< number of bits to increase or decrease luma by before/after write/read
-  Int m_bitDepthShiftC;  ///< number of bits to increase or decrease chroma by before/after write/read
+    Bool      m_bOpened;
+    // Under Linux the fstream class in TVideoIOYuv will crash on its destruction function
+    // nobody knows its reason, including Google and Stack Overflow
+    // crash stack info
+    //  std::locale::~locale() () from /usr/lib/i386-linux-gnu/libstdc++.so.6
+    //  std::basic_fstream<char, std::char_traits<char> >::~basic_fstream() () from /usr/lib/i386-linux-gnu/libstdc++.so.6
+    //  TVideoIOYuv::~TVideoIOYuv (this=0xab3ccecc) at ../../HEVCAnalyzer/../TLibVideoIO/TVideoIOYuv.h:66
+    // so I change the fstream into basic file pointer
+    //fstream   m_cHandle;                                      ///< file handle
+    FILE     *m_filePointer;
+    Int m_fileBitDepthY; ///< bitdepth of input/output video file luma component
+    Int m_fileBitDepthC; ///< bitdepth of input/output video file chroma component
+    Int m_bitDepthShiftY;  ///< number of bits to increase or decrease luma by before/after write/read
+    Int m_bitDepthShiftC;  ///< number of bits to increase or decrease chroma by before/after write/read
 
 public:
-  TVideoIOYuv() : m_bOpened(false)           {}
-  virtual ~TVideoIOYuv()  {}
+    TVideoIOYuv() : m_bOpened(false)           {}
+    virtual ~TVideoIOYuv()  {}
 
-  Void  open  ( const Char* pchFile, Bool bWriteMode, Int fileBitDepthY, Int fileBitDepthC, Int internalBitDepthY, Int internalBitDepthC ); ///< open or create file
-  Void  close ();                                           ///< close file
-  Bool  isOpen() const { return m_bOpened; }
-  Void  reset ();
+    Void  open  ( const Char *pchFile, Bool bWriteMode, Int fileBitDepthY, Int fileBitDepthC, Int internalBitDepthY, Int internalBitDepthC ); ///< open or create file
+    Void  close ();                                           ///< close file
+    Bool  isOpen() const
+    {
+        return m_bOpened;
+    }
+    Void  reset ();
 
-  void skipFrames(UInt numFrames, UInt width, UInt height);
+    void skipFrames(UInt numFrames, UInt width, UInt height);
 
-  Bool  read  ( TComPicYuv*   pPicYuv, Int aiPad[2] );     ///< read  one YUV frame with padding parameter
-  Bool  write( TComPicYuv*    pPicYuv, Int confLeft=0, Int confRight=0, Int confTop=0, Int confBottom=0 );
+    Bool  read  ( TComPicYuv   *pPicYuv, Int aiPad[2] );     ///< read  one YUV frame with padding parameter
+    Bool  write( TComPicYuv    *pPicYuv, Int confLeft = 0, Int confRight = 0, Int confTop = 0, Int confBottom = 0 );
 
-  Bool  isEof ();                                           ///< check for end-of-file
-  Bool  isFail();                                           ///< check for failure
+    Bool  isEof ();                                           ///< check for end-of-file
+    Bool  isFail();                                           ///< check for failure
 
 };
 

@@ -1,7 +1,7 @@
 /* The copyright in this software is being made available under the BSD
  * License, included below. This software may be subject to other third party
  * and contributor rights, including patent rights, and no such rights are
- * granted under this license.  
+ * granted under this license.
  *
  * Copyright (c) 2010-2013, ITU/ISO/IEC
  * All rights reserved.
@@ -52,18 +52,18 @@
 /// weighting prediction class
 class TComWeightPrediction
 {
-  wpScalingParam  m_wp0[3], m_wp1[3];
+    wpScalingParam  m_wp0[3], m_wp1[3];
 
 public:
-  TComWeightPrediction();
+    TComWeightPrediction();
 
-  Void  getWpScaling( TComDataCU* pcCU, Int iRefIdx0, Int iRefIdx1, wpScalingParam *&wp0 , wpScalingParam *&wp1);
+    Void  getWpScaling( TComDataCU *pcCU, Int iRefIdx0, Int iRefIdx1, wpScalingParam *&wp0 , wpScalingParam *&wp1);
 
-  Void  addWeightBi( TComYuv* pcYuvSrc0, TComYuv* pcYuvSrc1, UInt iPartUnitIdx, UInt iWidth, UInt iHeight, wpScalingParam *wp0, wpScalingParam *wp1, TComYuv* rpcYuvDst, Bool bRound=true );
-  Void  addWeightUni( TComYuv* pcYuvSrc0, UInt iPartUnitIdx, UInt iWidth, UInt iHeight, wpScalingParam *wp0, TComYuv* rpcYuvDst );
+    Void  addWeightBi( TComYuv *pcYuvSrc0, TComYuv *pcYuvSrc1, UInt iPartUnitIdx, UInt iWidth, UInt iHeight, wpScalingParam *wp0, wpScalingParam *wp1, TComYuv *rpcYuvDst, Bool bRound = true );
+    Void  addWeightUni( TComYuv *pcYuvSrc0, UInt iPartUnitIdx, UInt iWidth, UInt iHeight, wpScalingParam *wp0, TComYuv *rpcYuvDst );
 
-  Void  xWeightedPredictionUni( TComDataCU* pcCU, TComYuv* pcYuvSrc, UInt uiPartAddr, Int iWidth, Int iHeight, RefPicList eRefPicList, TComYuv*& rpcYuvPred, Int iRefIdx=-1 );
-  Void  xWeightedPredictionBi( TComDataCU* pcCU, TComYuv* pcYuvSrc0, TComYuv* pcYuvSrc1, Int iRefIdx0, Int iRefIdx1, UInt uiPartIdx, Int iWidth, Int iHeight, TComYuv* rpcYuvDst );
+    Void  xWeightedPredictionUni( TComDataCU *pcCU, TComYuv *pcYuvSrc, UInt uiPartAddr, Int iWidth, Int iHeight, RefPicList eRefPicList, TComYuv *&rpcYuvPred, Int iRefIdx = -1 );
+    Void  xWeightedPredictionBi( TComDataCU *pcCU, TComYuv *pcYuvSrc0, TComYuv *pcYuvSrc1, Int iRefIdx0, Int iRefIdx1, UInt uiPartIdx, Int iWidth, Int iHeight, TComYuv *rpcYuvDst );
 };
 
-#endif 
+#endif

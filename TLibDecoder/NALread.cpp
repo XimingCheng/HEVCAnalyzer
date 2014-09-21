@@ -49,92 +49,92 @@ using namespace std;
 
 //! \ingroup TLibDecoder
 //! \{
-static void convertPayloadToRBSP(vector<uint8_t>& nalUnitBuf, Bool isVclNalUnit)
+static void convertPayloadToRBSP(vector<uint8_t> &nalUnitBuf, Bool isVclNalUnit)
 {
-  UInt zeroCount = 0;
-  vector<uint8_t>::iterator it_read, it_write;
+    UInt zeroCount = 0;
+    vector<uint8_t>::iterator it_read, it_write;
 
-  for (it_read = it_write = nalUnitBuf.begin(); it_read != nalUnitBuf.end(); it_read++, it_write++)
-  {
-    assert(zeroCount < 2 || *it_read >= 0x03);
-    if (zeroCount == 2 && *it_read == 0x03)
+    for (it_read = it_write = nalUnitBuf.begin(); it_read != nalUnitBuf.end(); it_read++, it_write++)
     {
-      it_read++;
-      zeroCount = 0;
-      if (it_read == nalUnitBuf.end())
-      {
-        break;
-      }
+        assert(zeroCount < 2 || *it_read >= 0x03);
+        if (zeroCount == 2 && *it_read == 0x03)
+        {
+            it_read++;
+            zeroCount = 0;
+            if (it_read == nalUnitBuf.end())
+            {
+                break;
+            }
+        }
+        zeroCount = (*it_read == 0x00) ? zeroCount + 1 : 0;
+        *it_write = *it_read;
     }
-    zeroCount = (*it_read == 0x00) ? zeroCount+1 : 0;
-    *it_write = *it_read;
-  }
-  assert(zeroCount == 0);
+    assert(zeroCount == 0);
 
-  if (isVclNalUnit)
-  {
-    // Remove cabac_zero_word from payload if present
-    Int n = 0;
-
-    while (it_write[-1] == 0x00)
+    if (isVclNalUnit)
     {
-      it_write--;
-      n++;
+        // Remove cabac_zero_word from payload if present
+        Int n = 0;
+
+        while (it_write[-1] == 0x00)
+        {
+            it_write--;
+            n++;
+        }
+
+        if (n > 0)
+        {
+            printf("\nDetected %d instances of cabac_zero_word", n / 2);
+        }
     }
 
-    if (n > 0)
-    {
-      printf("\nDetected %d instances of cabac_zero_word", n/2);
-    }
-  }
-
-  nalUnitBuf.resize(it_write - nalUnitBuf.begin());
+    nalUnitBuf.resize(it_write - nalUnitBuf.begin());
 }
 
-Void readNalUnitHeader(InputNALUnit& nalu)
+Void readNalUnitHeader(InputNALUnit &nalu)
 {
-  TComInputBitstream& bs = *nalu.m_Bitstream;
+    TComInputBitstream &bs = *nalu.m_Bitstream;
 
-  Bool forbidden_zero_bit = bs.read(1);           // forbidden_zero_bit
-  assert(forbidden_zero_bit == 0);
-  nalu.m_nalUnitType = (NalUnitType) bs.read(6);  // nal_unit_type
-  nalu.m_reservedZero6Bits = bs.read(6);       // nuh_reserved_zero_6bits
-  assert(nalu.m_reservedZero6Bits == 0);
-  nalu.m_temporalId = bs.read(3) - 1;             // nuh_temporal_id_plus1
+    Bool forbidden_zero_bit = bs.read(1);           // forbidden_zero_bit
+    assert(forbidden_zero_bit == 0);
+    nalu.m_nalUnitType = (NalUnitType) bs.read(6);  // nal_unit_type
+    nalu.m_reservedZero6Bits = bs.read(6);       // nuh_reserved_zero_6bits
+    assert(nalu.m_reservedZero6Bits == 0);
+    nalu.m_temporalId = bs.read(3) - 1;             // nuh_temporal_id_plus1
 
-  if ( nalu.m_temporalId )
-  {
-    assert( nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_BLA
-         && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_BLANT
-         && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_BLA_N_LP
-         && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_IDR
-         && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_IDR_N_LP
-         && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_CRA
-         && nalu.m_nalUnitType != NAL_UNIT_VPS
-         && nalu.m_nalUnitType != NAL_UNIT_SPS
-         && nalu.m_nalUnitType != NAL_UNIT_EOS
-         && nalu.m_nalUnitType != NAL_UNIT_EOB );
-  }
-  else
-  {
-    assert( nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_TLA
-         && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_TSA_N
-         && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_STSA_R
-         && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_STSA_N );
-  }
+    if ( nalu.m_temporalId )
+    {
+        assert( nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_BLA
+                && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_BLANT
+                && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_BLA_N_LP
+                && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_IDR
+                && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_IDR_N_LP
+                && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_CRA
+                && nalu.m_nalUnitType != NAL_UNIT_VPS
+                && nalu.m_nalUnitType != NAL_UNIT_SPS
+                && nalu.m_nalUnitType != NAL_UNIT_EOS
+                && nalu.m_nalUnitType != NAL_UNIT_EOB );
+    }
+    else
+    {
+        assert( nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_TLA
+                && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_TSA_N
+                && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_STSA_R
+                && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_STSA_N );
+    }
 }
 /**
  * create a NALunit structure with given header values and storage for
  * a bitstream
  */
-void read(InputNALUnit& nalu, vector<uint8_t>& nalUnitBuf)
+void read(InputNALUnit &nalu, vector<uint8_t> &nalUnitBuf)
 {
-  /* perform anti-emulation prevention */
-  TComInputBitstream *pcBitstream = new TComInputBitstream(NULL);
-  convertPayloadToRBSP(nalUnitBuf, (nalUnitBuf[0] & 64) == 0);
+    /* perform anti-emulation prevention */
+    TComInputBitstream *pcBitstream = new TComInputBitstream(NULL);
+    convertPayloadToRBSP(nalUnitBuf, (nalUnitBuf[0] & 64) == 0);
 
-  nalu.m_Bitstream = new TComInputBitstream(&nalUnitBuf);
-  delete pcBitstream;
-  readNalUnitHeader(nalu);
+    nalu.m_Bitstream = new TComInputBitstream(&nalUnitBuf);
+    delete pcBitstream;
+    readNalUnitHeader(nalu);
 }
 //! \}

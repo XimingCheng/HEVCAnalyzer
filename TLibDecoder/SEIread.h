@@ -53,23 +53,23 @@ class TComInputBitstream;
 class SEIReader: public SyntaxElementParser
 {
 public:
-  SEIReader() {};
-  virtual ~SEIReader() {};
-  Void parseSEImessage(TComInputBitstream* bs, SEIMessages& seis, const NalUnitType nalUnitType, TComSPS *sps);
+    SEIReader() {};
+    virtual ~SEIReader() {};
+    Void parseSEImessage(TComInputBitstream *bs, SEIMessages &seis, const NalUnitType nalUnitType, TComSPS *sps);
 protected:
-  Void xReadSEImessage                (SEIMessages& seis, const NalUnitType nalUnitType, TComSPS *sps);
-  Void xParseSEIuserDataUnregistered  (SEIuserDataUnregistered &sei, UInt payloadSize);
-  Void xParseSEIActiveParameterSets   (SEIActiveParameterSets  &sei, UInt payloadSize);
-  Void xParseSEIDecodingUnitInfo      (SEIDecodingUnitInfo& sei, UInt payloadSize, TComSPS *sps);
-  Void xParseSEIDecodedPictureHash    (SEIDecodedPictureHash& sei, UInt payloadSize);
-  Void xParseSEIBufferingPeriod       (SEIBufferingPeriod& sei, UInt payloadSize, TComSPS *sps);
-  Void xParseSEIPictureTiming         (SEIPictureTiming& sei, UInt payloadSize, TComSPS *sps);
-  Void xParseSEIRecoveryPoint         (SEIRecoveryPoint& sei, UInt payloadSize);
-  Void xParseSEIFramePacking          (SEIFramePacking& sei, UInt payloadSize);
-  Void xParseSEIDisplayOrientation    (SEIDisplayOrientation &sei, UInt payloadSize);
-  Void xParseSEITemporalLevel0Index   (SEITemporalLevel0Index &sei, UInt payloadSize);
-  Void xParseSEIGradualDecodingRefreshInfo (SEIGradualDecodingRefreshInfo &sei, UInt payloadSize);
-  Void xParseByteAlign();
+    Void xReadSEImessage                (SEIMessages &seis, const NalUnitType nalUnitType, TComSPS *sps);
+    Void xParseSEIuserDataUnregistered  (SEIuserDataUnregistered &sei, UInt payloadSize);
+    Void xParseSEIActiveParameterSets   (SEIActiveParameterSets  &sei, UInt payloadSize);
+    Void xParseSEIDecodingUnitInfo      (SEIDecodingUnitInfo &sei, UInt payloadSize, TComSPS *sps);
+    Void xParseSEIDecodedPictureHash    (SEIDecodedPictureHash &sei, UInt payloadSize);
+    Void xParseSEIBufferingPeriod       (SEIBufferingPeriod &sei, UInt payloadSize, TComSPS *sps);
+    Void xParseSEIPictureTiming         (SEIPictureTiming &sei, UInt payloadSize, TComSPS *sps);
+    Void xParseSEIRecoveryPoint         (SEIRecoveryPoint &sei, UInt payloadSize);
+    Void xParseSEIFramePacking          (SEIFramePacking &sei, UInt payloadSize);
+    Void xParseSEIDisplayOrientation    (SEIDisplayOrientation &sei, UInt payloadSize);
+    Void xParseSEITemporalLevel0Index   (SEITemporalLevel0Index &sei, UInt payloadSize);
+    Void xParseSEIGradualDecodingRefreshInfo (SEIGradualDecodingRefreshInfo &sei, UInt payloadSize);
+    Void xParseByteAlign();
 };
 
 

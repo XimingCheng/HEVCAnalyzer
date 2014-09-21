@@ -58,64 +58,70 @@
 class TDecCu
 {
 private:
-  UInt                m_uiMaxDepth;       ///< max. number of depth
-  TComYuv**           m_ppcYuvResi;       ///< array of residual buffer
-  TComYuv**           m_ppcYuvReco;       ///< array of prediction & reconstruction buffer
-  TComDataCU**        m_ppcCU;            ///< CU data array
+    UInt                m_uiMaxDepth;       ///< max. number of depth
+    TComYuv           **m_ppcYuvResi;       ///< array of residual buffer
+    TComYuv           **m_ppcYuvReco;       ///< array of prediction & reconstruction buffer
+    TComDataCU        **m_ppcCU;            ///< CU data array
 
-  // access channel
-  TComTrQuant*        m_pcTrQuant;
-  TComPrediction*     m_pcPrediction;
-  TDecEntropy*        m_pcEntropyDecoder;
+    // access channel
+    TComTrQuant        *m_pcTrQuant;
+    TComPrediction     *m_pcPrediction;
+    TDecEntropy        *m_pcEntropyDecoder;
 
-  Bool                m_bDecodeDQP;
-  std::vector<PtInfo>*  m_pCuSplitInfo;
+    Bool                m_bDecodeDQP;
+    std::vector<PtInfo>  *m_pCuSplitInfo;
 
 public:
-  TDecCu();
-  virtual ~TDecCu();
+    TDecCu();
+    virtual ~TDecCu();
 
-  /// initialize access channels
-  Void  init                    ( TDecEntropy* pcEntropyDecoder, TComTrQuant* pcTrQuant, TComPrediction* pcPrediction );
+    /// initialize access channels
+    Void  init                    ( TDecEntropy *pcEntropyDecoder, TComTrQuant *pcTrQuant, TComPrediction *pcPrediction );
 
-  /// create internal buffers
-  Void  create                  ( UInt uiMaxDepth, UInt uiMaxWidth, UInt uiMaxHeight );
+    /// create internal buffers
+    Void  create                  ( UInt uiMaxDepth, UInt uiMaxWidth, UInt uiMaxHeight );
 
-  /// destroy internal buffers
-  Void  destroy                 ();
+    /// destroy internal buffers
+    Void  destroy                 ();
 
-  /// decode CU information
-  Void  decodeCU                ( TComDataCU* pcCU, UInt& ruiIsLast );
+    /// decode CU information
+    Void  decodeCU                ( TComDataCU *pcCU, UInt &ruiIsLast );
 
-  /// reconstruct CU information
-  Void  decompressCU            ( TComDataCU* pcCU, std::vector<PtInfo>& pt );
+    /// reconstruct CU information
+    Void  decompressCU            ( TComDataCU *pcCU, std::vector<PtInfo> &pt );
 
 protected:
 
-  Void xDecodeCU                ( TComDataCU* pcCU,                       UInt uiAbsPartIdx, UInt uiDepth, UInt &ruiIsLast);
-  Void xFinishDecodeCU          ( TComDataCU* pcCU,                       UInt uiAbsPartIdx, UInt uiDepth, UInt &ruiIsLast);
-  Bool xDecodeSliceEnd          ( TComDataCU* pcCU,                       UInt uiAbsPartIdx, UInt uiDepth);
-  Void xDecompressCU            ( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth );
+    Void xDecodeCU                ( TComDataCU *pcCU,                       UInt uiAbsPartIdx, UInt uiDepth, UInt &ruiIsLast);
+    Void xFinishDecodeCU          ( TComDataCU *pcCU,                       UInt uiAbsPartIdx, UInt uiDepth, UInt &ruiIsLast);
+    Bool xDecodeSliceEnd          ( TComDataCU *pcCU,                       UInt uiAbsPartIdx, UInt uiDepth);
+    Void xDecompressCU            ( TComDataCU *pcCU, UInt uiAbsPartIdx, UInt uiDepth );
 
-  Void xReconInter              ( TComDataCU* pcCU, UInt uiDepth );
+    Void xReconInter              ( TComDataCU *pcCU, UInt uiDepth );
 
-  Void  xReconIntraQT           ( TComDataCU* pcCU, UInt uiDepth );
-  Void  xIntraRecLumaBlk        ( TComDataCU* pcCU, UInt uiTrDepth, UInt uiAbsPartIdx, TComYuv* pcRecoYuv, TComYuv* pcPredYuv, TComYuv* pcResiYuv );
-  Void  xIntraRecChromaBlk      ( TComDataCU* pcCU, UInt uiTrDepth, UInt uiAbsPartIdx, TComYuv* pcRecoYuv, TComYuv* pcPredYuv, TComYuv* pcResiYuv, UInt uiChromaId );
+    Void  xReconIntraQT           ( TComDataCU *pcCU, UInt uiDepth );
+    Void  xIntraRecLumaBlk        ( TComDataCU *pcCU, UInt uiTrDepth, UInt uiAbsPartIdx, TComYuv *pcRecoYuv, TComYuv *pcPredYuv, TComYuv *pcResiYuv );
+    Void  xIntraRecChromaBlk      ( TComDataCU *pcCU, UInt uiTrDepth, UInt uiAbsPartIdx, TComYuv *pcRecoYuv, TComYuv *pcPredYuv, TComYuv *pcResiYuv, UInt uiChromaId );
 
-  Void  xReconPCM               ( TComDataCU* pcCU, UInt uiDepth );
+    Void  xReconPCM               ( TComDataCU *pcCU, UInt uiDepth );
 
-  Void xDecodeInterTexture      ( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth );
-  Void xDecodePCMTexture        ( TComDataCU* pcCU, UInt uiPartIdx, Pel *piPCM, Pel* piReco, UInt uiStride, UInt uiWidth, UInt uiHeight, TextType ttText);
+    Void xDecodeInterTexture      ( TComDataCU *pcCU, UInt uiAbsPartIdx, UInt uiDepth );
+    Void xDecodePCMTexture        ( TComDataCU *pcCU, UInt uiPartIdx, Pel *piPCM, Pel *piReco, UInt uiStride, UInt uiWidth, UInt uiHeight, TextType ttText);
 
-  Void xCopyToPic               ( TComDataCU* pcCU, TComPic* pcPic, UInt uiZorderIdx, UInt uiDepth );
+    Void xCopyToPic               ( TComDataCU *pcCU, TComPic *pcPic, UInt uiZorderIdx, UInt uiDepth );
 
-  Void  xIntraLumaRecQT         ( TComDataCU* pcCU, UInt uiTrDepth, UInt uiAbsPartIdx, TComYuv* pcRecoYuv, TComYuv* pcPredYuv, TComYuv* pcResiYuv );
-  Void  xIntraChromaRecQT       ( TComDataCU* pcCU, UInt uiTrDepth, UInt uiAbsPartIdx, TComYuv* pcRecoYuv, TComYuv* pcPredYuv, TComYuv* pcResiYuv );
+    Void  xIntraLumaRecQT         ( TComDataCU *pcCU, UInt uiTrDepth, UInt uiAbsPartIdx, TComYuv *pcRecoYuv, TComYuv *pcPredYuv, TComYuv *pcResiYuv );
+    Void  xIntraChromaRecQT       ( TComDataCU *pcCU, UInt uiTrDepth, UInt uiAbsPartIdx, TComYuv *pcRecoYuv, TComYuv *pcPredYuv, TComYuv *pcResiYuv );
 
-  Bool getdQPFlag               ()                        { return m_bDecodeDQP;        }
-  Void setdQPFlag               ( Bool b )                { m_bDecodeDQP = b;           }
-  Void xFillPCMBuffer           (TComDataCU* pCU, UInt depth);
+    Bool getdQPFlag               ()
+    {
+        return m_bDecodeDQP;
+    }
+    Void setdQPFlag               ( Bool b )
+    {
+        m_bDecodeDQP = b;
+    }
+    Void xFillPCMBuffer           (TComDataCU *pCU, UInt depth);
 };
 
 //! \}

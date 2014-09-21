@@ -45,43 +45,43 @@
 
 #if ENC_DEC_TRACE
 
-Void  SyntaxElementParser::xReadCodeTr           (UInt length, UInt& rValue, const Char *pSymbolName)
+Void  SyntaxElementParser::xReadCodeTr           (UInt length, UInt &rValue, const Char *pSymbolName)
 {
-  xReadCode (length, rValue);
-  fprintf( g_hTrace, "%8lld  ", g_nSymbolCounter++ );
-  if (length < 10)
-  {
-    fprintf( g_hTrace, "%-50s u(%d)  : %d\n", pSymbolName, length, rValue );
-  }
-  else
-  {
-    fprintf( g_hTrace, "%-50s u(%d) : %d\n", pSymbolName, length, rValue );
-  }
-  fflush ( g_hTrace );
+    xReadCode (length, rValue);
+    fprintf( g_hTrace, "%8lld  ", g_nSymbolCounter++ );
+    if (length < 10)
+    {
+        fprintf( g_hTrace, "%-50s u(%d)  : %d\n", pSymbolName, length, rValue );
+    }
+    else
+    {
+        fprintf( g_hTrace, "%-50s u(%d) : %d\n", pSymbolName, length, rValue );
+    }
+    fflush ( g_hTrace );
 }
 
-Void  SyntaxElementParser::xReadUvlcTr           (UInt& rValue, const Char *pSymbolName)
+Void  SyntaxElementParser::xReadUvlcTr           (UInt &rValue, const Char *pSymbolName)
 {
-  xReadUvlc (rValue);
-  fprintf( g_hTrace, "%8lld  ", g_nSymbolCounter++ );
-  fprintf( g_hTrace, "%-50s ue(v) : %d\n", pSymbolName, rValue );
-  fflush ( g_hTrace );
+    xReadUvlc (rValue);
+    fprintf( g_hTrace, "%8lld  ", g_nSymbolCounter++ );
+    fprintf( g_hTrace, "%-50s ue(v) : %d\n", pSymbolName, rValue );
+    fflush ( g_hTrace );
 }
 
-Void  SyntaxElementParser::xReadSvlcTr           (Int& rValue, const Char *pSymbolName)
+Void  SyntaxElementParser::xReadSvlcTr           (Int &rValue, const Char *pSymbolName)
 {
-  xReadSvlc(rValue);
-  fprintf( g_hTrace, "%8lld  ", g_nSymbolCounter++ );
-  fprintf( g_hTrace, "%-50s se(v) : %d\n", pSymbolName, rValue );
-  fflush ( g_hTrace );
+    xReadSvlc(rValue);
+    fprintf( g_hTrace, "%8lld  ", g_nSymbolCounter++ );
+    fprintf( g_hTrace, "%-50s se(v) : %d\n", pSymbolName, rValue );
+    fflush ( g_hTrace );
 }
 
-Void  SyntaxElementParser::xReadFlagTr           (UInt& rValue, const Char *pSymbolName)
+Void  SyntaxElementParser::xReadFlagTr           (UInt &rValue, const Char *pSymbolName)
 {
-  xReadFlag(rValue);
-  fprintf( g_hTrace, "%8lld  ", g_nSymbolCounter++ );
-  fprintf( g_hTrace, "%-50s u(1)  : %d\n", pSymbolName, rValue );
-  fflush ( g_hTrace );
+    xReadFlag(rValue);
+    fprintf( g_hTrace, "%8lld  ", g_nSymbolCounter++ );
+    fprintf( g_hTrace, "%-50s u(1)  : %d\n", pSymbolName, rValue );
+    fflush ( g_hTrace );
 }
 
 #endif
@@ -91,65 +91,65 @@ Void  SyntaxElementParser::xReadFlagTr           (UInt& rValue, const Char *pSym
 // Protected member functions
 // ====================================================================================================================
 
-Void SyntaxElementParser::xReadCode (UInt uiLength, UInt& ruiCode)
+Void SyntaxElementParser::xReadCode (UInt uiLength, UInt &ruiCode)
 {
-  assert ( uiLength > 0 );
-  m_pcBitstream->read (uiLength, ruiCode);
+    assert ( uiLength > 0 );
+    m_pcBitstream->read (uiLength, ruiCode);
 }
 
-Void SyntaxElementParser::xReadUvlc( UInt& ruiVal)
+Void SyntaxElementParser::xReadUvlc( UInt &ruiVal)
 {
-  UInt uiVal = 0;
-  UInt uiCode = 0;
-  UInt uiLength;
-  m_pcBitstream->read( 1, uiCode );
+    UInt uiVal = 0;
+    UInt uiCode = 0;
+    UInt uiLength;
+    m_pcBitstream->read( 1, uiCode );
 
-  if( 0 == uiCode )
-  {
-    uiLength = 0;
-
-    while( ! ( uiCode & 1 ))
+    if( 0 == uiCode )
     {
-      m_pcBitstream->read( 1, uiCode );
-      uiLength++;
+        uiLength = 0;
+
+        while( ! ( uiCode & 1 ))
+        {
+            m_pcBitstream->read( 1, uiCode );
+            uiLength++;
+        }
+
+        m_pcBitstream->read( uiLength, uiVal );
+
+        uiVal += (1 << uiLength) - 1;
     }
 
-    m_pcBitstream->read( uiLength, uiVal );
-
-    uiVal += (1 << uiLength)-1;
-  }
-
-  ruiVal = uiVal;
+    ruiVal = uiVal;
 }
 
-Void SyntaxElementParser::xReadSvlc( Int& riVal)
+Void SyntaxElementParser::xReadSvlc( Int &riVal)
 {
-  UInt uiBits = 0;
-  m_pcBitstream->read( 1, uiBits );
-  if( 0 == uiBits )
-  {
-    UInt uiLength = 0;
-
-    while( ! ( uiBits & 1 ))
+    UInt uiBits = 0;
+    m_pcBitstream->read( 1, uiBits );
+    if( 0 == uiBits )
     {
-      m_pcBitstream->read( 1, uiBits );
-      uiLength++;
+        UInt uiLength = 0;
+
+        while( ! ( uiBits & 1 ))
+        {
+            m_pcBitstream->read( 1, uiBits );
+            uiLength++;
+        }
+
+        m_pcBitstream->read( uiLength, uiBits );
+
+        uiBits += (1 << uiLength);
+        riVal = ( uiBits & 1) ? -(Int)(uiBits >> 1) : (Int)(uiBits >> 1);
     }
-
-    m_pcBitstream->read( uiLength, uiBits );
-
-    uiBits += (1 << uiLength);
-    riVal = ( uiBits & 1) ? -(Int)(uiBits>>1) : (Int)(uiBits>>1);
-  }
-  else
-  {
-    riVal = 0;
-  }
+    else
+    {
+        riVal = 0;
+    }
 }
 
-Void SyntaxElementParser::xReadFlag (UInt& ruiCode)
+Void SyntaxElementParser::xReadFlag (UInt &ruiCode)
 {
-  m_pcBitstream->read( 1, ruiCode );
+    m_pcBitstream->read( 1, ruiCode );
 }
 
 

@@ -65,67 +65,73 @@ struct InputNALUnit;
 class TDecTop
 {
 private:
-  Int                     m_iMaxRefPicNum;
+    Int                     m_iMaxRefPicNum;
 
-  Int                     m_pocCRA;            ///< POC number of the latest CRA picture
-  Bool                    m_prevRAPisBLA;      ///< true if the previous RAP (CRA/CRANT/BLA/BLANT/IDR) picture is a BLA/BLANT picture
-  Int                     m_pocRandomAccess;   ///< POC number of the random access point (the first IDR or CRA picture)
+    Int                     m_pocCRA;            ///< POC number of the latest CRA picture
+    Bool                    m_prevRAPisBLA;      ///< true if the previous RAP (CRA/CRANT/BLA/BLANT/IDR) picture is a BLA/BLANT picture
+    Int                     m_pocRandomAccess;   ///< POC number of the random access point (the first IDR or CRA picture)
 
-  TComList<TComPic*>      m_cListPic;         //  Dynamic buffer
-  ParameterSetManagerDecoder m_parameterSetManagerDecoder;  // storage for parameter sets
-  TComSlice*              m_apcSlicePilot;
+    TComList<TComPic *>      m_cListPic;        //  Dynamic buffer
+    ParameterSetManagerDecoder m_parameterSetManagerDecoder;  // storage for parameter sets
+    TComSlice              *m_apcSlicePilot;
 
-  SEIMessages             m_SEIs; ///< List of SEI messages that have been received before the first slice and between slices
+    SEIMessages             m_SEIs; ///< List of SEI messages that have been received before the first slice and between slices
 
-  // functional classes
-  TComPrediction          m_cPrediction;
-  TComTrQuant             m_cTrQuant;
-  TDecGop                 m_cGopDecoder;
-  TDecSlice               m_cSliceDecoder;
-  TDecCu                  m_cCuDecoder;
-  TDecEntropy             m_cEntropyDecoder;
-  TDecCavlc               m_cCavlcDecoder;
-  TDecSbac                m_cSbacDecoder;
-  TDecBinCABAC            m_cBinCABAC;
-  SEIReader               m_seiReader;
-  TComLoopFilter          m_cLoopFilter;
-  TComSampleAdaptiveOffset m_cSAO;
+    // functional classes
+    TComPrediction          m_cPrediction;
+    TComTrQuant             m_cTrQuant;
+    TDecGop                 m_cGopDecoder;
+    TDecSlice               m_cSliceDecoder;
+    TDecCu                  m_cCuDecoder;
+    TDecEntropy             m_cEntropyDecoder;
+    TDecCavlc               m_cCavlcDecoder;
+    TDecSbac                m_cSbacDecoder;
+    TDecBinCABAC            m_cBinCABAC;
+    SEIReader               m_seiReader;
+    TComLoopFilter          m_cLoopFilter;
+    TComSampleAdaptiveOffset m_cSAO;
 
-  Bool isSkipPictureForBLA(Int& iPOCLastDisplay);
-  Bool isRandomAccessSkipPicture(Int& iSkipFrame,  Int& iPOCLastDisplay);
-  TComPic*                m_pcPic;
-  UInt                    m_uiSliceIdx;
-  Int                     m_prevPOC;
-  Bool                    m_bFirstSliceInPicture;
-  Bool                    m_bFirstSliceInSequence;
+    Bool isSkipPictureForBLA(Int &iPOCLastDisplay);
+    Bool isRandomAccessSkipPicture(Int &iSkipFrame,  Int &iPOCLastDisplay);
+    TComPic                *m_pcPic;
+    UInt                    m_uiSliceIdx;
+    Int                     m_prevPOC;
+    Bool                    m_bFirstSliceInPicture;
+    Bool                    m_bFirstSliceInSequence;
 
 public:
-  TDecTop();
-  virtual ~TDecTop();
+    TDecTop();
+    virtual ~TDecTop();
 
-  Void  create  ();
-  Void  destroy ();
+    Void  create  ();
+    Void  destroy ();
 
-  void setDecodedPictureHashSEIEnabled(Int enabled) { m_cGopDecoder.setDecodedPictureHashSEIEnabled(enabled); }
+    void setDecodedPictureHashSEIEnabled(Int enabled)
+    {
+        m_cGopDecoder.setDecodedPictureHashSEIEnabled(enabled);
+    }
 
-  Void  init();
-  Bool  decode(InputNALUnit& nalu, Int& iSkipFrame, Int& iPOCLastDisplay);
+    Void  init();
+    Bool  decode(InputNALUnit &nalu, Int &iSkipFrame, Int &iPOCLastDisplay);
 
-  Void  deletePicBuffer();
+    Void  deletePicBuffer();
 
-  Void executeLoopFilters(Int& poc, TComList<TComPic*>*& rpcListPic);
-  TDecSlice* getTDecSlice() { return &m_cSliceDecoder; }
+    Void executeLoopFilters(Int &poc, TComList<TComPic *> *&rpcListPic);
+    TDecSlice *getTDecSlice()
+    {
+        return &m_cSliceDecoder;
+    }
 
 protected:
-  Void  xGetNewPicBuffer  (TComSlice* pcSlice, TComPic*& rpcPic);
-  Void  xCreateLostPicture (Int iLostPOC);
+    Void  xGetNewPicBuffer  (TComSlice *pcSlice, TComPic *&rpcPic);
+    Void  xCreateLostPicture (Int iLostPOC);
 
-  Void      xActivateParameterSets();
-  Bool      xDecodeSlice(InputNALUnit &nalu, Int &iSkipFrame, Int iPOCLastDisplay);
-  Void      xDecodeVPS();
-  Void      xDecodeSPS();
-  Void      xDecodePPS();
-  Void      xDecodeSEI( TComInputBitstream* bs, const NalUnitType nalUnitType );
+    Void      xActivateParameterSets();
+    Bool      xDecodeSlice(InputNALUnit &nalu, Int &iSkipFrame, Int iPOCLastDisplay);
+    Void      xDecodeVPS();
+    Void      xDecodeSPS();
+    Void      xDecodePPS();
+    Void      xDecodeSEI( TComInputBitstream *bs, const NalUnitType nalUnitType );
 
 };// END CLASS DEFINITION TDecTop
 

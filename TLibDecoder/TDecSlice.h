@@ -62,49 +62,61 @@
 class TDecSlice
 {
 private:
-  // access channel
-  TDecEntropy*    m_pcEntropyDecoder;
-  TDecCu*         m_pcCuDecoder;
-  UInt            m_uiCurrSliceIdx;
+    // access channel
+    TDecEntropy    *m_pcEntropyDecoder;
+    TDecCu         *m_pcCuDecoder;
+    UInt            m_uiCurrSliceIdx;
 
-  TDecSbac*       m_pcBufferSbacDecoders;   ///< line to store temporary contexts, one per column of tiles.
-  TDecBinCABAC*   m_pcBufferBinCABACs;
-  TDecSbac*       m_pcBufferLowLatSbacDecoders;   ///< dependent tiles: line to store temporary contexts, one per column of tiles.
-  TDecBinCABAC*   m_pcBufferLowLatBinCABACs;
-  std::vector<TDecSbac*> CTXMem;
-  std::vector<PtInfo> m_cuSplitPoints;
+    TDecSbac       *m_pcBufferSbacDecoders;   ///< line to store temporary contexts, one per column of tiles.
+    TDecBinCABAC   *m_pcBufferBinCABACs;
+    TDecSbac       *m_pcBufferLowLatSbacDecoders;   ///< dependent tiles: line to store temporary contexts, one per column of tiles.
+    TDecBinCABAC   *m_pcBufferLowLatBinCABACs;
+    std::vector<TDecSbac *> CTXMem;
+    std::vector<PtInfo> m_cuSplitPoints;
 
 public:
-  TDecSlice();
-  virtual ~TDecSlice();
+    TDecSlice();
+    virtual ~TDecSlice();
 
-  Void  init              ( TDecEntropy* pcEntropyDecoder, TDecCu* pcMbDecoder );
-  Void  create            ();
-  Void  destroy           ();
+    Void  init              ( TDecEntropy *pcEntropyDecoder, TDecCu *pcMbDecoder );
+    Void  create            ();
+    Void  destroy           ();
 
-  Void  decompressSlice   ( TComInputBitstream** ppcSubstreams,   TComPic*& rpcPic, TDecSbac* pcSbacDecoder, TDecSbac* pcSbacDecoders );
-  Void      initCtxMem(  UInt i );
-  Void      setCtxMem( TDecSbac* sb, Int b )   { CTXMem[b] = sb; }
+    Void  decompressSlice   ( TComInputBitstream **ppcSubstreams,   TComPic *&rpcPic, TDecSbac *pcSbacDecoder, TDecSbac *pcSbacDecoders );
+    Void      initCtxMem(  UInt i );
+    Void      setCtxMem( TDecSbac *sb, Int b )
+    {
+        CTXMem[b] = sb;
+    }
 };
 
 
-class ParameterSetManagerDecoder:public ParameterSetManager
+class ParameterSetManagerDecoder: public ParameterSetManager
 {
 public:
-  ParameterSetManagerDecoder();
-  virtual ~ParameterSetManagerDecoder();
-  Void     storePrefetchedVPS(TComVPS *vps)  { m_vpsBuffer.storePS( vps->getVPSId(), vps); };
-  TComVPS* getPrefetchedVPS  (Int vpsId);
-  Void     storePrefetchedSPS(TComSPS *sps)  { m_spsBuffer.storePS( sps->getSPSId(), sps); };
-  TComSPS* getPrefetchedSPS  (Int spsId);
-  Void     storePrefetchedPPS(TComPPS *pps)  { m_ppsBuffer.storePS( pps->getPPSId(), pps); };
-  TComPPS* getPrefetchedPPS  (Int ppsId);
-  Void     applyPrefetchedPS();
+    ParameterSetManagerDecoder();
+    virtual ~ParameterSetManagerDecoder();
+    Void     storePrefetchedVPS(TComVPS *vps)
+    {
+        m_vpsBuffer.storePS( vps->getVPSId(), vps);
+    };
+    TComVPS *getPrefetchedVPS  (Int vpsId);
+    Void     storePrefetchedSPS(TComSPS *sps)
+    {
+        m_spsBuffer.storePS( sps->getSPSId(), sps);
+    };
+    TComSPS *getPrefetchedSPS  (Int spsId);
+    Void     storePrefetchedPPS(TComPPS *pps)
+    {
+        m_ppsBuffer.storePS( pps->getPPSId(), pps);
+    };
+    TComPPS *getPrefetchedPPS  (Int ppsId);
+    Void     applyPrefetchedPS();
 
 private:
-  ParameterSetMap<TComVPS> m_vpsBuffer;
-  ParameterSetMap<TComSPS> m_spsBuffer;
-  ParameterSetMap<TComPPS> m_ppsBuffer;
+    ParameterSetMap<TComVPS> m_vpsBuffer;
+    ParameterSetMap<TComSPS> m_spsBuffer;
+    ParameterSetMap<TComPPS> m_ppsBuffer;
 };
 
 

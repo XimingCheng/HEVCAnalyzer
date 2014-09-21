@@ -50,16 +50,16 @@ extern Bool g_md5_mismatch; ///< top level flag to signal when there is a decode
 
 //! \ingroup TLibDecoder
 //! \{
-static void calcAndPrintHashStatus(TComPicYuv& pic, const SEIDecodedPictureHash* pictureHashSEI);
+static void calcAndPrintHashStatus(TComPicYuv &pic, const SEIDecodedPictureHash *pictureHashSEI);
 // ====================================================================================================================
 // Constructor / destructor / initialization / destroy
 // ====================================================================================================================
 
 TDecGop::TDecGop()
 {
-  m_dDecTime = 0;
-  m_pcSbacDecoders = NULL;
-  m_pcBinCABACs = NULL;
+    m_dDecTime = 0;
+    m_pcSbacDecoders = NULL;
+    m_pcBinCABACs = NULL;
 }
 
 TDecGop::~TDecGop()
@@ -77,22 +77,22 @@ Void TDecGop::destroy()
 {
 }
 
-Void TDecGop::init( TDecEntropy*            pcEntropyDecoder,
-                   TDecSbac*               pcSbacDecoder,
-                   TDecBinCABAC*           pcBinCABAC,
-                   TDecCavlc*              pcCavlcDecoder,
-                   TDecSlice*              pcSliceDecoder,
-                   TComLoopFilter*         pcLoopFilter,
-                   TComSampleAdaptiveOffset* pcSAO
-                   )
+Void TDecGop::init( TDecEntropy            *pcEntropyDecoder,
+                    TDecSbac               *pcSbacDecoder,
+                    TDecBinCABAC           *pcBinCABAC,
+                    TDecCavlc              *pcCavlcDecoder,
+                    TDecSlice              *pcSliceDecoder,
+                    TComLoopFilter         *pcLoopFilter,
+                    TComSampleAdaptiveOffset *pcSAO
+                  )
 {
-  m_pcEntropyDecoder      = pcEntropyDecoder;
-  m_pcSbacDecoder         = pcSbacDecoder;
-  m_pcBinCABAC            = pcBinCABAC;
-  m_pcCavlcDecoder        = pcCavlcDecoder;
-  m_pcSliceDecoder        = pcSliceDecoder;
-  m_pcLoopFilter          = pcLoopFilter;
-  m_pcSAO  = pcSAO;
+    m_pcEntropyDecoder      = pcEntropyDecoder;
+    m_pcSbacDecoder         = pcSbacDecoder;
+    m_pcBinCABAC            = pcBinCABAC;
+    m_pcCavlcDecoder        = pcCavlcDecoder;
+    m_pcSliceDecoder        = pcSliceDecoder;
+    m_pcLoopFilter          = pcLoopFilter;
+    m_pcSAO  = pcSAO;
 }
 
 
@@ -103,163 +103,165 @@ Void TDecGop::init( TDecEntropy*            pcEntropyDecoder,
 // Public member functions
 // ====================================================================================================================
 
-Void TDecGop::decompressSlice(TComInputBitstream* pcBitstream, TComPic*& rpcPic)
+Void TDecGop::decompressSlice(TComInputBitstream *pcBitstream, TComPic *&rpcPic)
 {
-  TComSlice*  pcSlice = rpcPic->getSlice(rpcPic->getCurrSliceIdx());
-  // Table of extracted substreams.
-  // These must be deallocated AND their internal fifos, too.
-  TComInputBitstream **ppcSubstreams = NULL;
+    TComSlice  *pcSlice = rpcPic->getSlice(rpcPic->getCurrSliceIdx());
+    // Table of extracted substreams.
+    // These must be deallocated AND their internal fifos, too.
+    TComInputBitstream **ppcSubstreams = NULL;
 
-  //-- For time output for each slice
-  long iBeforeTime = clock();
+    //-- For time output for each slice
+    long iBeforeTime = clock();
 
-  UInt uiStartCUAddr   = pcSlice->getSliceSegmentCurStartCUAddr();
+    UInt uiStartCUAddr   = pcSlice->getSliceSegmentCurStartCUAddr();
 
-  UInt uiSliceStartCuAddr = pcSlice->getSliceCurStartCUAddr();
-  if(uiSliceStartCuAddr == uiStartCUAddr)
-  {
-    m_sliceStartCUAddress.push_back(uiSliceStartCuAddr);
-  }
+    UInt uiSliceStartCuAddr = pcSlice->getSliceCurStartCUAddr();
+    if(uiSliceStartCuAddr == uiStartCUAddr)
+    {
+        m_sliceStartCUAddress.push_back(uiSliceStartCuAddr);
+    }
 
-  m_pcSbacDecoder->init( (TDecBinIf*)m_pcBinCABAC );
-  m_pcEntropyDecoder->setEntropyDecoder (m_pcSbacDecoder);
+    m_pcSbacDecoder->init( (TDecBinIf *)m_pcBinCABAC );
+    m_pcEntropyDecoder->setEntropyDecoder (m_pcSbacDecoder);
 
-  UInt uiNumSubstreams = pcSlice->getPPS()->getEntropyCodingSyncEnabledFlag() ? pcSlice->getNumEntryPointOffsets()+1 : pcSlice->getPPS()->getNumSubstreams();
+    UInt uiNumSubstreams = pcSlice->getPPS()->getEntropyCodingSyncEnabledFlag() ? pcSlice->getNumEntryPointOffsets() + 1 : pcSlice->getPPS()->getNumSubstreams();
 
-  // init each couple {EntropyDecoder, Substream}
-  UInt *puiSubstreamSizes = pcSlice->getSubstreamSizes();
-  ppcSubstreams    = new TComInputBitstream*[uiNumSubstreams];
-  m_pcSbacDecoders = new TDecSbac[uiNumSubstreams];
-  m_pcBinCABACs    = new TDecBinCABAC[uiNumSubstreams];
-  for ( UInt ui = 0 ; ui < uiNumSubstreams ; ui++ )
-  {
-    m_pcSbacDecoders[ui].init(&m_pcBinCABACs[ui]);
-    ppcSubstreams[ui] = pcBitstream->extractSubstream(ui+1 < uiNumSubstreams ? puiSubstreamSizes[ui] : pcBitstream->getNumBitsLeft());
-  }
+    // init each couple {EntropyDecoder, Substream}
+    UInt *puiSubstreamSizes = pcSlice->getSubstreamSizes();
+    ppcSubstreams    = new TComInputBitstream*[uiNumSubstreams];
+    m_pcSbacDecoders = new TDecSbac[uiNumSubstreams];
+    m_pcBinCABACs    = new TDecBinCABAC[uiNumSubstreams];
+    for ( UInt ui = 0 ; ui < uiNumSubstreams ; ui++ )
+    {
+        m_pcSbacDecoders[ui].init(&m_pcBinCABACs[ui]);
+        ppcSubstreams[ui] = pcBitstream->extractSubstream(ui + 1 < uiNumSubstreams ? puiSubstreamSizes[ui] : pcBitstream->getNumBitsLeft());
+    }
 
-  for ( UInt ui = 0 ; ui+1 < uiNumSubstreams; ui++ )
-  {
-    m_pcEntropyDecoder->setEntropyDecoder ( &m_pcSbacDecoders[uiNumSubstreams - 1 - ui] );
-    m_pcEntropyDecoder->setBitstream      (  ppcSubstreams   [uiNumSubstreams - 1 - ui] );
+    for ( UInt ui = 0 ; ui + 1 < uiNumSubstreams; ui++ )
+    {
+        m_pcEntropyDecoder->setEntropyDecoder ( &m_pcSbacDecoders[uiNumSubstreams - 1 - ui] );
+        m_pcEntropyDecoder->setBitstream      (  ppcSubstreams   [uiNumSubstreams - 1 - ui] );
+        m_pcEntropyDecoder->resetEntropy      (pcSlice);
+    }
+
+    m_pcEntropyDecoder->setEntropyDecoder ( m_pcSbacDecoder  );
+    m_pcEntropyDecoder->setBitstream      ( ppcSubstreams[0] );
     m_pcEntropyDecoder->resetEntropy      (pcSlice);
-  }
 
-  m_pcEntropyDecoder->setEntropyDecoder ( m_pcSbacDecoder  );
-  m_pcEntropyDecoder->setBitstream      ( ppcSubstreams[0] );
-  m_pcEntropyDecoder->resetEntropy      (pcSlice);
+    if(uiSliceStartCuAddr == uiStartCUAddr)
+    {
+        m_LFCrossSliceBoundaryFlag.push_back( pcSlice->getLFCrossSliceBoundaryFlag());
+    }
+    m_pcSbacDecoders[0].load(m_pcSbacDecoder);
+    m_pcSliceDecoder->decompressSlice( ppcSubstreams, rpcPic, m_pcSbacDecoder, m_pcSbacDecoders);
+    m_pcEntropyDecoder->setBitstream(  ppcSubstreams[uiNumSubstreams - 1] );
+    // deallocate all created substreams, including internal buffers.
+    for (UInt ui = 0; ui < uiNumSubstreams; ui++)
+    {
+        ppcSubstreams[ui]->deleteFifo();
+        delete ppcSubstreams[ui];
+    }
+    delete[] ppcSubstreams;
+    delete[] m_pcSbacDecoders;
+    m_pcSbacDecoders = NULL;
+    delete[] m_pcBinCABACs;
+    m_pcBinCABACs = NULL;
 
-  if(uiSliceStartCuAddr == uiStartCUAddr)
-  {
-    m_LFCrossSliceBoundaryFlag.push_back( pcSlice->getLFCrossSliceBoundaryFlag());
-  }
-  m_pcSbacDecoders[0].load(m_pcSbacDecoder);
-  m_pcSliceDecoder->decompressSlice( ppcSubstreams, rpcPic, m_pcSbacDecoder, m_pcSbacDecoders);
-  m_pcEntropyDecoder->setBitstream(  ppcSubstreams[uiNumSubstreams-1] );
-  // deallocate all created substreams, including internal buffers.
-  for (UInt ui = 0; ui < uiNumSubstreams; ui++)
-  {
-    ppcSubstreams[ui]->deleteFifo();
-    delete ppcSubstreams[ui];
-  }
-  delete[] ppcSubstreams;
-  delete[] m_pcSbacDecoders; m_pcSbacDecoders = NULL;
-  delete[] m_pcBinCABACs; m_pcBinCABACs = NULL;
-
-  m_dDecTime += (Double)(clock()-iBeforeTime) / CLOCKS_PER_SEC;
+    m_dDecTime += (Double)(clock() - iBeforeTime) / CLOCKS_PER_SEC;
 }
 
-Void TDecGop::filterPicture(TComPic*& rpcPic)
+Void TDecGop::filterPicture(TComPic *&rpcPic)
 {
-  TComSlice*  pcSlice = rpcPic->getSlice(rpcPic->getCurrSliceIdx());
+    TComSlice  *pcSlice = rpcPic->getSlice(rpcPic->getCurrSliceIdx());
 
-  //-- For time output for each slice
-  long iBeforeTime = clock();
+    //-- For time output for each slice
+    long iBeforeTime = clock();
 
-  // deblocking filter
-  Bool bLFCrossTileBoundary = pcSlice->getPPS()->getLoopFilterAcrossTilesEnabledFlag();
-  m_pcLoopFilter->setCfg(bLFCrossTileBoundary);
-  m_pcLoopFilter->loopFilterPic( rpcPic );
+    // deblocking filter
+    Bool bLFCrossTileBoundary = pcSlice->getPPS()->getLoopFilterAcrossTilesEnabledFlag();
+    m_pcLoopFilter->setCfg(bLFCrossTileBoundary);
+    m_pcLoopFilter->loopFilterPic( rpcPic );
 
-  if(pcSlice->getSPS()->getUseSAO())
-  {
-    m_sliceStartCUAddress.push_back(rpcPic->getNumCUsInFrame()* rpcPic->getNumPartInCU());
-    rpcPic->createNonDBFilterInfo(m_sliceStartCUAddress, 0, &m_LFCrossSliceBoundaryFlag, rpcPic->getPicSym()->getNumTiles(), bLFCrossTileBoundary);
-  }
-
-  if( pcSlice->getSPS()->getUseSAO() )
-  {
+    if(pcSlice->getSPS()->getUseSAO())
     {
-      SAOParam *saoParam = rpcPic->getPicSym()->getSaoParam();
-      saoParam->bSaoFlag[0] = pcSlice->getSaoEnabledFlag();
-      saoParam->bSaoFlag[1] = pcSlice->getSaoEnabledFlagChroma();
-      m_pcSAO->setSaoLcuBasedOptimization(1);
-      m_pcSAO->createPicSaoInfo(rpcPic);
-      m_pcSAO->SAOProcess(saoParam);
-      m_pcSAO->PCMLFDisableProcess(rpcPic);
-      m_pcSAO->destroyPicSaoInfo();
+        m_sliceStartCUAddress.push_back(rpcPic->getNumCUsInFrame()* rpcPic->getNumPartInCU());
+        rpcPic->createNonDBFilterInfo(m_sliceStartCUAddress, 0, &m_LFCrossSliceBoundaryFlag, rpcPic->getPicSym()->getNumTiles(), bLFCrossTileBoundary);
     }
-  }
 
-  if(pcSlice->getSPS()->getUseSAO())
-  {
-    rpcPic->destroyNonDBFilterInfo();
-  }
-
-  rpcPic->compressMotion();
-  Char c = (pcSlice->isIntra() ? 'I' : pcSlice->isInterP() ? 'P' : 'B');
-  if (!pcSlice->isReferenced()) c += 32;
-
-  // decoded YUV buffer for one frame
-  TComPicYuv* pDecodedPic      = rpcPic->getPicYuvRec();
-  TComPicYuv* pDecodedPic_copy = new TComPicYuv();
-  pDecodedPic_copy->create(pDecodedPic->getWidth(), pDecodedPic->getHeight(), 64, 64, 4);
-  pDecodedPic->copyToPic(pDecodedPic_copy);
-  Utils::tuple<int, TComPicYuv*> msg(pcSlice->getPOC(), pDecodedPic_copy);
-  if(pcSlice->getPOC() == 0) // the first frame
-  {
-    TComPicYuv* pDecodedPic_copy_thub = new TComPicYuv();
-    pDecodedPic_copy_thub->create(pDecodedPic->getWidth(), pDecodedPic->getHeight(), 64, 64, 4);
-    pDecodedPic->copyToPic(pDecodedPic_copy_thub);
-    Utils::tuple<int, TComPicYuv*> msg_thub(pcSlice->getPOC(), pDecodedPic_copy_thub);
-    MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETYUV_BUFFER, msg);
-    MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETTHUMBNAIL_BUFFER, msg_thub);
-  }
-  else
-    MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETTHUMBNAIL_BUFFER, msg);
-  //-- For time output for each slice
-  printf("\nPOC %4d TId: %1d ( %c-SLICE, QP%3d ) ", pcSlice->getPOC(),
-                                                    pcSlice->getTLayer(),
-                                                    c,
-                                                    pcSlice->getSliceQp() );
-
-  m_dDecTime += (Double)(clock()-iBeforeTime) / CLOCKS_PER_SEC;
-  printf ("[DT %6.3f] ", m_dDecTime );
-  m_dDecTime  = 0;
-
-  for (Int iRefList = 0; iRefList < 2; iRefList++)
-  {
-    printf ("[L%d ", iRefList);
-    for (Int iRefIndex = 0; iRefIndex < pcSlice->getNumRefIdx(RefPicList(iRefList)); iRefIndex++)
+    if( pcSlice->getSPS()->getUseSAO() )
     {
-      printf ("%d ", pcSlice->getRefPOC(RefPicList(iRefList), iRefIndex));
+        {
+            SAOParam *saoParam = rpcPic->getPicSym()->getSaoParam();
+            saoParam->bSaoFlag[0] = pcSlice->getSaoEnabledFlag();
+            saoParam->bSaoFlag[1] = pcSlice->getSaoEnabledFlagChroma();
+            m_pcSAO->setSaoLcuBasedOptimization(1);
+            m_pcSAO->createPicSaoInfo(rpcPic);
+            m_pcSAO->SAOProcess(saoParam);
+            m_pcSAO->PCMLFDisableProcess(rpcPic);
+            m_pcSAO->destroyPicSaoInfo();
+        }
     }
-    printf ("] ");
-  }
-  if (m_decodedPictureHashSEIEnabled)
-  {
-    SEIMessages pictureHashes = getSeisByType(rpcPic->getSEIs(), SEI::DECODED_PICTURE_HASH );
-    const SEIDecodedPictureHash *hash = ( pictureHashes.size() > 0 ) ? (SEIDecodedPictureHash*) *(pictureHashes.begin()) : NULL;
-    if (pictureHashes.size() > 1)
-    {
-      printf ("Warning: Got multiple decoded picture hash SEI messages. Using first.");
-    }
-    calcAndPrintHashStatus(*rpcPic->getPicYuvRec(), hash);
-  }
 
-  rpcPic->setOutputMark(true);
-  rpcPic->setReconMark(true);
-  m_sliceStartCUAddress.clear();
-  m_LFCrossSliceBoundaryFlag.clear();
+    if(pcSlice->getSPS()->getUseSAO())
+    {
+        rpcPic->destroyNonDBFilterInfo();
+    }
+
+    rpcPic->compressMotion();
+    Char c = (pcSlice->isIntra() ? 'I' : pcSlice->isInterP() ? 'P' : 'B');
+    if (!pcSlice->isReferenced()) c += 32;
+
+    // decoded YUV buffer for one frame
+    TComPicYuv *pDecodedPic      = rpcPic->getPicYuvRec();
+    TComPicYuv *pDecodedPic_copy = new TComPicYuv();
+    pDecodedPic_copy->create(pDecodedPic->getWidth(), pDecodedPic->getHeight(), 64, 64, 4);
+    pDecodedPic->copyToPic(pDecodedPic_copy);
+    Utils::tuple<int, TComPicYuv *> msg(pcSlice->getPOC(), pDecodedPic_copy);
+    if(pcSlice->getPOC() == 0) // the first frame
+    {
+        TComPicYuv *pDecodedPic_copy_thub = new TComPicYuv();
+        pDecodedPic_copy_thub->create(pDecodedPic->getWidth(), pDecodedPic->getHeight(), 64, 64, 4);
+        pDecodedPic->copyToPic(pDecodedPic_copy_thub);
+        Utils::tuple<int, TComPicYuv *> msg_thub(pcSlice->getPOC(), pDecodedPic_copy_thub);
+        MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETYUV_BUFFER, msg);
+        MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETTHUMBNAIL_BUFFER, msg_thub);
+    }
+    else
+        MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETTHUMBNAIL_BUFFER, msg);
+    //-- For time output for each slice
+    printf("\nPOC %4d TId: %1d ( %c-SLICE, QP%3d ) ", pcSlice->getPOC(),
+           pcSlice->getTLayer(),
+           c,
+           pcSlice->getSliceQp() );
+
+    m_dDecTime += (Double)(clock() - iBeforeTime) / CLOCKS_PER_SEC;
+    printf ("[DT %6.3f] ", m_dDecTime );
+    m_dDecTime  = 0;
+
+    for (Int iRefList = 0; iRefList < 2; iRefList++)
+    {
+        printf ("[L%d ", iRefList);
+        for (Int iRefIndex = 0; iRefIndex < pcSlice->getNumRefIdx(RefPicList(iRefList)); iRefIndex++)
+        {
+            printf ("%d ", pcSlice->getRefPOC(RefPicList(iRefList), iRefIndex));
+        }
+        printf ("] ");
+    }
+    if (m_decodedPictureHashSEIEnabled)
+    {
+        SEIMessages pictureHashes = getSeisByType(rpcPic->getSEIs(), SEI::DECODED_PICTURE_HASH );
+        const SEIDecodedPictureHash *hash = ( pictureHashes.size() > 0 ) ? (SEIDecodedPictureHash *) * (pictureHashes.begin()) : NULL;
+        if (pictureHashes.size() > 1)
+        {
+            printf ("Warning: Got multiple decoded picture hash SEI messages. Using first.");
+        }
+        calcAndPrintHashStatus(*rpcPic->getPicYuvRec(), hash);
+    }
+
+    rpcPic->setOutputMark(true);
+    rpcPic->setReconMark(true);
+    m_sliceStartCUAddress.clear();
+    m_LFCrossSliceBoundaryFlag.clear();
 }
 
 /**
@@ -273,71 +275,71 @@ Void TDecGop::filterPicture(TComPic*& rpcPic)
  *            ***ERROR*** - calculated hash does not match the SEI message
  *            unk         - no SEI message was available for comparison
  */
-static void calcAndPrintHashStatus(TComPicYuv& pic, const SEIDecodedPictureHash* pictureHashSEI)
+static void calcAndPrintHashStatus(TComPicYuv &pic, const SEIDecodedPictureHash *pictureHashSEI)
 {
-  /* calculate MD5sum for entire reconstructed picture */
-  UChar recon_digest[3][16];
-  Int numChar=0;
-  const Char* hashType = "\0";
+    /* calculate MD5sum for entire reconstructed picture */
+    UChar recon_digest[3][16];
+    Int numChar = 0;
+    const Char *hashType = "\0";
 
-  if (pictureHashSEI)
-  {
-    switch (pictureHashSEI->method)
+    if (pictureHashSEI)
     {
-    case SEIDecodedPictureHash::MD5:
-      {
-        hashType = "MD5";
-        calcMD5(pic, recon_digest);
-        numChar = 16;
-        break;
-      }
-    case SEIDecodedPictureHash::CRC:
-      {
-        hashType = "CRC";
-        calcCRC(pic, recon_digest);
-        numChar = 2;
-        break;
-      }
-    case SEIDecodedPictureHash::CHECKSUM:
-      {
-        hashType = "Checksum";
-        calcChecksum(pic, recon_digest);
-        numChar = 4;
-        break;
-      }
-    default:
-      {
-        assert (!"unknown hash type");
-      }
-    }
-  }
-
-  /* compare digest against received version */
-  const Char* ok = "(unk)";
-  Bool mismatch = false;
-
-  if (pictureHashSEI)
-  {
-    ok = "(OK)";
-    for(Int yuvIdx = 0; yuvIdx < 3; yuvIdx++)
-    {
-      for (UInt i = 0; i < numChar; i++)
-      {
-        if (recon_digest[yuvIdx][i] != pictureHashSEI->digest[yuvIdx][i])
+        switch (pictureHashSEI->method)
         {
-          ok = "(***ERROR***)";
-          mismatch = true;
+        case SEIDecodedPictureHash::MD5:
+        {
+            hashType = "MD5";
+            calcMD5(pic, recon_digest);
+            numChar = 16;
+            break;
         }
-      }
+        case SEIDecodedPictureHash::CRC:
+        {
+            hashType = "CRC";
+            calcCRC(pic, recon_digest);
+            numChar = 2;
+            break;
+        }
+        case SEIDecodedPictureHash::CHECKSUM:
+        {
+            hashType = "Checksum";
+            calcChecksum(pic, recon_digest);
+            numChar = 4;
+            break;
+        }
+        default:
+        {
+            assert (!"unknown hash type");
+        }
+        }
     }
-  }
 
-  printf("[%s:%s,%s] ", hashType, digestToString(recon_digest, numChar), ok);
+    /* compare digest against received version */
+    const Char *ok = "(unk)";
+    Bool mismatch = false;
 
-  if (mismatch)
-  {
-    g_md5_mismatch = true;
-    printf("[rx%s:%s] ", hashType, digestToString(pictureHashSEI->digest, numChar));
-  }
+    if (pictureHashSEI)
+    {
+        ok = "(OK)";
+        for(Int yuvIdx = 0; yuvIdx < 3; yuvIdx++)
+        {
+            for (UInt i = 0; i < numChar; i++)
+            {
+                if (recon_digest[yuvIdx][i] != pictureHashSEI->digest[yuvIdx][i])
+                {
+                    ok = "(***ERROR***)";
+                    mismatch = true;
+                }
+            }
+        }
+    }
+
+    printf("[%s:%s,%s] ", hashType, digestToString(recon_digest, numChar), ok);
+
+    if (mismatch)
+    {
+        g_md5_mismatch = true;
+        printf("[rx%s:%s] ", hashType, digestToString(pictureHashSEI->digest, numChar));
+    }
 }
 //! \}

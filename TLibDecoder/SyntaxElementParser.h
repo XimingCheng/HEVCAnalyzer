@@ -70,26 +70,32 @@
 class SyntaxElementParser
 {
 protected:
-  TComInputBitstream*   m_pcBitstream;
+    TComInputBitstream   *m_pcBitstream;
 
-  SyntaxElementParser()
-  : m_pcBitstream (NULL)
-  {};
-  virtual ~SyntaxElementParser() {};
+    SyntaxElementParser()
+        : m_pcBitstream (NULL)
+    {};
+    virtual ~SyntaxElementParser() {};
 
-  Void  xReadCode    ( UInt   length, UInt& val );
-  Void  xReadUvlc    ( UInt&  val );
-  Void  xReadSvlc    ( Int&   val );
-  Void  xReadFlag    ( UInt&  val );
+    Void  xReadCode    ( UInt   length, UInt &val );
+    Void  xReadUvlc    ( UInt  &val );
+    Void  xReadSvlc    ( Int   &val );
+    Void  xReadFlag    ( UInt  &val );
 #if ENC_DEC_TRACE
-  Void  xReadCodeTr  (UInt  length, UInt& rValue, const Char *pSymbolName);
-  Void  xReadUvlcTr  (              UInt& rValue, const Char *pSymbolName);
-  Void  xReadSvlcTr  (               Int& rValue, const Char *pSymbolName);
-  Void  xReadFlagTr  (              UInt& rValue, const Char *pSymbolName);
+    Void  xReadCodeTr  (UInt  length, UInt &rValue, const Char *pSymbolName);
+    Void  xReadUvlcTr  (              UInt &rValue, const Char *pSymbolName);
+    Void  xReadSvlcTr  (               Int &rValue, const Char *pSymbolName);
+    Void  xReadFlagTr  (              UInt &rValue, const Char *pSymbolName);
 #endif
 public:
-  Void  setBitstream ( TComInputBitstream* p )   { m_pcBitstream = p; }
-  TComInputBitstream* getBitstream() { return m_pcBitstream; }
+    Void  setBitstream ( TComInputBitstream *p )
+    {
+        m_pcBitstream = p;
+    }
+    TComInputBitstream *getBitstream()
+    {
+        return m_pcBitstream;
+    }
 };
 
 //! \}

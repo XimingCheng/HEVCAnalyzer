@@ -31,7 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** 
+/**
  \file     AccessUnit.h
  \brief    Access Unit class (header)
  */
@@ -56,16 +56,16 @@
  * The AccessUnit owns all pointers stored within.  Destroying the
  * AccessUnit will delete all contained objects.
  */
-class AccessUnit : public std::list<NALUnitEBSP*>
+class AccessUnit : public std::list<NALUnitEBSP *>
 {
 public:
-  ~AccessUnit()
-  {
-    for (AccessUnit::iterator it = this->begin(); it != this->end(); it++)
+    ~AccessUnit()
     {
-      delete *it;
+        for (AccessUnit::iterator it = this->begin(); it != this->end(); it++)
+        {
+            delete *it;
+        }
     }
-  }
 };
 
 //! \}

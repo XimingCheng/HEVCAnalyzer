@@ -1,7 +1,7 @@
 /* The copyright in this software is being made available under the BSD
  * License, included below. This software may be subject to other third party
  * and contributor rights, including patent rights, and no such rights are
- * granted under this license.  
+ * granted under this license.
  *
  * Copyright (c) 2010-2013, ITU/ISO/IEC
  * All rights reserved.
@@ -128,11 +128,20 @@ extern Int g_bitDepthY;
 extern Int g_bitDepthC;
 
 /** clip x, such that 0 <= x <= #g_maxLumaVal */
-template <typename T> inline T ClipY(T x) { return std::min<T>(T((1 << g_bitDepthY)-1), std::max<T>( T(0), x)); }
-template <typename T> inline T ClipC(T x) { return std::min<T>(T((1 << g_bitDepthC)-1), std::max<T>( T(0), x)); }
+template <typename T> inline T ClipY(T x)
+{
+    return std::min<T>(T((1 << g_bitDepthY) - 1), std::max<T>( T(0), x));
+}
+template <typename T> inline T ClipC(T x)
+{
+    return std::min<T>(T((1 << g_bitDepthC) - 1), std::max<T>( T(0), x));
+}
 
 /** clip a, such that minVal <= a <= maxVal */
-template <typename T> inline T Clip3( T minVal, T maxVal, T a) { return std::min<T> (std::max<T> (minVal, a) , maxVal); }  ///< general min/max clip
+template <typename T> inline T Clip3( T minVal, T maxVal, T a)
+{
+    return std::min<T> (std::max<T> (minVal, a) , maxVal);    ///< general min/max clip
+}
 
 #define DATA_ALIGN                  1                                                                 ///< use 32-bit aligned malloc/free
 #if     DATA_ALIGN && _WIN32 && ( _MSC_VER > 1300 )
@@ -188,83 +197,83 @@ template <typename T> inline T Clip3( T minVal, T maxVal, T a) { return std::min
 #define MAX_CHROMA_FORMAT_IDC      3
 
 // TODO: Existing names used for the different NAL unit types can be altered to better reflect the names in the spec.
-//       However, the names in the spec are not yet stable at this point. Once the names are stable, a cleanup 
+//       However, the names in the spec are not yet stable at this point. Once the names are stable, a cleanup
 //       effort can be done without use of macros to alter the names used to indicate the different NAL unit types.
 enum NalUnitType
 {
-  NAL_UNIT_CODED_SLICE_TRAIL_N = 0,   // 0
-  NAL_UNIT_CODED_SLICE_TRAIL_R,   // 1
-  
-  NAL_UNIT_CODED_SLICE_TSA_N,     // 2
-  NAL_UNIT_CODED_SLICE_TLA,       // 3   // Current name in the spec: TSA_R
-  
-  NAL_UNIT_CODED_SLICE_STSA_N,    // 4
-  NAL_UNIT_CODED_SLICE_STSA_R,    // 5
+    NAL_UNIT_CODED_SLICE_TRAIL_N = 0,   // 0
+    NAL_UNIT_CODED_SLICE_TRAIL_R,   // 1
 
-  NAL_UNIT_CODED_SLICE_RADL_N,    // 6
-  NAL_UNIT_CODED_SLICE_DLP,       // 7 // Current name in the spec: RADL_R
-  
-  NAL_UNIT_CODED_SLICE_RASL_N,    // 8
-  NAL_UNIT_CODED_SLICE_TFD,       // 9 // Current name in the spec: RASL_R
+    NAL_UNIT_CODED_SLICE_TSA_N,     // 2
+    NAL_UNIT_CODED_SLICE_TLA,       // 3   // Current name in the spec: TSA_R
 
-  NAL_UNIT_RESERVED_10,
-  NAL_UNIT_RESERVED_11,
-  NAL_UNIT_RESERVED_12,
-  NAL_UNIT_RESERVED_13,
-  NAL_UNIT_RESERVED_14,
-  NAL_UNIT_RESERVED_15,
+    NAL_UNIT_CODED_SLICE_STSA_N,    // 4
+    NAL_UNIT_CODED_SLICE_STSA_R,    // 5
 
-  NAL_UNIT_CODED_SLICE_BLA,       // 16   // Current name in the spec: BLA_W_LP
-  NAL_UNIT_CODED_SLICE_BLANT,     // 17   // Current name in the spec: BLA_W_DLP
-  NAL_UNIT_CODED_SLICE_BLA_N_LP,  // 18
-  NAL_UNIT_CODED_SLICE_IDR,       // 19  // Current name in the spec: IDR_W_DLP
-  NAL_UNIT_CODED_SLICE_IDR_N_LP,  // 20
-  NAL_UNIT_CODED_SLICE_CRA,       // 21
-  NAL_UNIT_RESERVED_22,
-  NAL_UNIT_RESERVED_23,
+    NAL_UNIT_CODED_SLICE_RADL_N,    // 6
+    NAL_UNIT_CODED_SLICE_DLP,       // 7 // Current name in the spec: RADL_R
 
-  NAL_UNIT_RESERVED_24,
-  NAL_UNIT_RESERVED_25,
-  NAL_UNIT_RESERVED_26,
-  NAL_UNIT_RESERVED_27,
-  NAL_UNIT_RESERVED_28,
-  NAL_UNIT_RESERVED_29,
-  NAL_UNIT_RESERVED_30,
-  NAL_UNIT_RESERVED_31,
+    NAL_UNIT_CODED_SLICE_RASL_N,    // 8
+    NAL_UNIT_CODED_SLICE_TFD,       // 9 // Current name in the spec: RASL_R
 
-  NAL_UNIT_VPS,                   // 32
-  NAL_UNIT_SPS,                   // 33
-  NAL_UNIT_PPS,                   // 34
-  NAL_UNIT_ACCESS_UNIT_DELIMITER, // 35
-  NAL_UNIT_EOS,                   // 36
-  NAL_UNIT_EOB,                   // 37
-  NAL_UNIT_FILLER_DATA,           // 38
-  NAL_UNIT_SEI,                   // 39 Prefix SEI
-  NAL_UNIT_SEI_SUFFIX,            // 40 Suffix SEI
-  NAL_UNIT_RESERVED_41,
-  NAL_UNIT_RESERVED_42,
-  NAL_UNIT_RESERVED_43,
-  NAL_UNIT_RESERVED_44,
-  NAL_UNIT_RESERVED_45,
-  NAL_UNIT_RESERVED_46,
-  NAL_UNIT_RESERVED_47,
-  NAL_UNIT_UNSPECIFIED_48,
-  NAL_UNIT_UNSPECIFIED_49,
-  NAL_UNIT_UNSPECIFIED_50,
-  NAL_UNIT_UNSPECIFIED_51,
-  NAL_UNIT_UNSPECIFIED_52,
-  NAL_UNIT_UNSPECIFIED_53,
-  NAL_UNIT_UNSPECIFIED_54,
-  NAL_UNIT_UNSPECIFIED_55,
-  NAL_UNIT_UNSPECIFIED_56,
-  NAL_UNIT_UNSPECIFIED_57,
-  NAL_UNIT_UNSPECIFIED_58,
-  NAL_UNIT_UNSPECIFIED_59,
-  NAL_UNIT_UNSPECIFIED_60,
-  NAL_UNIT_UNSPECIFIED_61,
-  NAL_UNIT_UNSPECIFIED_62,
-  NAL_UNIT_UNSPECIFIED_63,
-  NAL_UNIT_INVALID,
+    NAL_UNIT_RESERVED_10,
+    NAL_UNIT_RESERVED_11,
+    NAL_UNIT_RESERVED_12,
+    NAL_UNIT_RESERVED_13,
+    NAL_UNIT_RESERVED_14,
+    NAL_UNIT_RESERVED_15,
+
+    NAL_UNIT_CODED_SLICE_BLA,       // 16   // Current name in the spec: BLA_W_LP
+    NAL_UNIT_CODED_SLICE_BLANT,     // 17   // Current name in the spec: BLA_W_DLP
+    NAL_UNIT_CODED_SLICE_BLA_N_LP,  // 18
+    NAL_UNIT_CODED_SLICE_IDR,       // 19  // Current name in the spec: IDR_W_DLP
+    NAL_UNIT_CODED_SLICE_IDR_N_LP,  // 20
+    NAL_UNIT_CODED_SLICE_CRA,       // 21
+    NAL_UNIT_RESERVED_22,
+    NAL_UNIT_RESERVED_23,
+
+    NAL_UNIT_RESERVED_24,
+    NAL_UNIT_RESERVED_25,
+    NAL_UNIT_RESERVED_26,
+    NAL_UNIT_RESERVED_27,
+    NAL_UNIT_RESERVED_28,
+    NAL_UNIT_RESERVED_29,
+    NAL_UNIT_RESERVED_30,
+    NAL_UNIT_RESERVED_31,
+
+    NAL_UNIT_VPS,                   // 32
+    NAL_UNIT_SPS,                   // 33
+    NAL_UNIT_PPS,                   // 34
+    NAL_UNIT_ACCESS_UNIT_DELIMITER, // 35
+    NAL_UNIT_EOS,                   // 36
+    NAL_UNIT_EOB,                   // 37
+    NAL_UNIT_FILLER_DATA,           // 38
+    NAL_UNIT_SEI,                   // 39 Prefix SEI
+    NAL_UNIT_SEI_SUFFIX,            // 40 Suffix SEI
+    NAL_UNIT_RESERVED_41,
+    NAL_UNIT_RESERVED_42,
+    NAL_UNIT_RESERVED_43,
+    NAL_UNIT_RESERVED_44,
+    NAL_UNIT_RESERVED_45,
+    NAL_UNIT_RESERVED_46,
+    NAL_UNIT_RESERVED_47,
+    NAL_UNIT_UNSPECIFIED_48,
+    NAL_UNIT_UNSPECIFIED_49,
+    NAL_UNIT_UNSPECIFIED_50,
+    NAL_UNIT_UNSPECIFIED_51,
+    NAL_UNIT_UNSPECIFIED_52,
+    NAL_UNIT_UNSPECIFIED_53,
+    NAL_UNIT_UNSPECIFIED_54,
+    NAL_UNIT_UNSPECIFIED_55,
+    NAL_UNIT_UNSPECIFIED_56,
+    NAL_UNIT_UNSPECIFIED_57,
+    NAL_UNIT_UNSPECIFIED_58,
+    NAL_UNIT_UNSPECIFIED_59,
+    NAL_UNIT_UNSPECIFIED_60,
+    NAL_UNIT_UNSPECIFIED_61,
+    NAL_UNIT_UNSPECIFIED_62,
+    NAL_UNIT_UNSPECIFIED_63,
+    NAL_UNIT_INVALID,
 };
 
 //! \}

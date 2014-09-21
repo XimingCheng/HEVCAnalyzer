@@ -66,44 +66,47 @@
 class TDecGop
 {
 private:
-  TComList<TComPic*>    m_cListPic;         //  Dynamic buffer
+    TComList<TComPic *>    m_cListPic;        //  Dynamic buffer
 
-  //  Access channel
-  TDecEntropy*          m_pcEntropyDecoder;
-  TDecSbac*             m_pcSbacDecoder;
-  TDecBinCABAC*         m_pcBinCABAC;
-  TDecSbac*             m_pcSbacDecoders; // independant CABAC decoders
-  TDecBinCABAC*         m_pcBinCABACs;
-  TDecCavlc*            m_pcCavlcDecoder;
-  TDecSlice*            m_pcSliceDecoder;
-  TComLoopFilter*       m_pcLoopFilter;
+    //  Access channel
+    TDecEntropy          *m_pcEntropyDecoder;
+    TDecSbac             *m_pcSbacDecoder;
+    TDecBinCABAC         *m_pcBinCABAC;
+    TDecSbac             *m_pcSbacDecoders; // independant CABAC decoders
+    TDecBinCABAC         *m_pcBinCABACs;
+    TDecCavlc            *m_pcCavlcDecoder;
+    TDecSlice            *m_pcSliceDecoder;
+    TComLoopFilter       *m_pcLoopFilter;
 
-  TComSampleAdaptiveOffset*     m_pcSAO;
-  Double                m_dDecTime;
-  Int                   m_decodedPictureHashSEIEnabled;  ///< Checksum(3)/CRC(2)/MD5(1)/disable(0) acting on decoded picture hash SEI message
+    TComSampleAdaptiveOffset     *m_pcSAO;
+    Double                m_dDecTime;
+    Int                   m_decodedPictureHashSEIEnabled;  ///< Checksum(3)/CRC(2)/MD5(1)/disable(0) acting on decoded picture hash SEI message
 
-  //! list that contains the CU address of each slice plus the end address
-  std::vector<Int> m_sliceStartCUAddress;
-  std::vector<Bool> m_LFCrossSliceBoundaryFlag;
+    //! list that contains the CU address of each slice plus the end address
+    std::vector<Int> m_sliceStartCUAddress;
+    std::vector<Bool> m_LFCrossSliceBoundaryFlag;
 
 public:
-  TDecGop();
-  virtual ~TDecGop();
+    TDecGop();
+    virtual ~TDecGop();
 
-  Void  init    ( TDecEntropy*            pcEntropyDecoder,
-                 TDecSbac*               pcSbacDecoder,
-                 TDecBinCABAC*           pcBinCABAC,
-                 TDecCavlc*              pcCavlcDecoder,
-                 TDecSlice*              pcSliceDecoder,
-                 TComLoopFilter*         pcLoopFilter,
-                 TComSampleAdaptiveOffset* pcSAO
-                 );
-  Void  create  ();
-  Void  destroy ();
-  Void  decompressSlice(TComInputBitstream* pcBitstream, TComPic*& rpcPic );
-  Void  filterPicture  (TComPic*& rpcPic );
+    Void  init    ( TDecEntropy            *pcEntropyDecoder,
+                    TDecSbac               *pcSbacDecoder,
+                    TDecBinCABAC           *pcBinCABAC,
+                    TDecCavlc              *pcCavlcDecoder,
+                    TDecSlice              *pcSliceDecoder,
+                    TComLoopFilter         *pcLoopFilter,
+                    TComSampleAdaptiveOffset *pcSAO
+                  );
+    Void  create  ();
+    Void  destroy ();
+    Void  decompressSlice(TComInputBitstream *pcBitstream, TComPic *&rpcPic );
+    Void  filterPicture  (TComPic *&rpcPic );
 
-  void setDecodedPictureHashSEIEnabled(Int enabled) { m_decodedPictureHashSEIEnabled = enabled; }
+    void setDecodedPictureHashSEIEnabled(Int enabled)
+    {
+        m_decodedPictureHashSEIEnabled = enabled;
+    }
 
 };
 
