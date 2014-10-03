@@ -138,6 +138,8 @@ enum PreType
 
 struct PtInfo
 {
+    UInt _ptCUBlockX;
+    UInt _ptCUBlockY;
     UInt _ptStartX;
     UInt _ptStartY;
     UInt _ptEndX;

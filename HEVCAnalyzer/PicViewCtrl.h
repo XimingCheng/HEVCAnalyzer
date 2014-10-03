@@ -6,6 +6,7 @@
 #include "PixelViewCtrl.h"
 #include "MainUIInstance.h"
 #include <list>
+#include <vector>
 #include <wx/dnd.h>
 
 class HEVCStatusBar;
@@ -38,6 +39,8 @@ public:
     ~PicViewCtrl();
 
     void SetScale(const double dScale);
+    void SetPicWidth(const int w) { m_iPicWidth = w; }
+    void SetPicHeight(const int h) { m_iPicHeight = h; }
     //void SetSize(const wxSize& size) { m_CtrlSize = size; }
     void SetBitmap(wxBitmap bitmap, wxBitmap bitmapY, wxBitmap bitmapU, wxBitmap bitmapV);
     void SetLCUSize(const wxSize& size);
@@ -92,6 +95,9 @@ private:
     void DrawSplitInfo(wxGraphicsContext* gc);
 
 private:
+    // the width and height are used in the m_cViewBitmap is invalid
+    int                  m_iPicWidth;
+    int                  m_iPicHeight;
     bool                 m_bClearFlag;
     bool                 m_bFitMode;
     double               m_dScaleRate;
@@ -138,9 +144,10 @@ private:
     int*                 m_piRowData;
     int*                 m_piColData;
 
-    // cu split info
-    PtInfo*              m_pCurSplitInfo;
-    int                  m_iSplitPtSize;
+    // cu split info, the first index of vector is CU index
+    vector<vector<PtInfo> > m_vCurCUSplitInfo;
+    vector<vector<PtInfo> > m_vCurPUSplitInfo;
+    vector<vector<PtInfo> > m_vCurTUSplitInfo;
 
     DECLARE_EVENT_TABLE();
 };

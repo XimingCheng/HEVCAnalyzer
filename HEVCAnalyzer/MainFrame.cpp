@@ -1137,6 +1137,9 @@ void MainFrame::OnDecodingSetSize(wxCommandEvent& event)
     m_iSourceWidth  = Utils::tuple_get<0>(*pData);
     m_iSourceHeight = Utils::tuple_get<1>(*pData);
     m_iYUVBit = 8;
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetLCUSize(wxSize(g_uiMaxCUWidth, g_uiMaxCUHeight));
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetPicWidth(m_iSourceWidth);
+    m_pCenterPageManager->GetPicViewCtrl(0)->SetPicHeight(m_iSourceHeight);
     // the memeory is malloced in the msg router function, and the memory should be
     // released by ourself
     delete pData;

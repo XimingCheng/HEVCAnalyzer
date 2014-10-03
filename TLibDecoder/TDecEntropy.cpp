@@ -428,6 +428,8 @@ Void TDecEntropy::xDecodeTransform( TComDataCU *pcCU, UInt offsetLuma, UInt offs
         UInt uiTPelY = pcCU->getCUPelY() + g_auiRasterToPelY[ g_auiZscanToRaster[uiAbsPartIdx] ];
         UInt uiRPelX = uiLPelX + (g_uiMaxCUWidth >> uiDepth);
         UInt uiBPelY = uiTPelY + (g_uiMaxCUHeight >> uiDepth);
+        ptInfo._ptCUBlockX = uiLPelX / g_uiMaxCUWidth;
+        ptInfo._ptCUBlockY = uiTPelY / g_uiMaxCUHeight;
         ptInfo._ptStartX = uiLPelX;
         ptInfo._ptStartY = uiTPelY;
         ptInfo._ptEndX   = uiRPelX;

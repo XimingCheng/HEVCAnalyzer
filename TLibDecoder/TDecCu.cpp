@@ -435,12 +435,16 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         }
     }
 
+    // start of encoding Points Info structure
+    // add the CU Blocks XY in Points Info
     PtInfo pt;
     pt._ptStartX = uiLPelX;
     pt._ptStartY = uiTPelY;
     pt._ptEndX   = uiRPelX + 1;
     pt._ptEndY   = uiBPelY + 1;
     pt._sType    = Type_CU;
+    pt._ptCUBlockX = pt._ptStartX / g_uiMaxCUWidth;
+    pt._ptCUBlockY = pt._ptStartY / g_uiMaxCUHeight;
     if(bOneMode)
         pt._preMode  = mode;
     else
@@ -460,6 +464,8 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp1._ptEndY   = uiBPelY + 1;
         ptp1._sType    = Type_PU;
         ptp1._preMode  = pMode[0];
+        ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
+        ptp1._ptCUBlockY = ptp1._ptStartY / g_uiMaxCUHeight;
         m_pCuSplitInfo->push_back(ptp1);
         break;
     case SIZE_2NxN:
@@ -477,6 +483,10 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp2._sType    = Type_PU;
         ptp1._preMode  = pMode[0];
         ptp2._preMode  = pMode[1];
+        ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
+        ptp1._ptCUBlockY = ptp1._ptStartY / g_uiMaxCUHeight;
+        ptp2._ptCUBlockX = ptp2._ptStartX / g_uiMaxCUWidth;
+        ptp2._ptCUBlockY = ptp2._ptStartY / g_uiMaxCUHeight;
         m_pCuSplitInfo->push_back(ptp1);
         m_pCuSplitInfo->push_back(ptp2);
         break;
@@ -494,6 +504,10 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp2._ptEndY   = uiBPelY + 1;
         ptp1._preMode  = pMode[0];
         ptp2._preMode  = pMode[1];
+        ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
+        ptp1._ptCUBlockY = ptp1._ptStartY / g_uiMaxCUHeight;
+        ptp2._ptCUBlockX = ptp2._ptStartX / g_uiMaxCUWidth;
+        ptp2._ptCUBlockY = ptp2._ptStartY / g_uiMaxCUHeight;
         m_pCuSplitInfo->push_back(ptp1);
         m_pCuSplitInfo->push_back(ptp2);
         break;
@@ -520,6 +534,14 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp4._ptStartY = uiTPelY + h;
         ptp4._ptEndX   = uiRPelX + 1;
         ptp4._ptEndY   = uiBPelY + 1;
+        ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
+        ptp1._ptCUBlockY = ptp1._ptStartY / g_uiMaxCUHeight;
+        ptp2._ptCUBlockX = ptp2._ptStartX / g_uiMaxCUWidth;
+        ptp2._ptCUBlockY = ptp2._ptStartY / g_uiMaxCUHeight;
+        ptp3._ptCUBlockX = ptp3._ptStartX / g_uiMaxCUWidth;
+        ptp3._ptCUBlockY = ptp3._ptStartY / g_uiMaxCUHeight;
+        ptp4._ptCUBlockX = ptp4._ptStartX / g_uiMaxCUWidth;
+        ptp4._ptCUBlockY = ptp4._ptStartY / g_uiMaxCUHeight;
         if(bOneMode)
         {
             ptp1._preMode  = mode;
@@ -553,6 +575,10 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp2._sType    = Type_PU;
         ptp1._preMode  = pMode[0];
         ptp2._preMode  = pMode[1];
+        ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
+        ptp1._ptCUBlockY = ptp1._ptStartY / g_uiMaxCUHeight;
+        ptp2._ptCUBlockX = ptp2._ptStartX / g_uiMaxCUWidth;
+        ptp2._ptCUBlockY = ptp2._ptStartY / g_uiMaxCUHeight;
         m_pCuSplitInfo->push_back(ptp1);
         m_pCuSplitInfo->push_back(ptp2);
         break;
@@ -570,6 +596,10 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp2._sType    = Type_PU;
         ptp1._preMode  = pMode[0];
         ptp2._preMode  = pMode[1];
+        ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
+        ptp1._ptCUBlockY = ptp1._ptStartY / g_uiMaxCUHeight;
+        ptp2._ptCUBlockX = ptp2._ptStartX / g_uiMaxCUWidth;
+        ptp2._ptCUBlockY = ptp2._ptStartY / g_uiMaxCUHeight;
         m_pCuSplitInfo->push_back(ptp1);
         m_pCuSplitInfo->push_back(ptp2);
         break;
@@ -587,6 +617,10 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp2._sType    = Type_PU;
         ptp1._preMode  = pMode[0];
         ptp2._preMode  = pMode[1];
+        ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
+        ptp1._ptCUBlockY = ptp1._ptStartY / g_uiMaxCUHeight;
+        ptp2._ptCUBlockX = ptp2._ptStartX / g_uiMaxCUWidth;
+        ptp2._ptCUBlockY = ptp2._ptStartY / g_uiMaxCUHeight;
         m_pCuSplitInfo->push_back(ptp1);
         m_pCuSplitInfo->push_back(ptp2);
         break;
@@ -604,6 +638,10 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp2._sType    = Type_PU;
         ptp1._preMode  = pMode[0];
         ptp2._preMode  = pMode[1];
+        ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
+        ptp1._ptCUBlockY = ptp1._ptStartY / g_uiMaxCUHeight;
+        ptp2._ptCUBlockX = ptp2._ptStartX / g_uiMaxCUWidth;
+        ptp2._ptCUBlockY = ptp2._ptStartY / g_uiMaxCUHeight;
         m_pCuSplitInfo->push_back(ptp1);
         m_pCuSplitInfo->push_back(ptp2);
         break;
