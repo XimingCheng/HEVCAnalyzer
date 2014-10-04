@@ -710,6 +710,9 @@ void PicViewCtrl::SetCurSliderInStatusBarPos()
     int curVal = (int)(m_dScaleRate * 10000);
     pSlider->SetRange(minVal, maxVal);
     pSlider->SetValue(curVal);
+    double curValScale = static_cast<double>(pSlider->GetValue()) / 10000;
+    wxString txt = wxString::Format(_T("%.2f%%"), curValScale * 100);
+    m_pStatusBar->SetStatusText(txt, HEVCStatusBar::Field_ZoomInfo);
 }
 
 void PicViewCtrl::SetRowData(const int num_row, const int* pRowData)

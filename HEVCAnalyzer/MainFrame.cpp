@@ -191,7 +191,7 @@ void MainFrame::CreateMenuToolBar()
     m_pStatusBar->SetStatusText(_T("Ready"));
 
     // first is tips, second is msg, the last is the scale ctrl
-    m_pStatusBar->SetFieldsCount(3);
+    m_pStatusBar->SetFieldsCount(HEVCStatusBar::Field_Max);
     SetMinSize(wxSize(400, 300));
 
     CreateFileIOToolBar();
@@ -782,7 +782,10 @@ void MainFrame::OnUpdateUI(wxUpdateUIEvent& event)
     case ID_FastForward:
     case ID_FastBackward:
         if(!m_bOPened)
+        {
             pSlider->SetValue(0);
+            GetStatusBar()->SetStatusText(_T(""), HEVCStatusBar::Field_ZoomInfo);
+        }
         pSlider->Enable(m_bOPened);
         event.Enable(m_bOPened);
         break;
@@ -1059,6 +1062,8 @@ void MainFrame::OnScrollChange(wxScrollEvent& event)
     {
         wxSlider* pSlider = m_pStatusBar->GetSlider();
         double curVal = static_cast<double>(pSlider->GetValue()) / 10000;
+        wxString txt = wxString::Format(_T("%.2f%%"), curVal * 100);
+        m_pStatusBar->SetStatusText(txt, HEVCStatusBar::Field_ZoomInfo);
         for(std::size_t idx = 0; idx < m_pCenterPageManager->GetSize(); idx++)
         {
             PicViewCtrl* pPic = m_pCenterPageManager->GetPicViewCtrl(idx);
@@ -1234,12 +1239,12 @@ END_EVENT_TABLE()
 HEVCStatusBar::HEVCStatusBar(wxWindow *parent)
             : wxStatusBar(parent, wxID_ANY), m_pZoomSlider(NULL), m_pManager(NULL)
 {
-    static const int widths[Feild_Max] = { -1, 100, 150 };
-    SetFieldsCount(Feild_Max);
-    SetStatusWidths(Feild_Max, widths);
+    static const int widths[Field_Max] = { -1, 100, 50, 150 };
+    SetFieldsCount(Field_Max);
+    SetStatusWidths(Field_Max, widths);
     m_pZoomSlider = new wxSlider(this, ID_ZoomSlider, 0, 0, 100);
     wxRect rect;
-    GetFieldRect(Feild_ZoomSlider, rect);
+    GetFieldRect(Field_ZoomSlider, rect);
     m_pZoomSlider->SetSize(rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2);
 }
 
@@ -1252,7 +1257,7 @@ void HEVCStatusBar::OnSize(wxSizeEvent& event)
     if(!m_pZoomSlider)
         return;
     wxRect rect;
-    GetFieldRect(Feild_ZoomSlider, rect);
+    GetFieldRect(Field_ZoomSlider, rect);
     m_pZoomSlider->SetSize(rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2);
     event.Skip();
 }

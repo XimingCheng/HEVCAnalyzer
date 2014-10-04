@@ -4,14 +4,14 @@ HEVCAnalyzer
 
 HEVC stream and YUV file GUI Analyzer based on wxWidgets
 
+Win7
+![win32](https://cloud.githubusercontent.com/assets/2611722/4261031/818d5156-3b5a-11e4-9e2a-6b527ae4e3f9.png)
+
 Ubuntu
 ![ubuntu](https://cloud.githubusercontent.com/assets/2611722/4212011/ab9afc00-3894-11e4-95c8-ca3febcffe64.png)
 
 Linux Mint (old version)
 ![mint](https://f.cloud.github.com/assets/2611722/1792373/710f7022-699e-11e3-8415-6e2f1dfc60e5.jpg)
-
-Win7
-![win32](https://cloud.githubusercontent.com/assets/2611722/4261031/818d5156-3b5a-11e4-9e2a-6b527ae4e3f9.png)
 
 Build Under Linux(Ubuntu)
 -------------------------

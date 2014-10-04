@@ -10,6 +10,7 @@
 #include "RulerCtrl.h"
 
 #define ID_ZoomSlider      MainFrame::ID_MainFrameMax + 100
+#define ID_ZoomSliderInfo  MainFrame::ID_MainFrameMax + 101
 
 DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_END_THUMB_THREAD, wxID_ANY)
@@ -173,8 +174,9 @@ public:
     {
         Field_TextTips = 0,
         Field_Info,
-        Feild_ZoomSlider,
-        Feild_Max,
+        Field_ZoomInfo,
+        Field_ZoomSlider,
+        Field_Max,
     };
     HEVCStatusBar(wxWindow *parent);
     virtual ~HEVCStatusBar();
