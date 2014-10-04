@@ -1035,25 +1035,29 @@ void MainFrame::OnDropFiles(wxCommandEvent& event)
     wxString filename = event.GetString();
     if(filename.Lower().EndsWith(_T(".yuv")))
         m_bYUVFile = true;
-    else
+    else if(filename.Lower().EndsWith(_T(".bin")))
     {
         m_bYUVFile = false;
-        LogMsgUIInstance::GetInstance()->LogMessage(_T("The file to be open must be YUV file"), LogMsgUIInstance::MSG_TYPE_ERROR);
+    }
+    else
+    {
+        LogMsgUIInstance::GetInstance()->LogMessage(_T("The file to be open must be YUV/bin file"), LogMsgUIInstance::MSG_TYPE_ERROR);
+        return;
     }
 
     if(m_bYUVFile)
     {
         OnCloseFile(event);
-        m_sCurOpenedFilePath = filename;
-        m_sCurOpenedFileName = ::wxFileNameFromPath(filename);
-        OnOpenYUVFile(m_sCurOpenedFilePath, m_sCurOpenedFileName);
+        OnOpenYUVFile(filename, ::wxFileNameFromPath(filename));
     }
     else
     {
         OnCloseFile(event);
+        OnOpenStreamFile(filename, ::wxFileNameFromPath(filename));
         m_bOPened = true;
     }
-
+    m_sCurOpenedFilePath = filename;
+    m_sCurOpenedFileName = ::wxFileNameFromPath(filename);
 }
 
 void MainFrame::OnScrollChange(wxScrollEvent& event)
