@@ -502,13 +502,13 @@ void PicViewCtrl::DrawBackGround(wxGraphicsContext* gc, wxGraphicsContext* gct)
 //        gc->SetBrush(wxBrush(wxColor(255, 0, 0, 50)));
 //        gc->DrawRectangle(0, 0, m_cViewBitmap.GetWidth(), m_cViewBitmap.GetHeight());
     }
+    if(m_bShowGrid)
+        DrawGrid(gct);
     if(!m_bOpenedYUVfile && m_bShowTilesInfo)
     {
         DrawSplitInfo(gct);
         DrawTilesGrid(gct);
     }
-    if(m_bShowGrid)
-        DrawGrid(gct);
 }
 
 void PicViewCtrl::DrawNoPictureTips(wxGraphicsContext* gc)
@@ -857,6 +857,7 @@ void PicViewCtrl::DrawSplitInfo(wxGraphicsContext* gc)
 
 void PicViewCtrl::DrawTilesGrid(wxGraphicsContext* gc)
 {
+    // TODO the tiles info did not support fully
     gc->SetPen(wxPen(wxColor(255, 255, 0, 255), 2));
     int w = 0, h = 0;
     for(int i = 0 ; i < m_iNumRow; i++)

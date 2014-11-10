@@ -407,9 +407,22 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
 
     m_ppcCU[uiDepth]->copySubCU( pcCU, uiAbsPartIdx, uiDepth );
 
+    // start of encoding Points Info structure
+    // add the CU Blocks XY in Points Info
+    // define a temp MV structure store the temp mv data
+    struct TempMVData
+    {
+        Int _iMotionXPre;
+        Int _iMotionYPre;
+        Int _iMotionXSuf;
+        Int _iMotionYSuf;
+    };
+
     PreType mode;
     PreType *pMode = NULL;
+    TempMVData *pTempMVData = NULL;
     bool bOneMode = true;
+    int num_part = 0;
     if(m_ppcCU[uiDepth]->getPredictionMode(0) == MODE_INTRA)
         mode = Type_INTRA;
     else if(m_ppcCU[uiDepth]->isSkipped(0))
@@ -420,23 +433,35 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         Int iWidth, iHeight;
         UInt uiPartAddr;
         // the CU can be splited into PUs
-        int num_part = m_ppcCU[uiDepth]->getNumPartInter();
+        // the inter MVs
+        num_part = m_ppcCU[uiDepth]->getNumPartInter();
         pMode = new PreType[num_part];
+        pTempMVData = new TempMVData[num_part];
         for(int iPartIdx = 0; iPartIdx < num_part; iPartIdx++)
         {
             pMode[iPartIdx] = Type_INTER_P;
+            TempMVData data;
+            TComMv mv = m_ppcCU[uiDepth]->getCUMvField(REF_PIC_LIST_0)->getMv(iPartIdx);
+            data._iMotionXPre = mv.getHor();
+            data._iMotionYPre = mv.getVer();
+            data._iMotionXSuf = 0;
+            data._iMotionYSuf = 0;
             m_ppcCU[uiDepth]->getPartIndexAndSize( iPartIdx, uiPartAddr, iWidth, iHeight );
             if( m_ppcCU[uiDepth]->getSlice()->isInterB() && !m_ppcCU[uiDepth]->getSlice()->getPPS()->getWPBiPred() )
             {
                 if( m_ppcCU[uiDepth]->getCUMvField(REF_PIC_LIST_0)->getRefIdx(uiPartAddr) >= 0 &&
                         m_ppcCU[uiDepth]->getCUMvField(REF_PIC_LIST_1)->getRefIdx(uiPartAddr) >= 0)
+                {
+                    TComMv mv = m_ppcCU[uiDepth]->getCUMvField(REF_PIC_LIST_1)->getMv(iPartIdx);
                     pMode[iPartIdx] = Type_INTER_B;
+                    data._iMotionXSuf = mv.getHor();
+                    data._iMotionYSuf = mv.getVer();
+                }
             }
+            pTempMVData[iPartIdx] = data;
         }
     }
 
-    // start of encoding Points Info structure
-    // add the CU Blocks XY in Points Info
     PtInfo pt;
     pt._ptStartX = uiLPelX;
     pt._ptStartY = uiTPelY;
@@ -445,6 +470,10 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
     pt._sType    = Type_CU;
     pt._ptCUBlockX = pt._ptStartX / g_uiMaxCUWidth;
     pt._ptCUBlockY = pt._ptStartY / g_uiMaxCUHeight;
+    pt._iMotionXPre = 0;
+    pt._iMotionYPre = 0;
+    pt._iMotionXSuf = 0;
+    pt._iMotionYSuf = 0;
     if(bOneMode)
         pt._preMode  = mode;
     else
@@ -466,6 +495,10 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp1._preMode  = pMode[0];
         ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
         ptp1._ptCUBlockY = ptp1._ptStartY / g_uiMaxCUHeight;
+        ptp1._iMotionXPre = pTempMVData[0]._iMotionXPre;
+        ptp1._iMotionYPre = pTempMVData[0]._iMotionYPre;
+        ptp1._iMotionXSuf = pTempMVData[0]._iMotionXSuf;
+        ptp1._iMotionYSuf = pTempMVData[0]._iMotionYSuf;
         m_pCuSplitInfo->push_back(ptp1);
         break;
     case SIZE_2NxN:
@@ -476,11 +509,21 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp1._ptEndX   = uiRPelX + 1;
         ptp1._ptEndY   = uiTPelY + h;
         ptp1._sType    = Type_PU;
+        ptp1._iMotionXPre = pTempMVData[0]._iMotionXPre;
+        ptp1._iMotionYPre = pTempMVData[0]._iMotionYPre;
+        ptp1._iMotionXSuf = pTempMVData[0]._iMotionXSuf;
+        ptp1._iMotionYSuf = pTempMVData[0]._iMotionYSuf;
+
         ptp2._ptStartX = uiLPelX;
         ptp2._ptStartY = uiTPelY + h;
         ptp2._ptEndX   = uiRPelX + 1;
         ptp2._ptEndY   = uiBPelY + 1;
         ptp2._sType    = Type_PU;
+        ptp2._iMotionXPre = pTempMVData[1]._iMotionXPre;
+        ptp2._iMotionYPre = pTempMVData[1]._iMotionYPre;
+        ptp2._iMotionXSuf = pTempMVData[1]._iMotionXSuf;
+        ptp2._iMotionYSuf = pTempMVData[1]._iMotionYSuf;
+
         ptp1._preMode  = pMode[0];
         ptp2._preMode  = pMode[1];
         ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
@@ -497,11 +540,21 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp1._ptStartY = uiTPelY;
         ptp1._ptEndX   = uiLPelX + w;
         ptp1._ptEndY   = uiBPelY + 1;
+        ptp1._iMotionXPre = pTempMVData[0]._iMotionXPre;
+        ptp1._iMotionYPre = pTempMVData[0]._iMotionYPre;
+        ptp1._iMotionXSuf = pTempMVData[0]._iMotionXSuf;
+        ptp1._iMotionYSuf = pTempMVData[0]._iMotionYSuf;
+
         ptp2._sType    = Type_PU;
         ptp2._ptStartX = uiLPelX + w;
         ptp2._ptStartY = uiTPelY;
         ptp2._ptEndX   = uiRPelX + 1;
         ptp2._ptEndY   = uiBPelY + 1;
+        ptp2._iMotionXPre = pTempMVData[1]._iMotionXPre;
+        ptp2._iMotionYPre = pTempMVData[1]._iMotionYPre;
+        ptp2._iMotionXSuf = pTempMVData[1]._iMotionXSuf;
+        ptp2._iMotionYSuf = pTempMVData[1]._iMotionYSuf;
+
         ptp1._preMode  = pMode[0];
         ptp2._preMode  = pMode[1];
         ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
@@ -519,21 +572,25 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp1._ptStartY = uiTPelY;
         ptp1._ptEndX   = uiLPelX + w;
         ptp1._ptEndY   = uiTPelY + h;
+
         ptp2._sType    = Type_PU;
         ptp2._ptStartX = uiLPelX + w;
         ptp2._ptStartY = uiTPelY;
         ptp2._ptEndX   = uiRPelX + 1;
         ptp2._ptEndY   = uiTPelY + h;
+
         ptp3._sType    = Type_PU;
         ptp3._ptStartX = uiLPelX;
         ptp3._ptStartY = uiTPelY + h;
         ptp3._ptEndX   = uiLPelX + w;
         ptp3._ptEndY   = uiBPelY + 1;
+
         ptp4._sType    = Type_PU;
         ptp4._ptStartX = uiLPelX + w;
         ptp4._ptStartY = uiTPelY + h;
         ptp4._ptEndX   = uiRPelX + 1;
         ptp4._ptEndY   = uiBPelY + 1;
+
         ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
         ptp1._ptCUBlockY = ptp1._ptStartY / g_uiMaxCUHeight;
         ptp2._ptCUBlockX = ptp2._ptStartX / g_uiMaxCUWidth;
@@ -548,6 +605,26 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
             ptp2._preMode  = mode;
             ptp3._preMode  = mode;
             ptp4._preMode  = mode;
+
+            ptp1._iMotionXPre = 0;
+            ptp1._iMotionYPre = 0;
+            ptp1._iMotionXSuf = 0;
+            ptp1._iMotionYSuf = 0;
+
+            ptp2._iMotionXPre = 0;
+            ptp2._iMotionYPre = 0;
+            ptp2._iMotionXSuf = 0;
+            ptp2._iMotionYSuf = 0;
+
+            ptp3._iMotionXPre = 0;
+            ptp3._iMotionYPre = 0;
+            ptp3._iMotionXSuf = 0;
+            ptp3._iMotionYSuf = 0;
+
+            ptp4._iMotionXPre = 0;
+            ptp4._iMotionYPre = 0;
+            ptp4._iMotionXSuf = 0;
+            ptp4._iMotionYSuf = 0;
         }
         else
         {
@@ -555,6 +632,26 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
             ptp2._preMode  = pMode[1];
             ptp3._preMode  = pMode[2];
             ptp4._preMode  = pMode[3];
+
+            ptp1._iMotionXPre = pTempMVData[0]._iMotionXPre;
+            ptp1._iMotionYPre = pTempMVData[0]._iMotionYPre;
+            ptp1._iMotionXSuf = pTempMVData[0]._iMotionXSuf;
+            ptp1._iMotionYSuf = pTempMVData[0]._iMotionYSuf;
+
+            ptp2._iMotionXPre = pTempMVData[1]._iMotionXPre;
+            ptp2._iMotionYPre = pTempMVData[1]._iMotionYPre;
+            ptp2._iMotionXSuf = pTempMVData[1]._iMotionXSuf;
+            ptp2._iMotionYSuf = pTempMVData[1]._iMotionYSuf;
+
+            ptp3._iMotionXPre = pTempMVData[2]._iMotionXPre;
+            ptp3._iMotionYPre = pTempMVData[2]._iMotionYPre;
+            ptp3._iMotionXSuf = pTempMVData[2]._iMotionXSuf;
+            ptp3._iMotionYSuf = pTempMVData[2]._iMotionYSuf;
+
+            ptp4._iMotionXPre = pTempMVData[3]._iMotionXPre;
+            ptp4._iMotionYPre = pTempMVData[3]._iMotionYPre;
+            ptp4._iMotionXSuf = pTempMVData[3]._iMotionXSuf;
+            ptp4._iMotionYSuf = pTempMVData[3]._iMotionYSuf;
         }
         m_pCuSplitInfo->push_back(ptp1);
         m_pCuSplitInfo->push_back(ptp2);
@@ -568,11 +665,21 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp1._ptEndX   = uiRPelX + 1;
         ptp1._ptEndY   = uiTPelY + h;
         ptp1._sType    = Type_PU;
+        ptp1._iMotionXPre = pTempMVData[0]._iMotionXPre;
+        ptp1._iMotionYPre = pTempMVData[0]._iMotionYPre;
+        ptp1._iMotionXSuf = pTempMVData[0]._iMotionXSuf;
+        ptp1._iMotionYSuf = pTempMVData[0]._iMotionYSuf;
+
         ptp2._ptStartX = uiLPelX;
         ptp2._ptStartY = uiTPelY + h;
         ptp2._ptEndX   = uiRPelX + 1;
         ptp2._ptEndY   = uiBPelY + 1;
         ptp2._sType    = Type_PU;
+        ptp2._iMotionXPre = pTempMVData[1]._iMotionXPre;
+        ptp2._iMotionYPre = pTempMVData[1]._iMotionYPre;
+        ptp2._iMotionXSuf = pTempMVData[1]._iMotionXSuf;
+        ptp2._iMotionYSuf = pTempMVData[1]._iMotionYSuf;
+
         ptp1._preMode  = pMode[0];
         ptp2._preMode  = pMode[1];
         ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
@@ -589,11 +696,21 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp1._ptEndX   = uiRPelX + 1;
         ptp1._ptEndY   = uiTPelY + h;
         ptp1._sType    = Type_PU;
+        ptp1._iMotionXPre = pTempMVData[0]._iMotionXPre;
+        ptp1._iMotionYPre = pTempMVData[0]._iMotionYPre;
+        ptp1._iMotionXSuf = pTempMVData[0]._iMotionXSuf;
+        ptp1._iMotionYSuf = pTempMVData[0]._iMotionYSuf;
+
         ptp2._ptStartX = uiLPelX;
         ptp2._ptStartY = uiTPelY + h;
         ptp2._ptEndX   = uiRPelX + 1;
         ptp2._ptEndY   = uiBPelY + 1;
         ptp2._sType    = Type_PU;
+        ptp2._iMotionXPre = pTempMVData[1]._iMotionXPre;
+        ptp2._iMotionYPre = pTempMVData[1]._iMotionYPre;
+        ptp2._iMotionXSuf = pTempMVData[1]._iMotionXSuf;
+        ptp2._iMotionYSuf = pTempMVData[1]._iMotionYSuf;
+
         ptp1._preMode  = pMode[0];
         ptp2._preMode  = pMode[1];
         ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
@@ -610,11 +727,21 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp1._ptEndX   = uiLPelX + w;
         ptp1._ptEndY   = uiBPelY + 1;
         ptp1._sType    = Type_PU;
+        ptp1._iMotionXPre = pTempMVData[0]._iMotionXPre;
+        ptp1._iMotionYPre = pTempMVData[0]._iMotionYPre;
+        ptp1._iMotionXSuf = pTempMVData[0]._iMotionXSuf;
+        ptp1._iMotionYSuf = pTempMVData[0]._iMotionYSuf;
+
         ptp2._ptStartX = uiLPelX + w;
         ptp2._ptStartY = uiTPelY;
         ptp2._ptEndX   = uiRPelX + 1;
         ptp2._ptEndY   = uiBPelY + 1;
         ptp2._sType    = Type_PU;
+        ptp2._iMotionXPre = pTempMVData[1]._iMotionXPre;
+        ptp2._iMotionYPre = pTempMVData[1]._iMotionYPre;
+        ptp2._iMotionXSuf = pTempMVData[1]._iMotionXSuf;
+        ptp2._iMotionYSuf = pTempMVData[1]._iMotionYSuf;
+
         ptp1._preMode  = pMode[0];
         ptp2._preMode  = pMode[1];
         ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
@@ -631,11 +758,21 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         ptp1._ptEndX   = uiLPelX + w;
         ptp1._ptEndY   = uiBPelY + 1;
         ptp1._sType    = Type_PU;
+        ptp1._iMotionXPre = pTempMVData[0]._iMotionXPre;
+        ptp1._iMotionYPre = pTempMVData[0]._iMotionYPre;
+        ptp1._iMotionXSuf = pTempMVData[0]._iMotionXSuf;
+        ptp1._iMotionYSuf = pTempMVData[0]._iMotionYSuf;
+
         ptp2._ptStartX = uiLPelX + w;
         ptp2._ptStartY = uiTPelY;
         ptp2._ptEndX   = uiRPelX + 1;
         ptp2._ptEndY   = uiBPelY + 1;
         ptp2._sType    = Type_PU;
+        ptp2._iMotionXPre = pTempMVData[1]._iMotionXPre;
+        ptp2._iMotionYPre = pTempMVData[1]._iMotionYPre;
+        ptp2._iMotionXSuf = pTempMVData[1]._iMotionXSuf;
+        ptp2._iMotionYSuf = pTempMVData[1]._iMotionYSuf;
+
         ptp1._preMode  = pMode[0];
         ptp2._preMode  = pMode[1];
         ptp1._ptCUBlockX = ptp1._ptStartX / g_uiMaxCUWidth;
@@ -652,6 +789,9 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
     {
         delete [] pMode;
         pMode = NULL;
+
+        delete [] pTempMVData;
+        pTempMVData = NULL;
     }
 
     switch( m_ppcCU[uiDepth]->getPredictionMode(0) )

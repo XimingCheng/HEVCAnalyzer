@@ -146,6 +146,11 @@ struct PtInfo
     UInt _ptEndY;
     SplitType _sType;   // the PU split
     PreType   _preMode; // the mb predict type
+    // motion vector used by inter P/B
+    Int  _iMotionXPre;  // motion vector x/y
+    Int  _iMotionYPre;
+    Int  _iMotionXSuf;
+    Int  _iMotionYSuf;
 };
 
 class MainUIInstance : public NoneCopyable
