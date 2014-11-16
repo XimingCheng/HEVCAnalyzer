@@ -254,7 +254,7 @@ wxNotebook* MainFrame::CreateLeftNotebook()
     pThumbnalListPanel->SetSizer(gSizer);
     pThumbnalListPanel->Layout();
     ctrl->AddPage(pThumbnalListPanel, _T("Thumbnails"), true);
-    // aad ruler for cu pixel
+    // add ruler for cu pixel
     wxFlexGridSizer* fgSizerUp = new wxFlexGridSizer(2, 1, 0, 0);
     wxFlexGridSizer* fgSizerLeft = new wxFlexGridSizer(1, 2, 0, 0);
     fgSizerUp->AddGrowableCol(0);

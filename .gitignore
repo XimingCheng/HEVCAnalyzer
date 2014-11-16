@@ -29,3 +29,4 @@
 /Build/Win/*.sdf
 /Build/Win/*.opensdf
 /Build/Win/*.suo
+/Build/Win/*.user
