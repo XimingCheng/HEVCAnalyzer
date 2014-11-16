@@ -33,7 +33,7 @@ wxString wxbuildinfo(wxbuildinfoformat format)
 DEFINE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD)
 DEFINE_EVENT_TYPE(wxEVT_END_THUMB_THREAD)
 DEFINE_EVENT_TYPE(wxEVT_END_DECODING_THREAD)
-DEFINE_EVENT_TYPE(wxEVT_DROP_FILES)
+DEFINE_EVENT_TYPE(wxEVT_DROP_HEVCFILES)
 DEFINE_EVENT_TYPE(wxEVT_LOGMSG)
 DEFINE_EVENT_TYPE(wxEVT_DECODING_MAINFRAME_NOTIFY)
 
@@ -545,8 +545,9 @@ void MainFrame::OnThreadAddImage(wxCommandEvent& event)
 
     }
     m_pThumbnalList->Freeze();
-    unsigned int cnt = m_pThumbnalList->GetFirstVisibleLine();
-    m_pThumbnalList->ScrollToLine(cnt);
+    // in the 3.x the GetVisibleRowsBegin and ScrollToRow has changed!
+    unsigned int cnt = m_pThumbnalList->GetVisibleRowsBegin();
+    m_pThumbnalList->ScrollToRow(cnt);
     m_pThumbnalList->Thaw();
     m_pThumbnalList->RefreshAll();
     if(frame == framenumber-1)
@@ -1202,8 +1203,8 @@ void MainFrame::OnDecodingSetThumbnailBuffer(wxCommandEvent& event)
     wxString filename = wxString::Format(_T("Frame Number %d.bmp"), size_pic);
     m_StrMemFileName.Add(filename);
     m_pThumbnalList->Freeze();
-    unsigned int cnt = m_pThumbnalList->GetFirstVisibleLine();
-    m_pThumbnalList->ScrollToLine(cnt);
+    unsigned int cnt = m_pThumbnalList->GetVisibleRowsBegin();
+    m_pThumbnalList->ScrollToRow(cnt);
     m_pThumbnalList->Thaw();
     m_pThumbnalList->RefreshAll();
 

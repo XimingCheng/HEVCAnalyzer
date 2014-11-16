@@ -97,8 +97,8 @@ Bool TAppDecCfg::parseCfg( Int argc, Char *argv[] )
     }
 
     /* convert std::string to c string for compatability */
-    m_pchBitstreamFile = cfg_BitstreamFile.empty() ? NULL : strdup(cfg_BitstreamFile.c_str());
-    m_pchReconFile = cfg_ReconFile.empty() ? NULL : strdup(cfg_ReconFile.c_str());
+    m_pchBitstreamFile = cfg_BitstreamFile.empty() ? NULL : _strdup(cfg_BitstreamFile.c_str());
+    m_pchReconFile = cfg_ReconFile.empty() ? NULL : _strdup(cfg_ReconFile.c_str());
 
     if (!m_pchBitstreamFile)
     {

@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\HEVCAnalyzer\HEVCAnalyzer.cpp" />
+    <ClCompile Include="..\..\HEVCAnalyzer\HEVCodecApp.cpp" />
+    <ClCompile Include="..\..\HEVCAnalyzer\MainFrame.cpp" />
+    <ClCompile Include="..\..\HEVCAnalyzer\MainUIInstance.cpp" />
+    <ClCompile Include="..\..\HEVCAnalyzer\PicViewCtrl.cpp" />
+    <ClCompile Include="..\..\HEVCAnalyzer\PixelViewCtrl.cpp" />
+    <ClCompile Include="..\..\HEVCAnalyzer\RulerCtrl.cpp" />
+    <ClCompile Include="..\..\HEVCAnalyzer\ThumbnailThread.cpp" />
+    <ClCompile Include="..\..\HEVCAnalyzer\YUVConfigDlg.cpp" />
+    <ClCompile Include="..\..\libmd5\libmd5.c" />
+    <ClCompile Include="..\..\TAppCommon\program_options_lite.cpp" />
+    <ClCompile Include="..\..\TAppDecoder\TAppDecCfg.cpp" />
+    <ClCompile Include="..\..\TAppDecoder\TAppDecTop.cpp" />
+    <ClCompile Include="..\..\TLibCommon\ContextModel.cpp" />
+    <ClCompile Include="..\..\TLibCommon\ContextModel3DBuffer.cpp" />
+    <ClCompile Include="..\..\TLibCommon\SEI.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComBitStream.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComCABACTables.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComDataCU.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComInterpolationFilter.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComLoopFilter.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComMotionInfo.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComPattern.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComPic.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComPicSym.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComPicYuv.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComPicYuvMD5.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComPrediction.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComRdCost.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComRdCostWeightPrediction.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComRom.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComSampleAdaptiveOffset.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComSlice.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComTrQuant.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComWeightPrediction.cpp" />
+    <ClCompile Include="..\..\TLibCommon\TComYuv.cpp" />
+    <ClCompile Include="..\..\TLibDecoder\AnnexBread.cpp" />
+    <ClCompile Include="..\..\TLibDecoder\NALread.cpp" />
+    <ClCompile Include="..\..\TLibDecoder\SEIread.cpp" />
+    <ClCompile Include="..\..\TLibDecoder\SyntaxElementParser.cpp" />
+    <ClCompile Include="..\..\TLibDecoder\TDecBinCoderCABAC.cpp" />
+    <ClCompile Include="..\..\TLibDecoder\TDecCAVLC.cpp" />
+    <ClCompile Include="..\..\TLibDecoder\TDecCu.cpp" />
+    <ClCompile Include="..\..\TLibDecoder\TDecEntropy.cpp" />
+    <ClCompile Include="..\..\TLibDecoder\TDecGop.cpp" />
+    <ClCompile Include="..\..\TLibDecoder\TDecSbac.cpp" />
+    <ClCompile Include="..\..\TLibDecoder\TDecSlice.cpp" />
+    <ClCompile Include="..\..\TLibDecoder\TDecTop.cpp" />
+    <ClCompile Include="..\..\TLibVideoIO\TVideoIOYuv.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\HEVCAnalyzer\HEVCAnalyzer.h" />
+    <ClInclude Include="..\..\HEVCAnalyzer\HEVCodecApp.h" />
+    <ClInclude Include="..\..\HEVCAnalyzer\MainFrame.h" />
+    <ClInclude Include="..\..\HEVCAnalyzer\MainUIInstance.h" />
+    <ClInclude Include="..\..\HEVCAnalyzer\PicViewCtrl.h" />
+    <ClInclude Include="..\..\HEVCAnalyzer\PixelViewCtrl.h" />
+    <ClInclude Include="..\..\HEVCAnalyzer\RulerCtrl.h" />
+    <ClInclude Include="..\..\HEVCAnalyzer\ThumbnailThread.h" />
+    <ClInclude Include="..\..\HEVCAnalyzer\YUVConfigDlg.h" />
+    <ClInclude Include="..\..\libmd5\libmd5.h" />
+    <ClInclude Include="..\..\libmd5\MD5.h" />
+    <ClInclude Include="..\..\TAppCommon\program_options_lite.h" />
+    <ClInclude Include="..\..\TAppDecoder\TAppDecCfg.h" />
+    <ClInclude Include="..\..\TAppDecoder\TAppDecTop.h" />
+    <ClInclude Include="..\..\TLibCommon\AccessUnit.h" />
+    <ClInclude Include="..\..\TLibCommon\CommonDef.h" />
+    <ClInclude Include="..\..\TLibCommon\ContextModel.h" />
+    <ClInclude Include="..\..\TLibCommon\ContextModel3DBuffer.h" />
+    <ClInclude Include="..\..\TLibCommon\ContextTables.h" />
+    <ClInclude Include="..\..\TLibCommon\NAL.h" />
+    <ClInclude Include="..\..\TLibCommon\SEI.h" />
+    <ClInclude Include="..\..\TLibCommon\TComBitCounter.h" />
+    <ClInclude Include="..\..\TLibCommon\TComBitStream.h" />
+    <ClInclude Include="..\..\TLibCommon\TComCABACTables.h" />
+    <ClInclude Include="..\..\TLibCommon\TComDataCU.h" />
+    <ClInclude Include="..\..\TLibCommon\TComInterpolationFilter.h" />
+    <ClInclude Include="..\..\TLibCommon\TComList.h" />
+    <ClInclude Include="..\..\TLibCommon\TComLoopFilter.h" />
+    <ClInclude Include="..\..\TLibCommon\TComMotionInfo.h" />
+    <ClInclude Include="..\..\TLibCommon\TComMv.h" />
+    <ClInclude Include="..\..\TLibCommon\TComPattern.h" />
+    <ClInclude Include="..\..\TLibCommon\TComPic.h" />
+    <ClInclude Include="..\..\TLibCommon\TComPicSym.h" />
+    <ClInclude Include="..\..\TLibCommon\TComPicYuv.h" />
+    <ClInclude Include="..\..\TLibCommon\TComPrediction.h" />
+    <ClInclude Include="..\..\TLibCommon\TComRdCost.h" />
+    <ClInclude Include="..\..\TLibCommon\TComRdCostWeightPrediction.h" />
+    <ClInclude Include="..\..\TLibCommon\TComRom.h" />
+    <ClInclude Include="..\..\TLibCommon\TComSampleAdaptiveOffset.h" />
+    <ClInclude Include="..\..\TLibCommon\TComSlice.h" />
+    <ClInclude Include="..\..\TLibCommon\TComTrQuant.h" />
+    <ClInclude Include="..\..\TLibCommon\TComWeightPrediction.h" />
+    <ClInclude Include="..\..\TLibCommon\TComYuv.h" />
+    <ClInclude Include="..\..\TLibCommon\TypeDef.h" />
+    <ClInclude Include="..\..\TLibDecoder\AnnexBread.h" />
+    <ClInclude Include="..\..\TLibDecoder\NALread.h" />
+    <ClInclude Include="..\..\TLibDecoder\SEIread.h" />
+    <ClInclude Include="..\..\TLibDecoder\SyntaxElementParser.h" />
+    <ClInclude Include="..\..\TLibDecoder\TDecBinCoder.h" />
+    <ClInclude Include="..\..\TLibDecoder\TDecBinCoderCABAC.h" />
+    <ClInclude Include="..\..\TLibDecoder\TDecCAVLC.h" />
+    <ClInclude Include="..\..\TLibDecoder\TDecCu.h" />
+    <ClInclude Include="..\..\TLibDecoder\TDecEntropy.h" />
+    <ClInclude Include="..\..\TLibDecoder\TDecGop.h" />
+    <ClInclude Include="..\..\TLibDecoder\TDecSbac.h" />
+    <ClInclude Include="..\..\TLibDecoder\TDecSlice.h" />
+    <ClInclude Include="..\..\TLibDecoder\TDecTop.h" />
+    <ClInclude Include="..\..\TLibVideoIO\TVideoIOYuv.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{FEF61ACC-EAA4-4F32-8D9E-A0A204EF9A74}</ProjectGuid>
+    <RootNamespace>HEVCAnalyzer</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\..\bin\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\..\bin\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalOptions>/D _CRT_SECURE_NO_WARNINGS  /D"WXUSINGDLL" %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>wxbase30ud.lib;wxmsw30ud_core.lib;wxmsw30ud_html.lib;wxmsw30ud_aui.lib;wxbase30ud_xml.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxregexud.lib;wxcode_msw30ud_wxsqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalOptions>/D _CRT_SECURE_NO_WARNINGS  /D"WXUSINGDLL" %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>wxbase30u.lib;wxmsw30u_core.lib;wxmsw30u_html.lib;wxmsw30u_aui.lib;wxbase30u_xml.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlibd.lib;wxregexud.lib;wxcode_msw30ud_wxsqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -15,9 +15,15 @@
 DECLARE_EVENT_TYPE(wxEVT_ADDANIMAGE_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_END_THUMB_THREAD, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_END_DECODING_THREAD, wxID_ANY)
-DECLARE_EVENT_TYPE(wxEVT_DROP_FILES, wxID_ANY)
+DECLARE_EVENT_TYPE(wxEVT_DROP_HEVCFILES, wxID_ANY)
 DECLARE_EVENT_TYPE(wxEVT_LOGMSG, wxID_ANY)
-DECLARE_EVENT_TYPE(wxEVT_DECODING_MAINFRAME_NOTIFY, wxID_ANY)
+
+// in Microsoft Visual Studio 2013, the line below must be commented
+// I don't know why should do this, but the code above must not be commented
+// Awesome, and the code will generate warnings of C4273 which is disabled
+// in HEVCAnalyzer.h --> #pragma warning(disable:4273)
+
+//DECLARE_EVENT_TYPE(wxEVT_DECODING_MAINFRAME_NOTIFY, wxID_ANY)
 
 class ThumbnailThread;
 class DecodingThread;

@@ -5,7 +5,7 @@
 
 extern const wxEventType wxEVT_YUVBUFFER_CHANGED;
 extern const wxEventType wxEVT_POSITION_CHANGED;
-extern const wxEventType wxEVT_DROP_FILES;
+extern const wxEventType wxEVT_DROP_HEVCFILES;
 
 IMPLEMENT_DYNAMIC_CLASS(PicViewCtrl, wxControl);
 //IMPLEMENT_DYNAMIC_CLASS(PicViewCtrl, wxFileDropTarget);

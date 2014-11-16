@@ -22,3 +22,10 @@
 /TAppCommon/*.swp
 /Build/Linux/*.swp
 /*.swp
+
+# Visual Studio 2013 ignore
+/Build/Win/Debug
+/Build/Win/Release
+/Build/Win/*.sdf
+/Build/Win/*.opensdf
+/Build/Win/*.suo

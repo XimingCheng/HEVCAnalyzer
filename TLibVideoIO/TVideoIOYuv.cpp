@@ -222,7 +222,7 @@ void TVideoIOYuv::skipFrames(UInt numFrames, UInt width, UInt height)
 
     /* attempt to seek */
     //if (!!m_cHandle.seekg(offset, ios::cur))
-    if(!fseek( m_filePointer, offset, SEEK_CUR ))
+    if(!fseek( m_filePointer, (long)offset, SEEK_CUR ))
         return; /* success */
     //m_cHandle.clear();
     clearerr(m_filePointer);

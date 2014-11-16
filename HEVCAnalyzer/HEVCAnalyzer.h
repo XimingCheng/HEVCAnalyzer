@@ -1,6 +1,11 @@
 #ifndef HEVCANALYZER_H_INCLUDED
 #define HEVCANALYZER_H_INCLUDED
 
+// disable the MSVC specify warnings
+#if defined(_MSC_VER)
+    #pragma warning(disable:4273)
+#endif
+
 #include <cmath>
 #include <cassert>
 

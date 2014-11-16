@@ -1,0 +1,401 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="HEVCAnalyzer">
+      <UniqueIdentifier>{c5308ecd-ed32-45d5-a813-af89616977f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HEVCAnalyzer\Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="HEVCAnalyzer\Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="libmd5">
+      <UniqueIdentifier>{5b68bc4a-ef62-45f2-aa7c-dff39cfde0ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libmd5\Header Files">
+      <UniqueIdentifier>{7a475968-98b5-4edf-ad6f-edc734cc66bb}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="libmd5\Source Files">
+      <UniqueIdentifier>{997f4f01-ff23-475a-ab4e-87d2bed474ad}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="TLibCommon">
+      <UniqueIdentifier>{4545def5-d414-456c-bd94-17dcfc1efdda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TAppDecoder">
+      <UniqueIdentifier>{7abe1309-4815-44c8-822f-3d804c784dd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TAppCommon">
+      <UniqueIdentifier>{f7b6532c-1941-4f75-ad8a-640532532b10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TLibDecoder">
+      <UniqueIdentifier>{6c573ef7-11bf-4c81-8eb8-2c910b39f4a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="TLibVideoIO">
+      <UniqueIdentifier>{47d2b7e5-2c90-4c08-8a32-38c54362beed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TAppCommon\Header Files">
+      <UniqueIdentifier>{5680c1cf-fc1d-47a8-b9e0-391b56cc1fe5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TAppCommon\Source Files">
+      <UniqueIdentifier>{58bbe1a5-47a5-4607-adcc-1b523214bb2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TAppDecoder\Source Files">
+      <UniqueIdentifier>{99659116-c34a-49de-a14b-3e9b4b7cb7a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TLibCommon\Source Files">
+      <UniqueIdentifier>{c6a4da4c-4704-4a44-8c09-b40f3fa751b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TLibDecoder\Source Files">
+      <UniqueIdentifier>{cb66dd4b-1d23-4575-912c-37d53f8e1822}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TLibVideoIO\Source Files">
+      <UniqueIdentifier>{c9784109-77eb-4a52-a93c-ed1354d63c21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TAppDecoder\Header Files">
+      <UniqueIdentifier>{f0d10306-95d5-497e-b20a-fecbcc6b79b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TLibCommon\Header Files">
+      <UniqueIdentifier>{1ba54ec9-01ed-4d09-9d36-b255f9a09fb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TLibDecoder\Header Files">
+      <UniqueIdentifier>{b9b4c236-bac4-4ddf-bee4-0a9b02299a97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TLibVideoIO\Header Files">
+      <UniqueIdentifier>{75957547-9284-4b86-98ba-cf6170b05fa4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\HEVCAnalyzer\HEVCAnalyzer.cpp">
+      <Filter>HEVCAnalyzer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HEVCAnalyzer\HEVCodecApp.cpp">
+      <Filter>HEVCAnalyzer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HEVCAnalyzer\MainFrame.cpp">
+      <Filter>HEVCAnalyzer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HEVCAnalyzer\MainUIInstance.cpp">
+      <Filter>HEVCAnalyzer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HEVCAnalyzer\PicViewCtrl.cpp">
+      <Filter>HEVCAnalyzer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HEVCAnalyzer\PixelViewCtrl.cpp">
+      <Filter>HEVCAnalyzer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HEVCAnalyzer\RulerCtrl.cpp">
+      <Filter>HEVCAnalyzer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HEVCAnalyzer\ThumbnailThread.cpp">
+      <Filter>HEVCAnalyzer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HEVCAnalyzer\YUVConfigDlg.cpp">
+      <Filter>HEVCAnalyzer\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libmd5\libmd5.c">
+      <Filter>libmd5\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TAppCommon\program_options_lite.cpp">
+      <Filter>TAppCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TAppDecoder\TAppDecCfg.cpp">
+      <Filter>TAppDecoder\Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TAppDecoder\TAppDecTop.cpp">
+      <Filter>TAppDecoder\Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\ContextModel.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\ContextModel3DBuffer.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\SEI.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComBitStream.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComCABACTables.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComDataCU.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComInterpolationFilter.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComLoopFilter.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComMotionInfo.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComPattern.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComPic.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComPicSym.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComPicYuv.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComPicYuvMD5.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComPrediction.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComRdCost.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComRdCostWeightPrediction.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComRom.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComSampleAdaptiveOffset.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComSlice.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComTrQuant.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComWeightPrediction.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibCommon\TComYuv.cpp">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibDecoder\AnnexBread.cpp">
+      <Filter>TLibDecoder\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibDecoder\NALread.cpp">
+      <Filter>TLibDecoder\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibDecoder\SEIread.cpp">
+      <Filter>TLibDecoder\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibDecoder\SyntaxElementParser.cpp">
+      <Filter>TLibDecoder\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibDecoder\TDecBinCoderCABAC.cpp">
+      <Filter>TLibDecoder\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibDecoder\TDecCAVLC.cpp">
+      <Filter>TLibDecoder\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibDecoder\TDecCu.cpp">
+      <Filter>TLibDecoder\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibDecoder\TDecEntropy.cpp">
+      <Filter>TLibDecoder\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibDecoder\TDecGop.cpp">
+      <Filter>TLibDecoder\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibDecoder\TDecSbac.cpp">
+      <Filter>TLibDecoder\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibDecoder\TDecSlice.cpp">
+      <Filter>TLibDecoder\Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibDecoder\TDecTop.cpp">
+      <Filter>TLibDecoder\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TLibVideoIO\TVideoIOYuv.cpp">
+      <Filter>TLibVideoIO\Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\HEVCAnalyzer\HEVCAnalyzer.h">
+      <Filter>HEVCAnalyzer\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\HEVCAnalyzer\HEVCodecApp.h">
+      <Filter>HEVCAnalyzer\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\HEVCAnalyzer\MainFrame.h">
+      <Filter>HEVCAnalyzer\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\HEVCAnalyzer\MainUIInstance.h">
+      <Filter>HEVCAnalyzer\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\HEVCAnalyzer\PicViewCtrl.h">
+      <Filter>HEVCAnalyzer\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\HEVCAnalyzer\PixelViewCtrl.h">
+      <Filter>HEVCAnalyzer\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\HEVCAnalyzer\RulerCtrl.h">
+      <Filter>HEVCAnalyzer\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\HEVCAnalyzer\ThumbnailThread.h">
+      <Filter>HEVCAnalyzer\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\HEVCAnalyzer\YUVConfigDlg.h">
+      <Filter>HEVCAnalyzer\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libmd5\libmd5.h">
+      <Filter>libmd5\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libmd5\MD5.h">
+      <Filter>libmd5\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TAppCommon\program_options_lite.h">
+      <Filter>TAppCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TAppDecoder\TAppDecCfg.h">
+      <Filter>TAppDecoder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TAppDecoder\TAppDecTop.h">
+      <Filter>TAppDecoder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\AccessUnit.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\CommonDef.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\ContextModel.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\ContextModel3DBuffer.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\ContextTables.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\NAL.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\SEI.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComBitCounter.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComBitStream.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComCABACTables.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComDataCU.h">
+      <Filter>TLibCommon\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComInterpolationFilter.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComList.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComLoopFilter.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComMotionInfo.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComMv.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComPattern.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComPic.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComPicSym.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComPicYuv.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComPrediction.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComRdCost.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComRdCostWeightPrediction.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComRom.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComSampleAdaptiveOffset.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComSlice.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComTrQuant.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComWeightPrediction.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TComYuv.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibCommon\TypeDef.h">
+      <Filter>TLibCommon\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibDecoder\AnnexBread.h">
+      <Filter>TLibDecoder\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibDecoder\NALread.h">
+      <Filter>TLibDecoder\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibDecoder\SEIread.h">
+      <Filter>TLibDecoder\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibDecoder\SyntaxElementParser.h">
+      <Filter>TLibDecoder\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibDecoder\TDecBinCoder.h">
+      <Filter>TLibDecoder\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibDecoder\TDecBinCoderCABAC.h">
+      <Filter>TLibDecoder\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibDecoder\TDecCAVLC.h">
+      <Filter>TLibDecoder\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibDecoder\TDecCu.h">
+      <Filter>TLibDecoder\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibDecoder\TDecEntropy.h">
+      <Filter>TLibDecoder\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibDecoder\TDecGop.h">
+      <Filter>TLibDecoder\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibDecoder\TDecSbac.h">
+      <Filter>TLibDecoder\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibDecoder\TDecSlice.h">
+      <Filter>TLibDecoder\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibDecoder\TDecTop.h">
+      <Filter>TLibDecoder\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TLibVideoIO\TVideoIOYuv.h">
+      <Filter>TLibVideoIO\Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
