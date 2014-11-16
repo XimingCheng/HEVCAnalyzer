@@ -755,7 +755,7 @@ void PicViewCtrl::SetSplitData(const int size, const PtInfo* pData)
     m_vCurCUSplitInfo.clear();
     m_vCurPUSplitInfo.clear();
     m_vCurTUSplitInfo.clear();
-    // TODO chang the
+
     int iLCUWidth = ceil(m_iPicWidth / (double)m_LCUSize.GetWidth());
     int iLCUHeight = ceil(m_iPicHeight / (double)m_LCUSize.GetHeight());
     int iLCUNumber = iLCUWidth * iLCUHeight;
@@ -790,6 +790,7 @@ void PicViewCtrl::DrawSplitInfo(wxGraphicsContext* gc)
     wxPen penPU(wxColor(0, 0, 100, 255), 1);
     wxPen penTU_LUMA(wxColor(100, 0, 0, 255), 1);
     wxPen penTU_CHROMA(wxColor(0, 100, 0, 255), 1);
+    wxPen penPU_MV(wxColor(100, 0, 100, 200), 1);
     gc->SetPen(penCU);
 
     for(ptIterator it = m_vCurCUSplitInfo.begin(); it < m_vCurCUSplitInfo.end(); ++it)
@@ -817,6 +818,7 @@ void PicViewCtrl::DrawSplitInfo(wxGraphicsContext* gc)
     }
     gc->SetPen(penPU);
     gc->SetBrush(wxColor(255, 255, 255, 0));
+    // PU data draw the Motion Vector data and PU prediction data
     for(ptIterator it = m_vCurPUSplitInfo.begin(); it < m_vCurPUSplitInfo.end(); ++it)
     {
         for(sPtIterator sIt = (*it).begin(); sIt < (*it).end(); ++sIt)
@@ -853,11 +855,56 @@ void PicViewCtrl::DrawSplitInfo(wxGraphicsContext* gc)
             gc->DrawRectangle(sx * m_dScaleRate, sy * m_dScaleRate, (ex - sx) * m_dScaleRate, (ey - sy) * m_dScaleRate);
         }
     }
+    gc->SetPen(penPU_MV);
+    for (ptIterator it = m_vCurPUSplitInfo.begin(); it < m_vCurPUSplitInfo.end(); ++it)
+    {
+        for (sPtIterator sIt = (*it).begin(); sIt < (*it).end(); ++sIt)
+        {
+            if (sIt->_preMode == Type_INTER_P || sIt->_preMode == Type_INTER_B)
+            {
+                int motionXPre = sIt->_iMotionXPre;
+                int motionYPre = sIt->_iMotionYPre;
+                int motionXSuf = sIt->_iMotionXSuf;
+                int motionYSuf = sIt->_iMotionYSuf;
+                if (motionXPre != 0 || motionYPre != 0)
+                {
+                    int sx = sIt->_ptStartX;
+                    int sy = sIt->_ptStartY;
+                    int ex = sIt->_ptEndX;
+                    int ey = sIt->_ptEndY;
+                    double startX = ((sx + ex) / 2.0) * m_dScaleRate;
+                    double startY = ((sy + ey) / 2.0) * m_dScaleRate;
+                    // the motion data is 1/4 MV
+                    double endX = ((sx + ex) / 2.0 + motionXPre / 4.0) * m_dScaleRate;
+                    double endY = ((sy + ey) / 2.0 + motionYPre / 4.0) * m_dScaleRate;
+                    // draw the motion vector data
+                    gc->StrokeLine(startX, startY, endX, endY);
+                    gc->DrawEllipse(endX - 2, endY - 2, 4, 4);
+                }
+                if (sIt->_preMode == Type_INTER_B)
+                {
+                    if (motionXSuf != 0 || motionYSuf != 0)
+                    {
+                        int sx = sIt->_ptStartX;
+                        int sy = sIt->_ptStartY;
+                        int ex = sIt->_ptEndX;
+                        int ey = sIt->_ptEndY;
+                        double startX = ((sx + ex) / 2.0) * m_dScaleRate;
+                        double startY = ((sy + ey) / 2.0) * m_dScaleRate;
+                        double endSX = ((sx + ex) / 2.0 + motionXSuf / 4.0) * m_dScaleRate;
+                        double endSY = ((sy + ey) / 2.0 + motionYSuf / 4.0) * m_dScaleRate;
+                        gc->StrokeLine(startX, startY, endSX, endSY);
+                        gc->DrawEllipse(endSX - 2, endSY - 2, 4, 4);
+                    }
+                }
+            }
+        }
+    }
 }
 
 void PicViewCtrl::DrawTilesGrid(wxGraphicsContext* gc)
 {
-    // TODO the tiles info did not support fully
+    // TODO the tiles info did not fully support
     gc->SetPen(wxPen(wxColor(255, 255, 0, 255), 2));
     int w = 0, h = 0;
     for(int i = 0 ; i < m_iNumRow; i++)

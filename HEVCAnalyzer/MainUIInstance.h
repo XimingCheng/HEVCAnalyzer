@@ -147,9 +147,9 @@ struct PtInfo
     SplitType _sType;   // the PU split
     PreType   _preMode; // the mb predict type
     // motion vector used by inter P/B
-    Int  _iMotionXPre;  // motion vector x/y
+    Int  _iMotionXPre;  // motion vector x/y Pre is the previous Motion Vector of P/B
     Int  _iMotionYPre;
-    Int  _iMotionXSuf;
+    Int  _iMotionXSuf;  // Suf is the suffix Motion Vector of B
     Int  _iMotionYSuf;
 };
 

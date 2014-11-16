@@ -432,7 +432,7 @@ Void TDecCu::xDecompressCU( TComDataCU *pcCU, UInt uiAbsPartIdx,  UInt uiDepth )
         bOneMode = false;
         Int iWidth, iHeight;
         UInt uiPartAddr;
-        // the CU can be splited into PUs
+        // the CU can split into PUs
         // the inter MVs
         num_part = m_ppcCU[uiDepth]->getNumPartInter();
         pMode = new PreType[num_part];
