@@ -110,11 +110,12 @@ protected:
 
 enum MainMSG_TYPE
 {
-    MainMSG_SETSIZE_OF_DECODE_FRMAE = 0,
-    MainMSG_SETYUV_BUFFER,
-    MainMSG_SETTHUMBNAIL_BUFFER,
-    MainMSG_SETTILESINFO,
-    MainMSG_SETSPLITINFO,
+    MainMSG_SETSIZE_OF_DECODE_FRMAE = 0,    // the size of frame
+    MainMSG_SETYUV_BUFFER,                  // the YUV buffer of each frame
+    MainMSG_SETTHUMBNAIL_BUFFER,            // the thumbnail buffer of each frame
+    MainMSG_SETTILESINFO,                   // the tiles info of each frame (have bugs)
+    MainMSG_SETSPLITINFO,                   // CU/TU/PU split info (more data)
+    MainMSG_SETBITSINFO,                    // bits allocation of each frame
     MainMSG_MAX,
 };
 

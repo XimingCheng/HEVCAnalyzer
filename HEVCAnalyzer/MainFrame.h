@@ -128,6 +128,7 @@ private:
     void           OnDecodingSetThumbnailBuffer(wxCommandEvent& event);
     void           OnDecodingSetTilesInfo(wxCommandEvent& event);
     void           OnDecodingSetSplitInfo(wxCommandEvent& event);
+    void           OnDecodingSetBitsInfo(wxCommandEvent& event);
 
 private:
     wxAuiManager         m_mgr;

@@ -1135,6 +1135,9 @@ void MainFrame::OnDecodingNotify(wxCommandEvent& event)
     case MainMSG_SETSPLITINFO:
         OnDecodingSetSplitInfo(event);
         break;
+    case MainMSG_SETBITSINFO:
+        OnDecodingSetBitsInfo(event);
+        break;
     default:
         assert(0);
         break;
@@ -1150,7 +1153,7 @@ void MainFrame::OnDecodingSetSize(wxCommandEvent& event)
     m_pCenterPageManager->GetPicViewCtrl(0)->SetLCUSize(wxSize(g_uiMaxCUWidth, g_uiMaxCUHeight));
     m_pCenterPageManager->GetPicViewCtrl(0)->SetPicWidth(m_iSourceWidth);
     m_pCenterPageManager->GetPicViewCtrl(0)->SetPicHeight(m_iSourceHeight);
-    // the memeory is malloced in the msg router function, and the memory should be
+    // the memory is allocated in the msg router function, and the memory should be
     // released by ourself
     delete pData;
 }
@@ -1235,6 +1238,14 @@ void MainFrame::OnDecodingSetSplitInfo(wxCommandEvent& event)
     PtInfo* pPtData = Utils::tuple_get<2>(*pData);
     m_pCenterPageManager->GetPicViewCtrl(0)->SetSplitData(size, pPtData);
     delete [] pPtData;
+}
+
+void MainFrame::OnDecodingSetBitsInfo(wxCommandEvent& event)
+{
+    typedef Utils::tuple<int, int>* data_ptr;
+    data_ptr pData = (data_ptr)event.GetClientData();
+
+
 }
 
 BEGIN_EVENT_TABLE(HEVCStatusBar, wxStatusBar)

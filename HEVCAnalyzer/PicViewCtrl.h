@@ -27,7 +27,7 @@ public:
 //    DECLARE_DYNAMIC_CLASS(wxFileDropTarget);
     enum Direction
     {
-        MOVE_UP  = 0,
+        MOVE_UP = 0,
         MOVE_DOWN,
         MOVE_LEFT,
         MOVE_RIGHT,
