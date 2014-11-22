@@ -42,6 +42,11 @@ public:
         m_pVRuler->SetAdaptiveMarkLen(false);
     }
 
+    ~PixelViewCtrl()
+    {
+        delete m_pTimer;
+    }
+
 private:
     void OnPaint(wxPaintEvent& event);
     void OnEraseBkg(wxEraseEvent& event);

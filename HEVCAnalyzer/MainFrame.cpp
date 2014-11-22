@@ -2,6 +2,8 @@
 #include "YUVConfigDlg.h"
 #include "HEVCAnalyzer.h"
 #include "MainUIInstance.h"
+// memory leak detection
+//#include <vld.h>
 
 enum wxbuildinfoformat {
     short_f, long_f };
@@ -210,9 +212,11 @@ void MainFrame::CreateNoteBookPane()
 
 MainFrame::~MainFrame()
 {
+    MainUIInstance::GetInstance()->Destroy();
     LogMsgUIInstance::GetInstance()->Destory();
     ClearThumbnalMemory();
     delete m_pCenterPageManager;
+    delete m_pTimer;
     m_mgr.UnInit();
 }
 
@@ -273,8 +277,8 @@ wxNotebook* MainFrame::CreateLeftNotebook()
     fgSizerLeft->Add(m_pPixelVRuler, 0, wxEXPAND, 5);
 
     m_pPixelViewCtrl = new PixelViewCtrl(pCUPixelPanel, wxID_ANY, m_pPixelHRuler, m_pPixelVRuler);
-    wxGridSizer* pixelSizer = new wxGridSizer(1, 0, 0);
-    pixelSizer->Add(m_pPixelViewCtrl, 0, wxEXPAND, 5 );
+    //wxGridSizer* pixelSizer = new wxGridSizer(1, 0, 0);
+    //pixelSizer->Add(m_pPixelViewCtrl, 0, wxEXPAND, 5 );
     pCUPixelPanel->SetSizer(fgSizerUp);
     pCUPixelPanel->Layout();
     fgSizerLeft->Add(m_pPixelViewCtrl, 1, wxEXPAND, 5);
