@@ -3,7 +3,7 @@
 #include "HEVCAnalyzer.h"
 #include "MainUIInstance.h"
 // memory leak detection
-#include <vld.h>
+//#include <vld.h>
 
 enum wxbuildinfoformat {
     short_f, long_f };

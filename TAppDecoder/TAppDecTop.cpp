@@ -232,16 +232,19 @@ Void TAppDecTop::decode(wxThread* pThread)
         }
     }
     // the last pic
-    wxSQLite3Database *pDb = MainUIInstance::GetInstance()->GetDataBase();
-    wxString sql = _T("INSERT INTO BITS_INFO (DecodingOrder, bits) VALUES (");
-    wxString str_order = wxString::Format(_T("%d, "), decodingOrder);
-    int bits = totalBits - lastBits;
-    wxString str_bits = wxString::Format(_T("%d)"), bits);
-    sql += str_order;
-    sql += str_bits;
-    pDb->ExecuteUpdate(sql);
-    Utils::tuple<int, int> msg(decodingOrder, bits);
-    MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETBITSINFO, msg);
+    if (!pThread->TestDestroy())
+    {
+        wxSQLite3Database *pDb = MainUIInstance::GetInstance()->GetDataBase();
+        wxString sql = _T("INSERT INTO BITS_INFO (DecodingOrder, bits) VALUES (");
+        wxString str_order = wxString::Format(_T("%d, "), decodingOrder);
+        int bits = totalBits - lastBits;
+        wxString str_bits = wxString::Format(_T("%d)"), bits);
+        sql += str_order;
+        sql += str_bits;
+        pDb->ExecuteUpdate(sql);
+        Utils::tuple<int, int> msg(decodingOrder, bits);
+        MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETBITSINFO, msg);
+    }
 
     xFlushOutput( pcListPic );
     // delete buffers
