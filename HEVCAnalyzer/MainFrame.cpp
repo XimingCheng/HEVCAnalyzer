@@ -3,7 +3,7 @@
 #include "HEVCAnalyzer.h"
 #include "MainUIInstance.h"
 // memory leak detection
-//#include <vld.h>
+#include <vld.h>
 
 enum wxbuildinfoformat {
     short_f, long_f };
@@ -659,10 +659,15 @@ void MainFrame::SetPicViewSplitInfo(int poc)
 
 void MainFrame::SetPicViewTilesInfo(int decoding_order)
 {
+    int prePOC = -1;
+    if (decoding_order > 0)
+    {
+        prePOC = m_vDecodingPOCStore[decoding_order - 1];
+    }
     wxSQLite3Database* db = new wxSQLite3Database();
     db->Open(GetDataBaseFileName(ID_StreamInfoData));
-    wxString sqlQuery = _T("SELECT * FROM TILES_INFO WHERE DecodingOrder=\"");
-    wxString str_order = wxString::Format(_T("%d"), decoding_order);
+    wxString sqlQuery = _T("SELECT * FROM TILES_INFO WHERE prePOC=\"");
+    wxString str_order = wxString::Format(_T("%d"), prePOC);
     sqlQuery += ( str_order + _T("\"") );
     wxSQLite3ResultSet result = db->ExecuteQuery(sqlQuery);
 
@@ -672,19 +677,26 @@ void MainFrame::SetPicViewTilesInfo(int decoding_order)
     }
     else // set the last col data in the database
     {
-        wxString sqlQuery = _T("SELECT * FROM TILES_INFO WHERE DecodingOrder=\"");
-        for(int order = decoding_order - 1; order >= 0; order--)
+        bool bOk = false;
+        for (int order = decoding_order - 1; order >= 0; order--)
         {
-            wxString str_order = wxString::Format(_T("%d"), order);
-            sqlQuery += ( str_order + _T("\"") );
+            wxString sqlQuery = _T("SELECT * FROM TILES_INFO WHERE prePOC=\"");
+            wxString str_order;
+            if (order > 0)
+                str_order = wxString::Format(_T("%d"), m_vDecodingPOCStore[order - 1]);
+            else
+                str_order = "-1";
+            sqlQuery += (str_order + _T("\""));
             wxSQLite3ResultSet result = db->ExecuteQuery(sqlQuery);
-            if(result.NextRow())
+            if (result.NextRow())
             {
                 SetCurrentTiles(order, db, &result);
+                bOk = true;
                 break;
             }
         }
-        wxMessageBox(wxString::Format(_T("Could not find valid tile info for decoding_order: %d"),
+        if (!bOk)
+            wxMessageBox(wxString::Format(_T("Could not find valid tile info for decoding_order: %d"),
             decoding_order));
     }
     db->Close();

@@ -600,12 +600,12 @@ Void TDecTop::xDecodePPS()
 {
     // m_prevPOC shows the last poc, if m_prevPOC not changed, the new data
     // should not be inserted into database
-    static int order = 0, lastpRrePOC = 0;
+    static int order/*, lastpRrePOC = 0*/;
     TComPPS *pps = new TComPPS();
     m_cEntropyDecoder.decodePPS( pps );
     m_parameterSetManagerDecoder.storePrefetchedPPS( pps );
     Bool bTilesEnableFlag = pps->getTilesEnabledFlag();
-    if(bTilesEnableFlag && lastpRrePOC != m_prevPOC)
+    if(bTilesEnableFlag/* && lastpRrePOC != m_prevPOC*/)
     {
         int num_row = pps->getNumRowsMinus1();
         int num_col = pps->getNumColumnsMinus1();
@@ -618,16 +618,16 @@ Void TDecTop::xDecodePPS()
         wxSQLite3Database *pDb = MainUIInstance::GetInstance()->GetDataBase();
         if(!pDb->TableExists(_T("TILES_INFO")))
         {
-            wxString sql = _T("CREATE TABLE TILES_INFO (DecodingOrder INTEGER PRIMARY KEY,");
+            wxString sql = _T("CREATE TABLE TILES_INFO (prePOC INTEGER PRIMARY KEY,");
             sql += _T("num_row int, num_col int, row_data blob, col_data blob)");
             pDb->ExecuteUpdate(sql);
         }
         if(m_prevPOC == MAX_INT)
-            order = 0;
+            order = -1;
         else
-            order += 1;
+            order = m_prevPOC;
 
-        wxString sql = _T("INSERT INTO TILES_INFO (DecodingOrder, num_row, num_col, row_data, col_data) VALUES (");
+        wxString sql = _T("INSERT INTO TILES_INFO (prePOC, num_row, num_col, row_data, col_data) VALUES (");
         wxString str_order   = wxString::Format(_T("%d, "), order);
         wxString str_num_row = wxString::Format(_T("%d, "), num_row);
         wxString str_num_col = wxString::Format(_T("%d, "), num_col);
@@ -660,7 +660,7 @@ Void TDecTop::xDecodePPS()
         delete [] row_height_data;
         delete [] col_width_data;
     }
-    lastpRrePOC = m_prevPOC;
+    //lastpRrePOC = m_prevPOC;
     if( pps->getDependentSliceSegmentsEnabledFlag() )
     {
         Int NumCtx = pps->getEntropyCodingSyncEnabledFlag() ? 2 : 1;
