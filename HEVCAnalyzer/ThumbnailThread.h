@@ -16,8 +16,8 @@ public:
     bool GetAdaptiveFrameNumbers() const { return m_bAdaptiveFrameNumbers; }
 
 protected:
-    virtual void* Entry();
-    void OnExit();
+    virtual void* Entry() override;
+    void OnExit() override;
 
     wxString     m_sYUVPath;
     int          m_iSourceWidth;
@@ -49,10 +49,10 @@ public:
     void SetYUVBitsFlag(bool b10bit) { m_b10bit = b10bit; }
 
 protected:
-    virtual void* Entry();
+    virtual void* Entry() override;
     void          ReleaseBuffer();
     void          GenerateCommandLine();
-    void          OnExit();
+    void          OnExit() override;
 
     wxString      m_sStreamPath;
     wxString      m_sOutYUVPath;

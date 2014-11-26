@@ -110,7 +110,6 @@ Void TAppDecTop::decode(wxThread* pThread)
 
     // main decoder loop
     Bool recon_opened = false; // reconstruction file not yet opened. (must be performed after SPS is seen)
-    UInt decodingOrder = 0;
     int lastBits = 0;
     bitstreamFile.seekg(0, std::ios::end);
     int totalBits = bitstreamFile.tellg();
@@ -171,24 +170,6 @@ Void TAppDecTop::decode(wxThread* pThread)
                      *     (but bNewPicture doesn't happen then) */
 
                     bitstreamFile.seekg(location - streamoff(3));
-                    wxSQLite3Database *pDb = MainUIInstance::GetInstance()->GetDataBase();
-                    if (!pDb->TableExists(_T("BITS_INFO")))
-                    {
-                        wxString sql = _T("CREATE TABLE BITS_INFO (DecodingOrder INTEGER PRIMARY KEY, bits int)");
-                        pDb->ExecuteUpdate(sql);
-                    }
-                    
-                    wxString sql = _T("INSERT INTO BITS_INFO (DecodingOrder, bits) VALUES (");
-                    wxString str_order = wxString::Format(_T("%d, "), decodingOrder);
-                    int bits = (int)location - 3 - lastBits;
-                    wxString str_bits = wxString::Format(_T("%d)"), bits);
-                    sql += str_order;
-                    sql += str_bits;
-                    pDb->ExecuteUpdate(sql);
-                    Utils::tuple<int, int> msg(decodingOrder, bits);
-                    MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETBITSINFO, msg);
-                    decodingOrder++;
-                    lastBits = (int)location - 3;
                     bytestream.reset();
                 }
                 bPreviousPictureDecoded = true;
@@ -197,6 +178,27 @@ Void TAppDecTop::decode(wxThread* pThread)
         if (bNewPicture || !bitstreamFile)
         {
             m_cTDecTop.executeLoopFilters(poc, pcListPic);
+            wxSQLite3Database *pDb = MainUIInstance::GetInstance()->GetDataBase();
+            if (!pDb->TableExists(_T("BITS_INFO")))
+            {
+                wxString sql = _T("CREATE TABLE BITS_INFO (POC INTEGER PRIMARY KEY, bits int)");
+                pDb->ExecuteUpdate(sql);
+            }
+
+            wxString sql = _T("INSERT INTO BITS_INFO (POC, bits) VALUES (");
+            wxString str_poc = wxString::Format(_T("%d, "), poc);
+            int bits = 0;
+            if (!bitstreamFile.eof())
+                bits = (int)location - 3 - lastBits;
+            else
+                bits = totalBits - lastBits;
+            wxString str_bits = wxString::Format(_T("%d)"), bits);
+            sql += str_poc;
+            sql += str_bits;
+            pDb->ExecuteUpdate(sql);
+            Utils::tuple<int, int> msg(poc, bits);
+            MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETBITSINFO, msg);
+            lastBits = (int)location - 3;
         }
 
         if( pcListPic )
@@ -230,20 +232,6 @@ Void TAppDecTop::decode(wxThread* pThread)
                 xWriteOutput( pcListPic, nalu.m_temporalId );
             }
         }
-    }
-    // the last pic
-    if (!pThread->TestDestroy())
-    {
-        wxSQLite3Database *pDb = MainUIInstance::GetInstance()->GetDataBase();
-        wxString sql = _T("INSERT INTO BITS_INFO (DecodingOrder, bits) VALUES (");
-        wxString str_order = wxString::Format(_T("%d, "), decodingOrder);
-        int bits = totalBits - lastBits;
-        wxString str_bits = wxString::Format(_T("%d)"), bits);
-        sql += str_order;
-        sql += str_bits;
-        pDb->ExecuteUpdate(sql);
-        Utils::tuple<int, int> msg(decodingOrder, bits);
-        MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETBITSINFO, msg);
     }
 
     xFlushOutput( pcListPic );

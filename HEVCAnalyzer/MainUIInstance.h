@@ -101,11 +101,12 @@ namespace Utils
 
 class NoneCopyable
 {
-protected:
-    // = delete functions
-    NoneCopyable() {}
-    NoneCopyable(const NoneCopyable& ins);
-    NoneCopyable& operator = (const NoneCopyable& ins);
+public:
+    NoneCopyable() = default;
+
+    // delete the copy interface
+    NoneCopyable(const NoneCopyable& ins) = delete;
+    NoneCopyable& operator = (const NoneCopyable& ins) = delete;
 };
 
 enum MainMSG_TYPE
