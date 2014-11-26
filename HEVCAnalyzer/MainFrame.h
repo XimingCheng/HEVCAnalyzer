@@ -3,6 +3,7 @@
 
 #include <list>
 #include <vector>
+#include <deque>
 #include "HEVCAnalyzer.h"
 #include "ThumbnailThread.h"
 #include "PicViewCtrl.h"
@@ -31,6 +32,8 @@ class CenterPageManager;
 
 class MainFrame : public wxFrame
 {
+    typedef std::deque<std::pair<int, int>> BitsDataStore;
+
 public:
     enum
     {
@@ -121,6 +124,7 @@ private:
     void           SetPicViewTilesInfo(int decoding_order);
     void           SetCurrentTiles(int order, wxSQLite3Database* db, wxSQLite3ResultSet* pResult);
     void           SetPicViewSplitInfo(int poc);
+    bool           IsBitsDataReady();
 
     // decoding notify msg handler
     void           OnDecodingSetSize(wxCommandEvent& event);
@@ -169,6 +173,8 @@ private:
 
     DecodingThread*      m_pDecodingThread;
     std::vector<int>     m_vDecodingPOCStore;
+    BitsDataStore        m_dBitsData;
+    int                  m_iLastMAXPOC;
     wxString             m_sDecodedYUVPathName;
 
     DECLARE_EVENT_TABLE()

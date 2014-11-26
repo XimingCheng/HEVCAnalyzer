@@ -2,6 +2,7 @@
 #include "YUVConfigDlg.h"
 #include "HEVCAnalyzer.h"
 #include "MainUIInstance.h"
+#include <algorithm>
 // memory leak detection
 //#include <vld.h>
 
@@ -74,7 +75,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
             const wxSize& size, long style)
             : wxFrame(parent, id, title, pos, size, style),
             m_pImageList(NULL), m_bYUVFile(false), m_bOPened(false), m_eYUVComponentChoose(MODE_ORG), m_pcPicYuvOrg(NULL),
-            m_pThumbThread(NULL), m_pCenterPageManager(NULL), m_pDecodingThread(NULL)
+            m_pThumbThread(NULL), m_pCenterPageManager(NULL), m_pDecodingThread(NULL), m_iLastMAXPOC(-1)
 {
     m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
     m_mgr.SetManagedWindow(this);
@@ -1260,8 +1261,45 @@ void MainFrame::OnDecodingSetBitsInfo(wxCommandEvent& event)
 {
     typedef Utils::tuple<int, int>* data_ptr;
     data_ptr pData = (data_ptr)event.GetClientData();
+    int poc = Utils::tuple_get<0>(*pData);
+    int bits = Utils::tuple_get<1>(*pData);
+    std::pair<int, int> data = std::make_pair(poc, bits);
+    m_dBitsData.push_back(data);
 
+    if (IsBitsDataReady())
+    {
+        BitsDataStore data_copy;
+        std::copy(m_dBitsData.begin(), m_dBitsData.end(), back_inserter(data_copy));
+        m_dBitsData.clear();
+    }
+}
 
+bool MainFrame::IsBitsDataReady()
+{
+    if (m_bOPened && !m_bYUVFile && m_dBitsData.size() > 0)
+    {
+        typedef std::pair<int, int> BitsType;
+        sort(m_dBitsData.begin(), m_dBitsData.end(), 
+            [=] (const BitsType& dataL, const BitsType& dataR) -> bool {
+            return dataL.first < dataR.first;
+        });
+
+        int minPOC = m_dBitsData.begin()->first;
+        if (minPOC == m_iLastMAXPOC + 1)
+        {
+            for (auto it = m_dBitsData.begin() + 1; it != m_dBitsData.end(); ++it)
+            {
+                int poc = it->first;
+                if (poc != minPOC + 1)
+                    return false;
+                else
+                    minPOC = poc;
+            }
+            m_iLastMAXPOC = m_dBitsData.rbegin()->first;
+            return true;
+        }
+    }
+    return false;
 }
 
 BEGIN_EVENT_TABLE(HEVCStatusBar, wxStatusBar)
