@@ -14,30 +14,50 @@ Linux Mint (old version)
 Introduction
 ------------
 
-HEVCAnalyzer is a HEVC (H.265) stream and YUV file GUI Analyzer based on wxWidgets. The basic idea of the HEVCAnalyzer is building under Linux/Mac OS X/Windows for free. The core HEVC decoder is based on the HM open source project. The current HEVC decoder in the HEVCAnalyzer is HM 11.0. The goal of this project is just for fun and interest!
+HEVC/H.265 is the short name of the [High Efficiency Video Coding](http://en.wikipedia.org/wiki/High_Efficiency_Video_Coding) which is a video compression standard developed by the ISO/IEC Moving Picture Experts Group (MPEG) and ITU-T Video Coding Experts Group (VCEG). The difference between H.264/AVC and HEVC video coding standard can be found [here](http://iphome.hhi.de/wiegand/assets/pdfs/2012_12_IEEE-HEVC-Overview.pdf) . As the performance of the new HEVC standard is much better than former H.264/AVC, more and more devices and movies will adopt this standard soon.
 
-The project should be compiled with the C++11 flag enabled, some features of the code use the C++11 standard. The wxWidgets version of this project is 3.0.2, the version of wxWidgets in the older version of this project is 2.8.12 which retains some bugs. The newest code can be compiled with Visual Studio 2013, and the makefile under Linux will be updated soon. For Mac OS X, developer can build the code itself, I don't have money to buy a Mac and the application of HEVCAnalyzer does not fully test on Mac OS X.
+HEVCAnalyzer is a HEVC (H.265) stream and YUV file GUI Analyzer based on wxWidgets wchich can give video developer a bref view of the video coding structures and video coding params. The project is launched under the interest which wish leading a free vido coding analyzer for our researchers and video coding developers.
+
+The program can be built on Windows Linux or MacOS X, but the program does not fully test on MacOS X. I am trying to optimize the re-drawing efficiency ad current the program re-drawing is very slow!
 
 Main features
 -------------
 
-* Support YUV file viewing
-	* Viewing both 8bit and 10bit YUV file
-	* Viewing the RGB pixel value of the frame in HEX mode or normal mode
-	* Viewing the Y/U/V single color component
+* Support YUV file
+	* Both 8bit and 10bit YUV file
+	* RGB pixel value of the frame in HEX mode or normal mode
+	* Y/U/V single color component
 	* Recognize the formated YUV width and height, and remember the width/height when open it second time
-* Support the thumbnails viewing of the YUV file and HEVC stream file
-* Support scaling the frame of YUV and stream file
+* Support the thumbnails of the YUV file and HEVC stream file
+* Support scaling the frame of YUV and stream file in different size
 * Frame Ruler shows the frame size
-* Support HEVC stream file viewing
-	* CU/PU/TU coding block structure viewing
+* Support HEVC stream file
+	* CU/PU/TU coding block structure
 	* PU type viewing
-	* Tiles viewing (part support)
-	* Motion Vector viewing
+	* Tiles viewing (partly support)
+	* Motion Vector
 	* Frame bit allocation (soon)
 	* POC/Frame decoding order
 	* And Soon More!
 	
+Dependency
+----------
+
+Windows
+
+	wxWidgets 3.0.2
+	wxsqlite3 (build with wx30)
+
+Linux
+
+	libx11-dev libwxbase3.0-dev libwxgtk3.0-dev
+	libwxsqlite3-3.0-dev (this can be found on Debian testing)
+
+Complier
+
+	Visual Studio 2013
+	clang++ with -std=c++11
+
 Build with Visual Studio 2013
 -----------------------------
 
@@ -48,7 +68,9 @@ Open the VS sln file under the Bulid/Win, build the source code with F7 or Ctrl 
 Older Version Build Under Linux(Ubuntu)
 ---------------------------------------
 
-Prefer clang++, but you can use g++ to build this project
+Prefer `clang++`, but you can use g++ to build this project
+
+if you want to build the project with `gcc`, you can chang to `CXX = g++` in the makefile of this project.
 
     sudo apt-get install libx11-dev libwxbase2.8-dev libwxgtk2.8-dev libwxsqlite3-2.8-dev
     cd ~
@@ -61,14 +83,14 @@ Get to run:
     cd ~/HEVCAnalyzer/bin
     ./HEVCAnalyzer
     
-Also, you can download the wxWidgets-2.8-12 source code to build, but you must notice the **setup.h** as same as the Windows Building
+Also, you can download the wxWidgets-2.8-12 source code to build, but you must notice the **setup.h** in the source should `#define wxUSE_GRAPHICS_CONTEXT 1`
 
 Older Version Build Under Windows
 ---------------------------------
 
 Download wxWidgets-2.8-12 source code, you can build it with Visual Studio or other IDE
 
-**Notice that you must change the wxWidgets-2.8-12 source code setup.h from：**
+**Notice that you must change setup.h in the wxWidgets-2.8-12 source code from：**
 
 ```C
 #ifndef wxUSE_GRAPHICS_CONTEXT
@@ -102,3 +124,8 @@ then you have to download the wxsqlite3 source code, and build it with mingw
 **NOTICE THAT** you must change `WX_DIR` to your own wxWidgets src dir
 
 You can use the Code::Blocks project in HEVCAnalyzer/Build/Win/
+
+Contact
+-------
+
+Email: ximingc@mail.ustc.edu.cn
