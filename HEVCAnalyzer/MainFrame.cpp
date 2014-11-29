@@ -240,8 +240,19 @@ wxNotebook* MainFrame::CreateBottomNotebook()
     pLogPanel->SetSizer( gSizer );
     pLogPanel->Layout();
     ctrl->AddPage( pLogPanel, _T("Log Window"), true );
-    wxPanel* m_panel7 = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-    ctrl->AddPage( m_panel7, _T("Other information"), false );
+    wxGridSizer* gBitsSizer = new wxGridSizer(1, 0, 0);
+    wxPanel* pBitsBarPanel = new wxPanel( ctrl, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    wxGridSizer* innerSizer = new wxGridSizer(1, 0, 0);
+    wxScrolledWindow* pScrolledBitsBar = new wxScrolledWindow(pBitsBarPanel, -1,
+        wxDefaultPosition, wxDefaultSize, wxScrolledWindowStyle);
+    m_pBitBarCtrl = new BitsBarCtrl(pScrolledBitsBar, wxID_ANY);
+    innerSizer->Add(m_pBitBarCtrl, 1, wxALIGN_CENTER);
+    pScrolledBitsBar->SetSizer(innerSizer);
+    pScrolledBitsBar->SetScrollRate(4, 4);
+    gBitsSizer->Add(pScrolledBitsBar, 0, wxEXPAND, 5);
+    pBitsBarPanel->SetSizer(gBitsSizer);
+    pBitsBarPanel->Layout();
+    ctrl->AddPage(pBitsBarPanel, _T("Bits Allocation Bar"), false);
 
     LogMsgUIInstance::GetInstance()->LogMessage( _T("Message"));
     LogMsgUIInstance::GetInstance()->LogMessage( _T("Warning"), LogMsgUIInstance::MSG_TYPE_WARNING);
@@ -430,6 +441,8 @@ void MainFrame::OnOpenStreamFile(const wxString& sFile, const wxString& sName)
     }
     else
     {
+        m_iLastMAXPOC = -1;
+        m_iCurMAXBits = 0;
         if(m_pDecodingThread->Run() != wxTHREAD_NO_ERROR)
         {
             pDb->Close();
@@ -1259,17 +1272,22 @@ void MainFrame::OnDecodingSetSplitInfo(wxCommandEvent& event)
 
 void MainFrame::OnDecodingSetBitsInfo(wxCommandEvent& event)
 {
-    typedef Utils::tuple<int, int>* data_ptr;
+    typedef Utils::tuple<int, int, SliceType>* data_ptr;
     data_ptr pData = (data_ptr)event.GetClientData();
     int poc = Utils::tuple_get<0>(*pData);
     int bits = Utils::tuple_get<1>(*pData);
-    std::pair<int, int> data = std::make_pair(poc, bits);
+    SliceType type = Utils::tuple_get<2>(*pData);
+    BarData data;
+    data._poc = poc;
+    data._type = type;
+    data._value = bits;
     m_dBitsData.push_back(data);
 
     if (IsBitsDataReady())
     {
         BitsDataStore data_copy;
         std::copy(m_dBitsData.begin(), m_dBitsData.end(), back_inserter(data_copy));
+        m_pBitBarCtrl->AddData(data_copy);
         m_dBitsData.clear();
     }
 }
@@ -1278,24 +1296,23 @@ bool MainFrame::IsBitsDataReady()
 {
     if (m_bOPened && !m_bYUVFile && m_dBitsData.size() > 0)
     {
-        typedef std::pair<int, int> BitsType;
         sort(m_dBitsData.begin(), m_dBitsData.end(), 
-            [=] (const BitsType& dataL, const BitsType& dataR) -> bool {
-            return dataL.first < dataR.first;
+            [=](const BarData& dataL, const BarData& dataR) -> bool {
+            return dataL._poc < dataR._poc;
         });
 
-        int minPOC = m_dBitsData.begin()->first;
+        int minPOC = m_dBitsData.begin()->_poc;
         if (minPOC == m_iLastMAXPOC + 1)
         {
             for (auto it = m_dBitsData.begin() + 1; it != m_dBitsData.end(); ++it)
             {
-                int poc = it->first;
+                int poc = it->_poc;
                 if (poc != minPOC + 1)
                     return false;
                 else
                     minPOC = poc;
             }
-            m_iLastMAXPOC = m_dBitsData.rbegin()->first;
+            m_iLastMAXPOC = m_dBitsData.rbegin()->_poc;
             return true;
         }
     }

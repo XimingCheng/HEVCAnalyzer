@@ -221,6 +221,9 @@
     <ClCompile Include="..\..\TLibVideoIO\TVideoIOYuv.cpp">
       <Filter>TLibVideoIO\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\HEVCAnalyzer\BitsBarCtrl.cpp">
+      <Filter>HEVCAnalyzer\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\HEVCAnalyzer\HEVCAnalyzer.h">
@@ -396,6 +399,9 @@
     </ClInclude>
     <ClInclude Include="..\..\TAppDecoder\TAppDecTop.h">
       <Filter>TAppDecoder\Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\HEVCAnalyzer\BitsBarCtrl.h">
+      <Filter>HEVCAnalyzer\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

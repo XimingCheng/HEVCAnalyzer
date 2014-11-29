@@ -9,6 +9,7 @@
 #include "PicViewCtrl.h"
 #include "PixelViewCtrl.h"
 #include "RulerCtrl.h"
+#include "BitsBarCtrl.h"
 
 #define ID_ZoomSlider      MainFrame::ID_MainFrameMax + 100
 #define ID_ZoomSliderInfo  MainFrame::ID_MainFrameMax + 101
@@ -32,7 +33,7 @@ class CenterPageManager;
 
 class MainFrame : public wxFrame
 {
-    typedef std::deque<std::pair<int, int>> BitsDataStore;
+    typedef std::deque<BarData> BitsDataStore;
 
 public:
     enum
@@ -175,6 +176,8 @@ private:
     std::vector<int>     m_vDecodingPOCStore;
     BitsDataStore        m_dBitsData;
     int                  m_iLastMAXPOC;
+    int                  m_iCurMAXBits;
+    BitsBarCtrl*         m_pBitBarCtrl;
     wxString             m_sDecodedYUVPathName;
 
     DECLARE_EVENT_TABLE()

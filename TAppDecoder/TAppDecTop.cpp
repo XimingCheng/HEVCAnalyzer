@@ -177,26 +177,14 @@ Void TAppDecTop::decode(wxThread* pThread)
         }
         if (bNewPicture || !bitstreamFile)
         {
+            //LogMsgUIInstance::GetInstance()->LogMessage(wxString::Format(_T("%d"), m_cTDecTop.getSliceType()));
             m_cTDecTop.executeLoopFilters(poc, pcListPic);
-            wxSQLite3Database *pDb = MainUIInstance::GetInstance()->GetDataBase();
-            if (!pDb->TableExists(_T("BITS_INFO")))
-            {
-                wxString sql = _T("CREATE TABLE BITS_INFO (POC INTEGER PRIMARY KEY, bits int)");
-                pDb->ExecuteUpdate(sql);
-            }
-
-            wxString sql = _T("INSERT INTO BITS_INFO (POC, bits) VALUES (");
-            wxString str_poc = wxString::Format(_T("%d, "), poc);
             int bits = 0;
             if (!bitstreamFile.eof())
                 bits = (int)location - 3 - lastBits;
             else
                 bits = totalBits - lastBits;
-            wxString str_bits = wxString::Format(_T("%d)"), bits);
-            sql += str_poc;
-            sql += str_bits;
-            pDb->ExecuteUpdate(sql);
-            Utils::tuple<int, int> msg(poc, bits);
+            Utils::tuple<int, int, SliceType> msg(poc, bits, m_cTDecTop.getSliceType());
             MainUIInstance::GetInstance()->MessageRouterToMainFrame(MainMSG_SETBITSINFO, msg);
             lastBits = (int)location - 3;
         }

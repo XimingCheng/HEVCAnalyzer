@@ -16,9 +16,9 @@ Introduction
 
 HEVC/H.265 is the short name of the [High Efficiency Video Coding](http://en.wikipedia.org/wiki/High_Efficiency_Video_Coding) which is a video compression standard developed by the ISO/IEC Moving Picture Experts Group (MPEG) and ITU-T Video Coding Experts Group (VCEG). The difference between H.264/AVC and HEVC video coding standard can be found [here](http://iphome.hhi.de/wiegand/assets/pdfs/2012_12_IEEE-HEVC-Overview.pdf) . As the performance of the new HEVC standard is much better than former H.264/AVC, more and more devices and movies will adopt this standard soon.
 
-HEVCAnalyzer is a HEVC (H.265) stream and YUV file GUI Analyzer based on wxWidgets wchich can give video developer a bref view of the video coding structures and video coding params. The project is launched under the interest which wish leading a free vido coding analyzer for our researchers and video coding developers.
+HEVCAnalyzer is a HEVC (H.265) stream and YUV file GUI Analyzer based on wxWidgets which can give video developer a brief view of the video coding structures and video coding params. The project is launched under the interest which wish leading a free video coding analyzer for our researchers and video coding developers.
 
-The program can be built on Windows Linux or MacOS X, but the program does not fully test on MacOS X. I am trying to optimize the re-drawing efficiency ad current the program re-drawing is very slow!
+The program can be built on Windows Linux or Mac OS X, but the program does not fully test on MacOS X. I am trying to optimize the re-drawing efficiency as current the program re-drawing is very slow!
 
 Main features
 -------------

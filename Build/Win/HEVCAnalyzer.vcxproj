@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\HEVCAnalyzer\BitsBarCtrl.cpp" />
     <ClCompile Include="..\..\HEVCAnalyzer\HEVCAnalyzer.cpp" />
     <ClCompile Include="..\..\HEVCAnalyzer\HEVCodecApp.cpp" />
     <ClCompile Include="..\..\HEVCAnalyzer\MainFrame.cpp" />
@@ -62,6 +63,7 @@
     <ClCompile Include="..\..\TLibVideoIO\TVideoIOYuv.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\HEVCAnalyzer\BitsBarCtrl.h" />
     <ClInclude Include="..\..\HEVCAnalyzer\HEVCAnalyzer.h" />
     <ClInclude Include="..\..\HEVCAnalyzer\HEVCodecApp.h" />
     <ClInclude Include="..\..\HEVCAnalyzer\MainFrame.h" />

@@ -98,6 +98,7 @@ private:
     Int                     m_prevPOC;
     Bool                    m_bFirstSliceInPicture;
     Bool                    m_bFirstSliceInSequence;
+    SliceType               m_curSliceType;
 
 public:
     TDecTop();
@@ -120,6 +121,11 @@ public:
     TDecSlice *getTDecSlice()
     {
         return &m_cSliceDecoder;
+    }
+
+    SliceType getSliceType()
+    {
+        return m_curSliceType;
     }
 
 protected:

@@ -291,6 +291,7 @@ Bool TDecTop::xDecodeSlice(InputNALUnit &nalu, Int &iSkipFrame, Int iPOCLastDisp
     if (m_bFirstSliceInPicture)
     {
         m_uiSliceIdx     = 0;
+        m_curSliceType = m_apcSlicePilot->getSliceType();
     }
     m_apcSlicePilot->setSliceIdx(m_uiSliceIdx);
     if (!m_bFirstSliceInPicture)
