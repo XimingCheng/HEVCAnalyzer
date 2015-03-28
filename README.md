@@ -72,27 +72,31 @@ Prefer `clang++`, but you can use g++ to build this project
 
 if you want to build the project with `gcc`, you can chang to `CXX = g++` in the makefile of this project.
 
-    sudo apt-get install libx11-dev libwxbase2.8-dev libwxgtk2.8-dev libwxsqlite3-2.8-dev
-    cd ~
-    git clone https://github.com/XimingCheng/HEVCAnalyzer.git
-    cd ~/HEVCAnalyzer/Build/Linux
-    make
+```sh
+sudo apt-get install libx11-dev libwxbase2.8-dev libwxgtk2.8-dev libwxsqlite3-2.8-dev
+cd ~
+git clone https://github.com/XimingCheng/HEVCAnalyzer.git
+cd ~/HEVCAnalyzer/Build/Linux
+make
+```
     
 Get to run:
 
-    cd ~/HEVCAnalyzer/bin
-    ./HEVCAnalyzer
+```sh
+cd ~/HEVCAnalyzer/bin
+./HEVCAnalyzer
+```
     
-Also, you can download the wxWidgets-2.8-12 source code to build, but you must notice the **setup.h** in the source should `#define wxUSE_GRAPHICS_CONTEXT 1`
+Also, you can download the wxWidgets-2.8-12 source code to build, but you must note the **setup.h** in the source should `#define wxUSE_GRAPHICS_CONTEXT 1`
 
 Older Version Build Under Windows
 ---------------------------------
 
 Download wxWidgets-2.8-12 source code, you can build it with Visual Studio or other IDE
 
-**Notice that you must change setup.h in the wxWidgets-2.8-12 source code from：**
+**Note that you must change setup.h in the wxWidgets-2.8-12 source code from：**
 
-```C
+```cpp
 #ifndef wxUSE_GRAPHICS_CONTEXT
 #define wxUSE_GRAPHICS_CONTEXT 0
 #endif
@@ -100,7 +104,7 @@ Download wxWidgets-2.8-12 source code, you can build it with Visual Studio or ot
 
 **To：**
 
-```C
+```cpp
 #ifndef wxUSE_GRAPHICS_CONTEXT
 #define wxUSE_GRAPHICS_CONTEXT 1
 #endif
@@ -110,18 +114,24 @@ Download wxWidgets-2.8-12 source code, you can build it with Visual Studio or ot
 
 Build the wxWidgets source code you can located the build dir the source dir:
 
-    mingw32-make -f makefile.gcc MONOLITHIC=0 SHARED=1 UNICODE=1 USE_GDIPLUS=1  BUILD=release
+```sh
+mingw32-make -f makefile.gcc MONOLITHIC=0 SHARED=1 UNICODE=1 USE_GDIPLUS=1  BUILD=release
+```
 
 You may change the BUILD mode to debug:
 
-    mingw32-make -f makefile.gcc MONOLITHIC=0 SHARED=1 UNICODE=1 USE_GDIPLUS=1  BUILD=debug
+```sh
+mingw32-make -f makefile.gcc MONOLITHIC=0 SHARED=1 UNICODE=1 USE_GDIPLUS=1  BUILD=debug
+```
 
 then you have to download the wxsqlite3 source code, and build it with mingw
 
-    mingw32-make -f makefile.gcc WX_VERSION=28 WX_SHARED=1 WX_MONOLITHIC=0 WX_UNICODE=1 WX_DEBUG=0 WX_DIR=/e/Project/wxMSW-2.8.12/
-    mingw32-make -f makefile.gcc WX_VERSION=28 WX_SHARED=1 WX_MONOLITHIC=0 WX_UNICODE=1 WX_DEBUG=1 WX_DIR=/e/Project/wxMSW-2.8.12/
+```sh
+mingw32-make -f makefile.gcc WX_VERSION=28 WX_SHARED=1 WX_MONOLITHIC=0 WX_UNICODE=1 WX_DEBUG=0 WX_DIR=/e/Project/wxMSW-2.8.12/
+mingw32-make -f makefile.gcc WX_VERSION=28 WX_SHARED=1 WX_MONOLITHIC=0 WX_UNICODE=1 WX_DEBUG=1 WX_DIR=/e/Project/wxMSW-2.8.12/
+```
 
-**NOTICE THAT** you must change `WX_DIR` to your own wxWidgets src dir
+**NOTE THAT** you must change `WX_DIR` to your own wxWidgets src dir
 
 You can use the Code::Blocks project in HEVCAnalyzer/Build/Win/
 
